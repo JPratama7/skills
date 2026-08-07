@@ -1,0 +1,7 @@
+# Exclude everything
+*
+
+# But allow these
+!.gitignore
+!README*
+!skills/
