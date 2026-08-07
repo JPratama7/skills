@@ -167,3 +167,9 @@ Use this when opening a PR. Fills the gap left by removing Technical Details fro
 **Substance guidance for PR descriptions:**
 - **Technical Details** should include design rationale and trade-offs, not just parameter values. Explain *why* the chosen approach makes sense — what failure mode it prevents, what alternatives were considered, how the pieces interact. A reader should understand the design, not just the config.
 - **Test plan** should cover edge cases and error scenarios, not just the happy path. Include verification of failure modes (e.g. "non-retryable errors are not retried", "breaker transitions to half-open after timeout"), not just confirmation that features work.
+
+## Reference files (load on demand)
+
+- User wants to see what a good ticket looks like, or a drafted ticket feels off and needs a concrete contrast → `references/examples.md`
+- Acceptance criteria are vague, untestable, or the user is stuck writing them → `references/acceptance-criteria.md`
+- Scope contains hedges, TBDs, or fuzzy boundaries that need an explicit out-of-scope list → `references/scope.md`
