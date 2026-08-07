@@ -1,0 +1,7 @@
+{
+  "name": "skills",
+  "skills": [
+    "./skills/writing-coach",
+    "./skills/jira-ticket"
+  ]
+}
