@@ -15,3 +15,4 @@ npx skills add <owner>/skills
 - `writing-coach` — guides/critiques blog post & technical article writing process
 - `jira-ticket` — generate Jira ticket or PR description from compact templates
 - `discussion` — technical sparring partner that pressure-tests decisions before you commit
+- `skill-generator` — create, evaluate, iterate, and package agent skills for any harness
