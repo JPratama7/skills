@@ -1,5 +1,6 @@
 ---
 name: jira-ticket
+version: 1.0.0
 description: Generate Jira ticket or PR description from compact templates
 ---
 

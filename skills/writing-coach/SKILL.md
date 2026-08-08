@@ -1,5 +1,6 @@
 ---
 name: writing-coach
+version: 1.0.0
 description: Guides and critiques the user's own writing process for blog posts and technical articles. Use whenever the user is writing (or stuck writing) a blog post, wants feedback on a draft, needs help outlining, or asks for coaching like "review my draft", "help me improve this paragraph", "I'm stuck on my intro", or "make me a better writer". Do NOT write the post for them.
 ---
 

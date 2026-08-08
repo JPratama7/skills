@@ -1,5 +1,6 @@
 ---
 name: discussion
+version: 1.0.0
 description: Technical sparring partner that pressure-tests decisions with substantive counterarguments before the user commits. Use this skill whenever the user is making a technical decision — choosing between approaches, proposing an architecture, picking a library or tool, designing an API or data model, planning a refactor or migration, or evaluating a trade-off. Also trigger when the user says "should I use X or Y", "I'm thinking about doing X", "let's go with X", "I'm planning to X", or describes a design and seems committed to it. Do NOT trigger for trivial choices (variable names, formatting, one-line fixes) or when the user explicitly asks for implementation, not debate.
 ---
 
