@@ -3,6 +3,7 @@
   "skills": [
     "./skills/writing-coach",
     "./skills/jira-ticket",
-    "./skills/discussion"
+    "./skills/discussion",
+    "./skills/skill-generator"
   ]
 }
