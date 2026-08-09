@@ -4,6 +4,8 @@
     "./skills/writing-coach",
     "./skills/jira-ticket",
     "./skills/discussion",
-    "./skills/skill-generator"
+    "./skills/skill-generator",
+    "./skills/graph-decompose",
+    "./skills/graph-execute"
   ]
 }
