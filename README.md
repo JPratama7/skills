@@ -16,3 +16,5 @@ npx skills add <owner>/skills
 - `jira-ticket` — generate Jira ticket or PR description from compact templates
 - `discussion` — technical sparring partner that pressure-tests decisions before you commit
 - `skill-generator` — create, evaluate, iterate, and package agent skills for any harness
+- `graph-decompose` — decompose a task into a strict DAG of atomic, parallel-executable graph nodes (JSON + Mermaid plan; plan only, does not execute)
+- `graph-execute` — execute a `graph-decompose` plan by walking its DAG in waves: parallel node spawn, dep-respecting, verify-before-fan-out, stop-on-failure
