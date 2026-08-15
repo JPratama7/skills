@@ -9,7 +9,7 @@ for detail on how entries are classified.
 Output file layout (default `INDEX.md` at repo root):
 
 ```markdown
-# Unified Index
+# Indexer
 
 Generated: 2026-08-12 · Docs: 2 · Code: 3 · AI comments: 6 · TODOs: 4 ·
 Total entries: 15 · Files scanned: 34

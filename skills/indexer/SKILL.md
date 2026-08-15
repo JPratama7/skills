@@ -1,10 +1,10 @@
 ---
-name: unified-index
+name: indexer
 version: 1.0.0
 description: Consolidates everything searchable in a repository — documentation files, source code files (with their symbols), AI-generated comments (inline AI-marked comments, AI review artifacts, AI chat/session exports), and TODOs (inline TODO/FIXME/HACK markers plus standalone todo files) — into a single markdown document with a main index table so anything can be found in seconds. Trigger whenever the user asks to unify, consolidate, index, merge, or gather "all docs", "all code", "all comments", "all TODOs", "all AI feedback", or "everything" into one searchable file, e.g. "consolidate all docs, code, comments and TODOs into one document", "build one index of the whole repo", "give me a single file with everything I should search".
 ---
 
-# Unified Index
+# Indexer
 
 Build a single markdown document that consolidates everything worth
 searching in a repository: **documentation**, **source code**, **AI-generated
