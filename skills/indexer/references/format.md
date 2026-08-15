@@ -12,7 +12,7 @@ Output file layout (default `INDEX.md` at repo root):
 # Indexer
 
 Generated: 2026-08-12 · Docs: 2 · Code: 3 · AI comments: 6 · TODOs: 4 ·
-Total entries: 15 · Files scanned: 34
+Total entries: 15 · Files scanned: 34 · Redacted: 1 (code: 1)
 
 ## Main Index
 
@@ -162,8 +162,9 @@ format (`yaml`, `json`, ...).
 
 - **Extensions** (configurable via `codeExtensions`): programming
   languages (py, js, ts, tsx, jsx, go, rs, java, c, cpp, h, rb, php,
-  swift, kt, sh, ...) plus config formats (json, yaml, yml, toml, ini,
-  env).
+  swift, kt, sh, ...) plus config formats (json, yaml, yml, toml, ini).
+  `.env` is intentionally excluded from defaults — env files typically
+  hold secrets and are covered by `sensitiveGlobs` instead.
 - **Ignored** (configurable via `codeIgnore`): minified files
   (`*.min.js`), lockfiles (`*-lock.json`, `Cargo.lock`, `poetry.lock`,
   `yarn.lock`), vendored/third-party trees. Never index the output
@@ -266,6 +267,85 @@ user's file is never silently mangled.
 ## Config precedence
 
 `extraFiles` are appended to the source set after discovery. `excludeDirs`
-apply to every discovery pass. If `.ai-comments.json` is malformed, log a
-warning, use defaults, and continue — a config typo must not block the
-consolidation.
+apply to every discovery pass. `sensitiveGlobs` apply to every discovery
+pass and to `extraFiles` — a file matching a sensitive glob is refused
+from `extraFiles` unless `allowSensitive: true` is set. If
+`.ai-comments.json` is malformed, log a warning, use defaults, and
+continue — a config typo must not block the consolidation.
+
+## Secret redaction
+
+Two layers: file-level skips (`sensitiveGlobs`) and inline value
+detection (this section). Both always run. See SKILL.md § Secret
+redaction for the policy; this section is the pattern reference.
+
+### File-level skips
+
+Default `sensitiveGlobs` (configurable, but cannot be emptied — only
+extended):
+
+```
+**/.env
+**/.env.*
+**/*.pem
+**/*.key
+**/*.p12
+**/*.pfx
+**/id_rsa*
+**/id_ed25519*
+**/.aws/**
+**/.ssh/**
+**/credentials
+**/secrets/**
+```
+
+Files matching these are never discovered, never read, never appear in
+the output. The report counts them under `Files skipped (sensitive)` —
+not under `Files scanned`. A file in `extraFiles` that matches a
+sensitive glob is refused with a warning naming the glob that matched
+(not the file's contents), unless `allowSensitive: true` is set
+explicitly in config.
+
+### Inline value patterns
+
+After extraction, scan every entry's verbatim text for these patterns.
+On any match, drop the whole entry from the index and increment the
+per-type `redacted` counter. Do not redact in place — drop the entry.
+Never record the dropped entry's source path in the report.
+
+Patterns (case-insensitive where noted; match against the full verbatim
+text of the entry):
+
+| Name | Pattern | Notes |
+|------|---------|-------|
+| AWS access key ID | `AKIA[0-9A-Z]{16}` | case-sensitive |
+| AWS secret assignment | `aws_secret_access_key\s*[:=]\s*\S+` | case-insensitive |
+| GitHub PAT | `gh[pousr]_[A-Za-z0-9]{36,}` | |
+| GitHub fine-grained | `github_pat_[A-Za-z0-9_]{82}` | |
+| GitLab PAT | `glpat-[A-Za-z0-9_-]{20}` | |
+| Slack token | `xox[abp]-[A-Za-z0-9-]+` | |
+| Google API key | `AIza[0-9A-Za-z_-]{35}` | |
+| JWT | `eyJ[A-Za-z0-9_-]+\.eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+` | three-part dot-delimited |
+| Private key block | `-----BEGIN [A-Z ]*PRIVATE KEY-----` | covers RSA, EC, OPENSSH, PGP, etc. |
+| Generic credential assignment | `(password\|passwd\|pwd\|token\|api_key\|apikey\|secret\|access_key\|private_key)\s*[:=]\s*["']?[^\s"']{8,}` | case-insensitive; min 8-char value |
+| High-entropy with context | `[A-Za-z0-9_-]{32,}` within 50 chars of a key name matching `token\|key\|secret\|password\|cred` | heuristic; higher false-positive rate, acceptable per policy |
+
+The generic-assignment and high-entropy rules are the broadest. They
+will catch most real leaks and some false positives. Per SKILL.md
+policy, false positives are acceptable — dropping a non-secret entry is
+a nuisance, leaking a real secret is a breach. Users blocked by a false
+positive can add the offending file to `excludeDirs` and re-run, or
+report it for pattern tuning.
+
+### Report format
+
+The save-and-report step (SKILL.md workflow step 6) emits one
+redaction line:
+
+```
+Redacted: <total> (docs: <n>, code: <n>, ai-comments: <n>, todos: <n>)
+```
+
+The metadata header in the output document carries the same counts
+compactly (see the document template above). No source paths, no
+matched values, no pattern names — counts only.
