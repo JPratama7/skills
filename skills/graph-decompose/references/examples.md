@@ -27,6 +27,8 @@ Why bad: every node depends on the previous. Zero parallelism. This is a todo li
 ```json
 {
   "task": "Build a CRUD API for users from an OpenAPI spec",
+  "model": "cheap",
+  "skills": ["ponytail"],
   "nodes": [
     {
       "id": "read-spec",
@@ -40,6 +42,7 @@ Why bad: every node depends on the previous. Zero parallelism. This is a todo li
     {
       "id": "gen-types",
       "name": "Generate TypeScript types from extracted schema",
+      "model": "strong",
       "prompt": "From the user schema in extracted.md (below), generate `src/types/user.ts` with a User interface and CreateUser/UpdateUser partial variants. Use the existing project's TS config (strict mode).\n\n<paste extracted.md userSchema section>",
       "deps": ["read-spec"],
       "inputs": ["read-spec:extracted.md"],
@@ -49,6 +52,7 @@ Why bad: every node depends on the previous. Zero parallelism. This is a todo li
     {
       "id": "gen-handlers",
       "name": "Generate Express route handlers for /users CRUD",
+      "model": "strong",
       "prompt": "Generate `src/routes/users.ts` with Express router implementing GET/POST/PUT/DELETE for /users. Use an in-memory Map<string, User> as the store. Import User types from ../types/user. Match the paths in the spec:\n\n<paste extracted.md paths section>",
       "deps": ["read-spec"],
       "inputs": ["read-spec:extracted.md"],
@@ -67,6 +71,7 @@ Why bad: every node depends on the previous. Zero parallelism. This is a todo li
     {
       "id": "gen-tests",
       "name": "Write integration tests for /users CRUD",
+      "skills": ["tdd"],
       "prompt": "Write `test/users.test.ts` using supertest against the Express app. Cover: list empty, create + list, create + get one, update, delete, get-after-delete 404. Import the app from src/app.",
       "deps": ["wire-routes"],
       "inputs": ["wire-routes:app-diff"],
@@ -94,6 +99,10 @@ Why bad: every node depends on the previous. Zero parallelism. This is a todo li
 ```
 
 Why good: `gen-types` and `gen-handlers` actually run in parallel (both depend only on `read-spec`). `run-tests` correctly declares both `gen-tests` AND `gen-types` as deps (needs the test file and the types it imports). `honest_parallelism` admits the gain is modest and names the bottleneck.
+
+Model config demo: the user said "cheap model for the mechanical nodes, strong for the codegen ones". Top-level `"model": "cheap"` covers `read-spec`, `wire-routes`, `gen-tests`, and `run-tests`; `gen-types` and `gen-handlers` override with `"model": "strong"`. Node wins over top-level; unmentioned plans get no `model` field at all and run on the harness default.
+
+Skill config demo: the user said "preload ponytail everywhere, and tdd for the test node". Top-level `"skills": ["ponytail"]` applies to every node; `gen-tests` overrides with `"skills": ["tdd"]` (override replaces, not merges — the user asked for tdd there, not ponytail + tdd). Plans without a skill mention carry no `skills` field and nodes run without skill instructions.
 
 ## Example 2: "Refactor this 800-line function into smaller functions"
 

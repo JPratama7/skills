@@ -30,6 +30,36 @@ Key invariants:
 - **Stop the wave on failure.** Don't fan out a bad output to its dependents. Surface the failure with the node's prompt + output and ask the user: retry / edit prompt / rework graph.
 - **Capture outputs by name.** Downstream nodes reference deps by `inputs` (`dep_id:artifact_name`); the executor must be able to hand a downstream subagent the named artifact from each dep.
 
+## Model & skill dispatch
+
+Plans may carry optional `model` and `skills` values (per-node or top-level default from `graph-decompose`). Resolve before spawn:
+
+- Model: `node.model` → `plan.model` → harness default.
+- Skills: `node.skills` → `plan.skills` → no skill instructions. Override replaces, never merges — a node with its own `skills` list gets exactly that list.
+
+### Model — honor what the harness allows
+
+| Harness | Model support |
+|---|---|
+| Headless shell | Full — worker passes `--model <model>` to the agent CLI (e.g., `claude -p --model <model> < prompt`). |
+| Devin | None — `run_subagent` has no model parameter. Use the resolved `model` as a hint for profile choice when ambiguous, but do not claim the node ran on that model. |
+| Claude Code | `Task` has no model parameter in the standard form. If the harness exposes one, pass it; otherwise treat like Devin. |
+| Cowork / other | Whatever the spawn primitive exposes. If it takes a model param, pass the resolved value; if not, treat like Devin. |
+
+When a node's resolved `model` can't be honored, don't silently proceed: mention it once per wave ("nodes n2, n3 requested `strong`; this harness can't select models, running on default") so the user can decide whether the mapping matters. The plan file is never edited for this — the model request stays in the plan.
+
+### Skills — task-text instruction, every harness
+
+No spawn primitive (Devin `run_subagent`, Claude Code `Task`, headless worker) takes a native skill parameter. Every harness passes skills the same way: prepend to the spawned subagent's task text.
+
+```
+Invoke these skills before starting: tdd, ponytail
+
+<node prompt + inline inputs>
+```
+
+The instruction is a request, not a guarantee — the subagent honors it if its harness has the skill installed. Do not claim the skill ran; just ensure the instruction was given. Skills are not merged: a node with `"skills": ["tdd"]` under a plan with `"skills": ["ponytail"]` gets `tdd` only.
+
 ## Harness: Devin
 
 Use `run_subagent` with `is_background=true` for every ready node in the same turn (parallel launch). Then `read_subagent` with `block=true` to wait for each.
@@ -57,6 +87,7 @@ If the harness has no subagent primitive, the graph can still execute, just with
 - For each ready node, write its `prompt` to a file (`nodes/<id>.prompt.md`).
 - Spawn one worker process per node: `python worker.py nodes/<id>.prompt.md > nodes/<id>.out &` for all ready, then `wait`.
 - Worker is harness-specific — the skill does not bundle it, but the convention is: worker reads the prompt file, calls the agent CLI (e.g., `claude -p < prompt`), writes stdout to the `.out` file.
+- Model: when the node's resolved `model` is set, the worker passes it to the CLI — `claude -p --model <model> < prompt`. This is the only harness where model selection is fully under executor control.
 - After `wait` returns, run each node's `verify` (grep a file, run a test, diff). Record outputs. Next wave.
 
 This trades the harness's in-process subagent support for OS-level `&` + `wait`. Slower to set up, works anywhere with a shell.

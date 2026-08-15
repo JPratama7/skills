@@ -8,6 +8,8 @@ Full field-level reference for the JSON object emitted by `graph-decompose`. Use
 {
   "task": "string",
   "granularity": "single-subagent-call | one-logical-step | one-file-edit",
+  "model": "string",
+  "skills": ["skill-name"],
   "nodes": [Node],
   "summary": Summary
 }
@@ -17,6 +19,8 @@ Full field-level reference for the JSON object emitted by `graph-decompose`. Use
 |---|---|---|
 | `task` | string | One sentence, the done-when-true statement. Not a restatement of the user's prompt — the sharpened version. |
 | `granularity` | enum | Must match what the user requested. Default `single-subagent-call`. |
+| `model` | string, optional | Default model for nodes without their own `model`. Echoed verbatim from the user's request (id or tier like `fast`/`cheap`/`strong`). Absent = harness default. |
+| `skills` | array of string, optional | Default skills for nodes without their own `skills`. Echoed verbatim from the user's request. Absent = no skill instructions. |
 | `nodes` | array | ≥1 node. Every node id unique. |
 | `summary` | object | See Summary. Computed from `nodes`, not free text. |
 
@@ -26,6 +30,8 @@ Full field-level reference for the JSON object emitted by `graph-decompose`. Use
 {
   "id": "string",
   "name": "string",
+  "model": "string",
+  "skills": ["skill-name"],
   "prompt": "string",
   "deps": ["id"],
   "inputs": ["dep_id:artifact_name"],
@@ -38,6 +44,8 @@ Full field-level reference for the JSON object emitted by `graph-decompose`. Use
 |---|---|---|
 | `id` | string | Kebab/snake-safe. Unique across `nodes`. Short (`n1`, `read-spec`, `gen-types`). |
 | `name` | string | ≤60 chars, human-readable, outcome-oriented ("generate TypeScript types" not "step 2"). |
+| `model` | string, optional | Overrides top-level `model` for this node. Free-form (id or tier), echoed verbatim from the user's request. Non-empty when present. |
+| `skills` | array of string, optional | Overrides top-level `skills` for this node. Skill names echoed verbatim from the user's request. Every entry non-empty when present. |
 | `prompt` | string | **Self-contained.** No references to the parent conversation. Inline any context the subagent needs. A fresh subagent with only this string + `inputs` must be able to execute it. |
 | `deps` | array of id | Every id must exist in `nodes`. Empty = ready at wave 0. No cycles (see Validation). |
 | `inputs` | array of string | Format `dep_id:artifact_name`. Must line up with `deps` and the dep's `outputs`. A node with a dep but no matching `inputs` entry is a hidden-dep smell — either the input list is wrong or the dep is fake. |
@@ -77,6 +85,8 @@ Run these checks before emitting, and again if a grader validates a plan:
 7. **Verify objectivity** — every `verify` is a command, test, diff, or structural assertion. Reject "review", "looks good", "ensure quality".
 8. **No dead nodes** — every node either has a downstream consumer or produces a terminal output. Cut the rest.
 9. **Bottleneck honesty** — `summary.bottlenecks` lists every node with >8 direct dependents. Don't hide them.
+10. **Model sanity** — `model`, where present (top-level or per-node), is a non-empty string. Unknown values are not an error — the executor maps them per harness.
+11. **Skills sanity** — `skills`, where present (top-level or per-node), is an array of non-empty strings. Unknown skill names are not an error — the executor passes them as instructions and the subagent harness decides availability.
 
 ## Minimal valid example
 
@@ -84,6 +94,8 @@ Run these checks before emitting, and again if a grader validates a plan:
 {
   "task": "Add a /health endpoint to the Express app",
   "granularity": "single-subagent-call",
+  "model": "fast",
+  "skills": ["ponytail"],
   "nodes": [
     {
       "id": "read-app",
@@ -97,6 +109,8 @@ Run these checks before emitting, and again if a grader validates a plan:
     {
       "id": "add-route",
       "name": "Add GET /health route",
+      "model": "strong",
+      "skills": ["tdd"],
       "prompt": "In the Express app at <app-entry-path>, routes are registered like this:\n<route-registration-pattern>\n\nAdd a `GET /health` route that returns `{ status: \"ok\" }` with status 200, registered in the same style as existing routes. Do not change other routes.",
       "deps": ["read-app"],
       "inputs": ["read-app:app-entry-path", "read-app:route-registration-pattern"],

@@ -1,6 +1,6 @@
 ---
 name: graph-decompose
-version: 2.0.0
+version: 2.2.0
 description: Decompose a task into a strict DAG of atomic, parallel-executable graph nodes, each one a self-contained subagent prompt. Emit the plan as JSON + Mermaid. Plan only — never executes the graph itself. Trigger ONLY on explicit invoke — the user says "graph-decompose", "/graph-decompose", "decompose this into parallel tasks", "break this into a task graph", "split this into atomic nodes", or "split this into a DAG". Do not auto-trigger on ordinary multi-step work; the user must ask for graph decomposition specifically. To run a produced plan, use the `graph-execute` skill.
 ---
 
@@ -31,6 +31,8 @@ Collect before decomposing:
 1. **The task** — one sentence of what should be true when done. If the user's framing is fuzzy, sharpen it first: "In one sentence, what's done when this is done?"
 2. **Context** — files, repo, prior decisions, constraints. Ask for what you need; don't invent context.
 3. **Granularity target** (optional) — default is "one subagent call per node". The user may want coarser (one logical step) or finer (one file edit). Honor it if stated; otherwise use the default.
+4. **Model config** (optional) — if the user wants specific nodes run on specific models, capture it in their words: "use a fast model for the extraction nodes, the strong one for codegen". Emit their request verbatim as `model` fields. If the user never mentions models, leave `model` out of the plan entirely — the executor uses its harness default.
+5. **Skill config** (optional) — if the user wants nodes to run with specific skills preloaded, capture it: "use the tdd skill for the test node, ponytail for the refactor node". Emit their requests verbatim as `skills` arrays. If the user never mentions skills, leave `skills` out of the plan entirely — the executor runs nodes without skill instructions.
 
 If any input is missing and material, ask for it. One round of questions max before decomposing — better to decompose on partial info and let the user correct than to interview exhaustively.
 
@@ -89,10 +91,14 @@ Always emit both. JSON first (execution), Mermaid second (review).
 {
   "task": "<one-sentence task statement>",
   "granularity": "single-subagent-call",
+  "model": "<optional default model for nodes that don't specify one>",
+  "skills": ["<optional default skills for nodes that don't specify any>"],
   "nodes": [
     {
       "id": "n1",
       "name": "<short human-readable name>",
+      "model": "<optional; overrides top-level model for this node>",
+      "skills": ["<optional; overrides top-level skills for this node>"],
       "prompt": "<self-contained prompt a subagent can execute with only this + inputs>",
       "deps": [],
       "inputs": [],
@@ -113,6 +119,8 @@ Always emit both. JSON first (execution), Mermaid second (review).
 Field rules:
 
 - `id` — short, stable, kebab/snake-safe (`n1`, `n2`, ... or `read-spec`, `gen-types`).
+- `model` — optional, free-form string (model id like `claude-sonnet-4-5`, or a tier like `fast`/`cheap`/`strong`). Echo the user's words verbatim — don't normalize, don't guess. Precedence at execution: node `model` > top-level `model` > harness default. Omit entirely if the user never mentioned models.
+- `skills` — optional, array of skill names (e.g., `tdd`, `ponytail`). Echo the user's words verbatim. Precedence at execution: node `skills` > top-level `skills` > no skill instructions. Omit entirely if the user never mentioned skills.
 - `prompt` — **self-contained**. No "see above", no "as discussed". A subagent that has never seen this conversation should be able to execute it. Include the relevant slice of context inline.
 - `deps` — ids only. Empty array if ready at time zero.
 - `inputs` — for each dep the node consumes, name what artifact it pulls from that dep. Empty if no deps. This makes the data flow auditable and catches hidden deps (a node that needs a file but lists no input for it is suspect).
@@ -158,6 +166,7 @@ Do not execute the plan. Do not spawn subagents. Do not run nodes. This skill's 
 - If decomposition produced no real parallelism (a linear chain), say so in `summary.honest_parallelism`. A skill that pretends to parallelize but doesn't is worse than no skill.
 - If you hit a cycle, rework the decomposition. Don't ship a cyclic "DAG".
 - One round of input questions max before decomposing. Iteration happens via the user editing the emitted plan, not via longer upfront interview.
+- Never invent `model` or `skills` assignments the user didn't request. No mention → no field.
 
 ## Anti-patterns
 

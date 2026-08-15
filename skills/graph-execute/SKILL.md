@@ -1,6 +1,6 @@
 ---
 name: graph-execute
-version: 1.0.0
+version: 1.2.1
 description: Execute a graph-decompose plan by walking its DAG in waves — running ready nodes in parallel, respecting deps, verifying each node before fanning out, stopping on failure. Trigger ONLY when the user explicitly asks to run/execute a plan AND points at where the planner output is. Trigger phrases include "graph-execute", "/graph-execute", "execute this graph", "run this task graph", "walk the DAG", "execute the plan at PATH". Do not trigger on decomposition requests (that is `graph-decompose`) or on ordinary multi-step work. Requires the user to name the planner output location before proceeding.
 compatibility: Requires subagent dispatch (e.g., Devin `run_subagent`, Claude Code `Task`) OR a headless shell with `&` + `wait`. Filesystem read access to the plan path and to node output files.
 ---
@@ -31,6 +31,7 @@ Before doing anything else:
 1. **Plan path** — required. If not stated in the invoke, ask once and stop.
 2. **Read the plan file.** Parse the JSON block. If the file has both JSON and Mermaid (typical `graph-decompose` output), extract the JSON block from the ```json fence. If parsing fails, surface the error verbatim and stop — do not attempt to repair the plan.
 3. **Validate the plan** against the schema before execution. The schema lives in `graph-decompose`'s `references/schema.md` — read it if you haven't. Run the validation rules: unique ids, DAG (no cycle), no dangling dep refs, input/dep alignment, no dead nodes. If any check fails, surface it and stop. Do not execute an invalid plan — re-decompose or hand-edit instead.
+4. **Check model and skill fields** — optional `model` values (top-level or per-node) must be non-empty strings; optional `skills` values must be arrays of non-empty strings. Unknown values are not an error: you map them per harness at spawn time (see `references/execution.md`).
 
 If the plan is valid, show the user a one-line execution summary: node count, wave count, critical path, bottlenecks. Then ask: "Proceed? (yes / no)". Do not start wave 0 without an explicit yes.
 
@@ -48,6 +49,11 @@ while len(done) < len(nodes):
     if not ready:
         if failed: surface(failed); ask user
         else: break  # shouldn't happen on a validated DAG
+    # Resolve each node's model and skills:
+    # node.model > plan.model > harness default; node.skills > plan.skills > none.
+    for n in ready:
+        n.model = n.get("model") or plan.get("model")
+        n.skills = n.get("skills") or plan.get("skills", [])
     # Spawn all ready nodes in parallel — this is the whole point.
     results = spawn_all_parallel(ready)
     for id, result in results:
@@ -69,13 +75,14 @@ Invariants — never violate these:
 
 ## Per-harness mechanics
 
-The spawn primitive differs by harness. Read `references/execution.md` before executing on a harness you haven't handled — it covers Devin `run_subagent`, Claude Code `Task`, headless shell (`&` + `wait`), and others.
+The spawn primitive differs by harness. Don't assume — detect the current harness first, before deciding how to spawn:
 
-Quick reference:
+- `run_subagent` / `read_subagent` available → Devin
+- `Task` (or `!` subagent dispatch) available → Claude Code
+- neither, but a shell with `&` + `wait` → headless shell
+- some other parallel-dispatch primitive → whatever it exposes
 
-- **Devin**: `run_subagent` with `is_background=true` for every ready node in the same turn; `read_subagent` with `block=true` to wait. Profile `subagent_general` for code-editing nodes, `subagent_explore` for read-only research nodes.
-- **Claude Code**: one `Task` call per ready node, all in the same assistant turn. Wait for the wave to return before starting the next.
-- **Headless shell**: write each node's prompt to `nodes/<id>.prompt.md`, spawn `worker.py nodes/<id>.prompt.md > nodes/<id>.out &` for all ready, `wait`, then verify each. Slower to set up, works anywhere with a shell.
+Then read the matching section in `references/execution.md` — it covers Devin `run_subagent`, Claude Code `Task`, headless shell (`&` + `wait`), Cowork/other, plus model and skills dispatch for each. The harness determines the spawn primitive, the wave launch pattern, and which requested `model`/`skills` can be honored.
 
 ## Failure handling
 
@@ -107,6 +114,8 @@ When all terminal nodes (those with no downstream consumers) are `done`:
 - Never silently retry a failed node more than once.
 - Never fan out a failed node's outputs to its dependents.
 - Never mutate the plan file during execution. If the user wants to rework, stop and re-invoke on a new plan.
+- Never silently drop a requested `model`. Honor it where the harness supports it; where it doesn't, tell the user which nodes ran on the default instead.
+- Never silently drop requested `skills`. Every spawned node task carries its resolved `skills` as an explicit instruction.
 
 ## Anti-patterns
 
