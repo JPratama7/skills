@@ -1,6 +1,6 @@
 ---
 name: graph-decompose
-version: 2.2.0
+version: 3.0.0
 description: Decompose a task into a strict DAG of atomic, parallel-executable graph nodes, each one a self-contained subagent prompt. Emit the plan as JSON + Mermaid. Plan only — never executes the graph itself. Trigger ONLY on explicit invoke — the user says "graph-decompose", "/graph-decompose", "decompose this into parallel tasks", "break this into a task graph", "split this into atomic nodes", or "split this into a DAG". Do not auto-trigger on ordinary multi-step work; the user must ask for graph decomposition specifically. To run a produced plan, use the `graph-execute` skill.
 ---
 
@@ -83,89 +83,67 @@ Before emitting, self-check:
 
 ## Output format
 
-Always emit both. JSON first (execution), Mermaid second (review).
+Do not hand-write JSON. Use the bundled script `scripts/graph.py` — it backs the plan with a SQLite DB, validates each node as you add it, computes the `summary` (wave count, critical path, bottlenecks) deterministically, and emits both JSON and Mermaid in one call. This avoids JSON quoting/escaping errors on multi-line prompts and catches duplicate ids, dangling deps, and cycles at insert time rather than after a giant emit.
 
-### JSON
+### Workflow
 
-```json
-{
-  "task": "<one-sentence task statement>",
-  "granularity": "single-subagent-call",
-  "model": "<optional default model for nodes that don't specify one>",
-  "skills": ["<optional default skills for nodes that don't specify any>"],
-  "nodes": [
-    {
-      "id": "n1",
-      "name": "<short human-readable name>",
-      "model": "<optional; overrides top-level model for this node>",
-      "skills": ["<optional; overrides top-level skills for this node>"],
-      "prompt": "<self-contained prompt a subagent can execute with only this + inputs>",
-      "deps": [],
-      "inputs": [],
-      "outputs": ["<what this node produces, in a form downstream nodes can reference>"],
-      "verify": "<how to check this node is actually done and correct>"
-    }
-  ],
-  "summary": {
-    "node_count": 0,
-    "wave_count": 0,
-    "critical_path": ["n1", "n2"],
-    "bottlenecks": [],
-    "honest_parallelism": "<one line: did decomposition actually add parallelism vs a linear plan?>"
-  }
-}
+```bash
+# 1. set plan metadata (task required; model/skills only if the user named them)
+python scripts/graph.py init --task "<one-sentence done-when-true>" \
+  [--granularity single-subagent-call] [--model fast] [--skills ponytail,tdd]
+
+# 2. add nodes one at a time, in dependency order (deps must already exist)
+python scripts/graph.py add-node --id read-spec --name "Extract schema" \
+  --prompt "<terse self-contained prompt>" \
+  --verify "<objective check: command, test, or diff>" \
+  --outputs extracted.md \
+  [--deps read-spec] [--inputs read-spec:extracted.md] \
+  [--model strong] [--skills tdd]
+
+# 3. validate the whole plan (cycle, dangling refs, input/dep alignment, dead outputs, prompt style, verify objectivity)
+python scripts/graph.py validate
+
+# 4. export — refuses to write if validation fails; computes summary from the graph
+python scripts/graph.py export --json plan.json [--mermaid plan.mmd]
 ```
 
-Field rules:
+The DB defaults to `./plan.db` (override with `--db`). It is scratch state — the exported `plan.json` + `plan.mmd` are the deliverables; the DB can be deleted after export.
 
-- `id` — short, stable, kebab/snake-safe (`n1`, `n2`, ... or `read-spec`, `gen-types`).
-- `model` — optional, free-form string (model id like `claude-sonnet-4-5`, or a tier like `fast`/`cheap`/`strong`). Echo the user's words verbatim — don't normalize, don't guess. Precedence at execution: node `model` > top-level `model` > harness default. Omit entirely if the user never mentioned models.
-- `skills` — optional, array of skill names (e.g., `tdd`, `ponytail`). Echo the user's words verbatim. Precedence at execution: node `skills` > top-level `skills` > no skill instructions. Omit entirely if the user never mentioned skills.
-- `prompt` — **self-contained**. No "see above", no "as discussed". A subagent that has never seen this conversation should be able to execute it. Include the relevant slice of context inline.
-- `deps` — ids only. Empty array if ready at time zero.
-- `inputs` — for each dep the node consumes, name what artifact it pulls from that dep. Empty if no deps. This makes the data flow auditable and catches hidden deps (a node that needs a file but lists no input for it is suspect).
-- `outputs` — concrete artifacts (files, snippets, decisions, structured data). Downstream nodes reference these by name.
-- `verify` — an objective check, not "looks good". Prefer a command, a test, a diff, or a structural assertion.
+### Field rules (enforced by the script)
 
-Full schema with field-level constraints: `references/schema.md`.
+- `id` — short, stable, kebab/snake-safe (`n1`, `read-spec`). Unique; `add-node` rejects duplicates.
+- `model` — optional, free-form (id like `claude-sonnet-4-5` or tier like `fast`/`cheap`/`strong`). Echo the user's words verbatim. Precedence: node > top-level > harness default. Omit entirely if the user never mentioned models.
+- `skills` — optional, comma-separated skill names. Echo verbatim. Precedence: node > top-level > no skill instructions. Omit entirely if the user never mentioned skills.
+- `prompt` — **self-contained and terse**. No "see above", no "as discussed", no "you are a helpful assistant", no restating the task. Imperative voice, one instruction per line, inline only the context slice the subagent needs. A fresh subagent with only this string + `inputs` must be able to execute it. 3 lines beats 10. `validate` greps for banned phrases (`see above`, `as discussed`, `per the task`, `previously`, `you are a`, `please`, `your task is`).
+- `deps` — ids only. Empty = ready at wave 0. `add-node` rejects deps that don't exist yet (add deps before dependents).
+- `inputs` — `dep_id:artifact` per dep. Must line up with `deps`. Catches hidden deps: a node that needs a file but lists no input for it is suspect.
+- `outputs` — concrete artifact names downstream nodes reference (`types.ts`, `decision: use-postgres`, `test-results.json`). Not vague.
+- `verify` — objective check: a command, test, diff, or structural assertion. `validate` rejects `review`, `looks good`, `ensure quality`, `looks reasonable`.
+
+Full schema with field-level constraints and all validation rules: `references/schema.md`.
 
 ### Mermaid
 
-```mermaid
-graph LR
-  n1["read spec"]
-  n2["gen types"] --> depends on
-  n3["gen client"]
-  n1 --> n2
-  n1 --> n3
-  n2 --> n4["merge + test"]
-  n3 --> n4
-```
+`export` writes the Mermaid alongside the JSON automatically. It uses `graph LR`, labels each node with `id` and short name, draws every dep edge, and styles wave-0 (ready-now) nodes with a `ready` class so parallelism is visible at a glance. You do not write Mermaid by hand.
 
-Use `graph LR`. Label each node with its `id` and short name. Draw every dep edge. Style wave-0 (ready-now) nodes with a distinct class so the user can see parallelism at a glance:
+## After exporting
 
-```mermaid
-classDef ready fill:#cfe,stroke:#080;
-class n1,n3 ready;
-```
+Tell the user the path of the exported `plan.json` (and `plan.mmd`). Then point at the next step:
 
-## After emitting
+> Plan written to `plan.json` (+ `plan.mmd`). To execute it, invoke `graph-execute` and pass it the JSON path. To revise, edit nodes in the DB and re-export, or hand-edit the JSON.
 
-Save the plan to a file (e.g., `plan.json` with the Mermaid block adjacent or in a sibling `plan.mmd`). Tell the user the path. Then point at the next step:
-
-> Plan written to `<path>`. To execute it, invoke `graph-execute` and pass it this path. To revise, edit the plan and re-decompose or hand-edit.
-
-Do not execute the plan. Do not spawn subagents. Do not run nodes. This skill's output is the plan and nothing more.
+Do not execute the plan. Do not spawn subagents. Do not run nodes. This skill's output is the plan files and nothing more.
 
 ## Hard rules
 
-- Always emit both JSON and Mermaid. Always.
+- Never hand-write the plan JSON. Always use `scripts/graph.py` (`init` → `add-node` per node → `validate` → `export`). The script enforces the schema and computes the summary; writing JSON by hand defeats the point.
+- Always run `validate` before `export`. `export` refuses to write on validation failure, but running `validate` first gives you the violation list to fix.
 - Never execute the plan, never spawn subagents, never run nodes. Plan only.
 - Never invent deps to force sequencing, and never omit real deps to fake parallelism. The graph must reflect actual data flow.
 - Every node prompt is self-contained — no implicit context from the parent conversation.
-- If decomposition produced no real parallelism (a linear chain), say so in `summary.honest_parallelism`. A skill that pretends to parallelize but doesn't is worse than no skill.
-- If you hit a cycle, rework the decomposition. Don't ship a cyclic "DAG".
-- One round of input questions max before decomposing. Iteration happens via the user editing the emitted plan, not via longer upfront interview.
+- If decomposition produced no real parallelism (a linear chain), the script's `honest_parallelism` will say so. Don't override it to pretend. A skill that fakes parallelism is worse than no skill.
+- Cycles are impossible by construction (`add-node` rejects deps that don't exist yet), but `validate` checks as a safety net. If you somehow create one, rework the decomposition.
+- One round of input questions max before decomposing. Iteration happens via the user editing the DB and re-exporting, not via longer upfront interview.
 - Never invent `model` or `skills` assignments the user didn't request. No mention → no field.
 
 ## Anti-patterns
@@ -177,10 +155,11 @@ Do not execute the plan. Do not spawn subagents. Do not run nodes. This skill's 
 - **Vague verify**: "looks reasonable". Replace with a command, test, or structural check.
 - **Bottleneck pretending to be parallel**: one node feeds 12 others and calls it parallelism. Flag the bottleneck honestly.
 - **Self-referential prompt**: "as discussed above", "per the task". Inline the context.
+- **Verbose prompt**: preamble ("you are a..."), restated task, pleasantries, meta-commentary. Strip to imperative instructions + inline context only.
 
 ## Reference files (load on demand)
 
 - Need the full JSON schema with field constraints and validation rules → `references/schema.md`
-- Want worked examples of good vs bad decompositions → `references/examples.md`
+- Want worked examples of good vs bad decompositions (shown as `graph.py` calls + the resulting exported JSON) → `references/examples.md`
 
-The plan JSON this skill emits is the input contract for `graph-execute`. Its schema is `references/schema.md` here; the executor consumes it as-is.
+The plan JSON exported by `scripts/graph.py` is the input contract for `graph-execute`. Its schema is `references/schema.md` here; the executor consumes it as-is.

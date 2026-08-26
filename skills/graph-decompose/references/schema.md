@@ -1,6 +1,6 @@
 # JSON Schema — graph-decompose plan
 
-Full field-level reference for the JSON object emitted by `graph-decompose`. Use this to validate a plan before showing it to the user, or when writing a grader that checks a decomposition programmatically.
+Full field-level reference for the JSON object exported by `scripts/graph.py`. The script is the canonical emitter — do not hand-write this JSON. Use this doc to understand the export contract, to write graders that check a decomposition programmatically, or to hand-edit an exported plan (then re-validate with `graph.py --db <db> validate` if you still have the DB).
 
 ## Top-level object
 
@@ -46,7 +46,7 @@ Full field-level reference for the JSON object emitted by `graph-decompose`. Use
 | `name` | string | ≤60 chars, human-readable, outcome-oriented ("generate TypeScript types" not "step 2"). |
 | `model` | string, optional | Overrides top-level `model` for this node. Free-form (id or tier), echoed verbatim from the user's request. Non-empty when present. |
 | `skills` | array of string, optional | Overrides top-level `skills` for this node. Skill names echoed verbatim from the user's request. Every entry non-empty when present. |
-| `prompt` | string | **Self-contained.** No references to the parent conversation. Inline any context the subagent needs. A fresh subagent with only this string + `inputs` must be able to execute it. |
+| `prompt` | string | **Self-contained and terse.** No references to the parent conversation, no preamble ("you are a..."), no restated task, no pleasantries. Imperative voice, one instruction per line, inline only the context slice the subagent needs. A fresh subagent with only this string + `inputs` must be able to execute it. Prefer 3 lines over 10; every word earns its place. |
 | `deps` | array of id | Every id must exist in `nodes`. Empty = ready at wave 0. No cycles (see Validation). |
 | `inputs` | array of string | Format `dep_id:artifact_name`. Must line up with `deps` and the dep's `outputs`. A node with a dep but no matching `inputs` entry is a hidden-dep smell — either the input list is wrong or the dep is fake. |
 | `outputs` | array of string | Concrete artifact names downstream nodes can reference. `["types.ts", "schema.json"]`, `["decision: use-postgres"]`, `["test-results.json"]`. Not vague ("the result"). |
@@ -81,7 +81,7 @@ Run these checks before emitting, and again if a grader validates a plan:
 3. **Dangling refs** — every id in every `deps` array exists in `nodes`.
 4. **Input/dep alignment** — for each node, every dep has at least one matching `inputs` entry, and every `inputs` entry references a real dep. Mismatches signal hidden deps or fake deps.
 5. **Output reachability** — every `outputs` entry of every node is either consumed by a downstream node's `inputs` or is a terminal output of the graph. Dead outputs (produced, never used, not terminal) suggest the node or the output is unnecessary.
-6. **Self-contained prompts** — no prompt contains "see above", "as discussed", "per the task", "previously", or refers to parent conversation. (Grader can grep for these phrases.)
+6. **Self-contained, terse prompts** — no prompt contains "see above", "as discussed", "per the task", "previously", "you are a", "please", "your task is", or refers to the parent conversation. No preamble before the first imperative instruction. (Grader can grep for these phrases.)
 7. **Verify objectivity** — every `verify` is a command, test, diff, or structural assertion. Reject "review", "looks good", "ensure quality".
 8. **No dead nodes** — every node either has a downstream consumer or produces a terminal output. Cut the rest.
 9. **Bottleneck honesty** — `summary.bottlenecks` lists every node with >8 direct dependents. Don't hide them.
@@ -100,7 +100,7 @@ Run these checks before emitting, and again if a grader validates a plan:
     {
       "id": "read-app",
       "name": "Read existing Express app entry",
-      "prompt": "Read src/server.js (or src/app.js if present) and report: how routes are registered, the Express version, and the exact file path you read. Output the route-registration snippet verbatim.",
+      "prompt": "Read src/server.js (or src/app.js if present). Report: route-registration pattern, Express version, file path. Output the route-registration snippet verbatim.",
       "deps": [],
       "inputs": [],
       "outputs": ["app-entry-path", "route-registration-pattern"],
@@ -111,7 +111,7 @@ Run these checks before emitting, and again if a grader validates a plan:
       "name": "Add GET /health route",
       "model": "strong",
       "skills": ["tdd"],
-      "prompt": "In the Express app at <app-entry-path>, routes are registered like this:\n<route-registration-pattern>\n\nAdd a `GET /health` route that returns `{ status: \"ok\" }` with status 200, registered in the same style as existing routes. Do not change other routes.",
+      "prompt": "In the Express app at <app-entry-path>, routes are registered like this:\n<route-registration-pattern>\n\nAdd `GET /health` returning `{ status: \"ok\" }`, 200, in the same style as existing routes. Don't touch other routes.",
       "deps": ["read-app"],
       "inputs": ["read-app:app-entry-path", "read-app:route-registration-pattern"],
       "outputs": ["health-route-diff"],

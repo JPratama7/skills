@@ -24,85 +24,101 @@ Why bad: every node depends on the previous. Zero parallelism. This is a todo li
 
 ### Good — real parallelism
 
+Built with `scripts/graph.py` (each call is one node; the script validates as you go and computes the summary on export):
+
+```bash
+python scripts/graph.py init --task "Build a CRUD API for users from an OpenAPI spec" \
+  --model cheap --skills ponytail
+
+python scripts/graph.py add-node --id read-spec \
+  --name "Extract user resource schema from openapi.yaml" \
+  --prompt "Read openapi.yaml. Extract the /users paths, User schema, error response schemas. Write extracted.md with three sections — ## paths, ## userSchema, ## errorSchemas — each containing the verbatim YAML." \
+  --verify "extracted.md exists, has ## paths, ## userSchema, ## errorSchemas headers, and each section contains YAML." \
+  --outputs extracted.md
+
+python scripts/graph.py add-node --id gen-types --model strong \
+  --name "Generate TypeScript types from extracted schema" \
+  --prompt "From the user schema in extracted.md (below), generate src/types/user.ts: User interface + CreateUser/UpdateUser partial variants. Use the project's TS config (strict).\n\n<paste extracted.md userSchema section>" \
+  --verify "tsc --noEmit src/types/user.ts passes; file exports User, CreateUser, UpdateUser." \
+  --deps read-spec --inputs read-spec:extracted.md --outputs src/types/user.ts
+
+python scripts/graph.py add-node --id gen-handlers --model strong \
+  --name "Generate Express route handlers for /users CRUD" \
+  --prompt "Generate src/routes/users.ts: Express router with GET/POST/PUT/DELETE on /users, in-memory Map<string,User> store, import User from ../types/user. Match the spec paths:\n\n<paste extracted.md paths section>" \
+  --verify "File exists, exports a router, registers all 4 verbs on /users, imports from ../types/user." \
+  --deps read-spec --inputs read-spec:extracted.md --outputs src/routes/users.ts
+
+python scripts/graph.py add-node --id wire-routes \
+  --name "Wire users router into the Express app" \
+  --prompt "In src/app.ts (or src/index.ts), import the users router from ./routes/users and mount at /users. Don't touch other routes." \
+  --verify "git diff src/app.ts shows only an import and an app.use('/users', usersRouter)." \
+  --deps gen-handlers --inputs gen-handlers:src/routes/users.ts --outputs app-diff
+
+python scripts/graph.py add-node --id gen-tests --skills tdd \
+  --name "Write integration tests for /users CRUD" \
+  --prompt "Write test/users.test.ts with supertest against the Express app. Cover: list empty, create+list, create+get one, update, delete, get-after-delete 404. Import app from src/app." \
+  --verify "File exists, has >=6 test cases, uses supertest." \
+  --deps wire-routes --inputs wire-routes:app-diff --outputs test/users.test.ts
+
+python scripts/graph.py add-node --id run-tests \
+  --name "Run the test suite and report" \
+  --prompt "Run npm test. Report pass/fail counts + any failure output verbatim." \
+  --verify "Output contains 'passing' and a number; if 'failing' > 0, verify fails." \
+  --deps gen-tests,gen-types --inputs gen-tests:test/users.test.ts,gen-types:src/types/user.ts \
+  --outputs test-report
+
+python scripts/graph.py validate
+python scripts/graph.py export --json plan.json --mermaid plan.mmd
+```
+
+The exported `plan.json` (produced by the script — not hand-written):
+
 ```json
 {
   "task": "Build a CRUD API for users from an OpenAPI spec",
+  "granularity": "single-subagent-call",
   "model": "cheap",
   "skills": ["ponytail"],
   "nodes": [
-    {
-      "id": "read-spec",
-      "name": "Extract user resource schema from openapi.yaml",
-      "prompt": "Read openapi.yaml and extract: the /users paths, the User schema, and the error response schemas. Output a single file `extracted.md` with three sections (paths, userSchema, errorSchemas) containing the verbatim YAML for each.",
-      "deps": [],
-      "inputs": [],
-      "outputs": ["extracted.md"],
-      "verify": "extracted.md exists, has '## paths', '## userSchema', '## errorSchemas' headers, and each section contains YAML."
-    },
-    {
-      "id": "gen-types",
-      "name": "Generate TypeScript types from extracted schema",
-      "model": "strong",
-      "prompt": "From the user schema in extracted.md (below), generate `src/types/user.ts` with a User interface and CreateUser/UpdateUser partial variants. Use the existing project's TS config (strict mode).\n\n<paste extracted.md userSchema section>",
-      "deps": ["read-spec"],
-      "inputs": ["read-spec:extracted.md"],
-      "outputs": ["src/types/user.ts"],
-      "verify": "tsc --noEmit src/types/user.ts passes; file exports User, CreateUser, UpdateUser."
-    },
-    {
-      "id": "gen-handlers",
-      "name": "Generate Express route handlers for /users CRUD",
-      "model": "strong",
-      "prompt": "Generate `src/routes/users.ts` with Express router implementing GET/POST/PUT/DELETE for /users. Use an in-memory Map<string, User> as the store. Import User types from ../types/user. Match the paths in the spec:\n\n<paste extracted.md paths section>",
-      "deps": ["read-spec"],
-      "inputs": ["read-spec:extracted.md"],
-      "outputs": ["src/routes/users.ts"],
-      "verify": "File exists, exports a router, registers all 4 verbs on /users, imports from ../types/user."
-    },
-    {
-      "id": "wire-routes",
-      "name": "Wire users router into the Express app",
-      "prompt": "In src/app.ts (or src/index.ts), import the users router from ./routes/users and mount it at /users. Don't touch other routes.",
-      "deps": ["gen-handlers"],
-      "inputs": ["gen-handlers:src/routes/users.ts"],
-      "outputs": ["app-diff"],
-      "verify": "git diff src/app.ts shows only an import and an app.use('/users', usersRouter)."
-    },
-    {
-      "id": "gen-tests",
-      "name": "Write integration tests for /users CRUD",
-      "skills": ["tdd"],
-      "prompt": "Write `test/users.test.ts` using supertest against the Express app. Cover: list empty, create + list, create + get one, update, delete, get-after-delete 404. Import the app from src/app.",
-      "deps": ["wire-routes"],
-      "inputs": ["wire-routes:app-diff"],
-      "outputs": ["test/users.test.ts"],
-      "verify": "File exists, has ≥6 test cases, uses supertest."
-    },
-    {
-      "id": "run-tests",
-      "name": "Run the test suite and report",
-      "prompt": "Run `npm test` and report pass/fail counts plus any failure output verbatim.",
-      "deps": ["gen-tests", "gen-types"],
-      "inputs": ["gen-tests:test/users.test.ts", "gen-types:src/types/user.ts"],
-      "outputs": ["test-report"],
-      "verify": "Output contains 'passing' and a number; if 'failing' > 0, verify fails."
-    }
+    { "id": "read-spec", "name": "Extract user resource schema from openapi.yaml",
+      "prompt": "Read openapi.yaml. Extract the /users paths, User schema, error response schemas. Write extracted.md with three sections — ## paths, ## userSchema, ## errorSchemas — each containing the verbatim YAML.",
+      "deps": [], "inputs": [], "outputs": ["extracted.md"],
+      "verify": "extracted.md exists, has ## paths, ## userSchema, ## errorSchemas headers, and each section contains YAML." },
+    { "id": "gen-types", "model": "strong", "name": "Generate TypeScript types from extracted schema",
+      "prompt": "From the user schema in extracted.md (below), generate src/types/user.ts: User interface + CreateUser/UpdateUser partial variants. Use the project's TS config (strict).\n\n<paste extracted.md userSchema section>",
+      "deps": ["read-spec"], "inputs": ["read-spec:extracted.md"], "outputs": ["src/types/user.ts"],
+      "verify": "tsc --noEmit src/types/user.ts passes; file exports User, CreateUser, UpdateUser." },
+    { "id": "gen-handlers", "model": "strong", "name": "Generate Express route handlers for /users CRUD",
+      "prompt": "Generate src/routes/users.ts: Express router with GET/POST/PUT/DELETE on /users, in-memory Map<string,User> store, import User from ../types/user. Match the spec paths:\n\n<paste extracted.md paths section>",
+      "deps": ["read-spec"], "inputs": ["read-spec:extracted.md"], "outputs": ["src/routes/users.ts"],
+      "verify": "File exists, exports a router, registers all 4 verbs on /users, imports from ../types/user." },
+    { "id": "wire-routes", "name": "Wire users router into the Express app",
+      "prompt": "In src/app.ts (or src/index.ts), import the users router from ./routes/users and mount at /users. Don't touch other routes.",
+      "deps": ["gen-handlers"], "inputs": ["gen-handlers:src/routes/users.ts"], "outputs": ["app-diff"],
+      "verify": "git diff src/app.ts shows only an import and an app.use('/users', usersRouter)." },
+    { "id": "gen-tests", "skills": ["tdd"], "name": "Write integration tests for /users CRUD",
+      "prompt": "Write test/users.test.ts with supertest against the Express app. Cover: list empty, create+list, create+get one, update, delete, get-after-delete 404. Import app from src/app.",
+      "deps": ["wire-routes"], "inputs": ["wire-routes:app-diff"], "outputs": ["test/users.test.ts"],
+      "verify": "File exists, has >=6 test cases, uses supertest." },
+    { "id": "run-tests", "name": "Run the test suite and report",
+      "prompt": "Run npm test. Report pass/fail counts + any failure output verbatim.",
+      "deps": ["gen-tests", "gen-types"], "inputs": ["gen-tests:test/users.test.ts", "gen-types:src/types/user.ts"],
+      "outputs": ["test-report"], "verify": "Output contains 'passing' and a number; if 'failing' > 0, verify fails." }
   ],
   "summary": {
-    "node_count": 6,
-    "wave_count": 4,
+    "node_count": 6, "wave_count": 5,
     "critical_path": ["read-spec", "gen-handlers", "wire-routes", "gen-tests", "run-tests"],
-    "bottlenecks": ["read-spec"],
-    "honest_parallelism": "gen-types and gen-handlers run in parallel after read-spec (wave 1 has 2 nodes). Critical path is 5 waves; the parallel branch saves 1 wave vs linear. read-spec is the bottleneck — everything depends on it."
+    "bottlenecks": [],
+    "honest_parallelism": "wave 0 has 1 node(s); critical path is 5 wave(s) vs 6 linear."
   }
 }
 ```
 
-Why good: `gen-types` and `gen-handlers` actually run in parallel (both depend only on `read-spec`). `run-tests` correctly declares both `gen-tests` AND `gen-types` as deps (needs the test file and the types it imports). `honest_parallelism` admits the gain is modest and names the bottleneck.
+Why good: `gen-types` and `gen-handlers` actually run in parallel (both depend only on `read-spec`). `run-tests` correctly declares both `gen-tests` AND `gen-types` as deps (needs the test file and the types it imports). `honest_parallelism` admits the gain is modest — one wave saved over linear. `read-spec` is a fan-in point (everything depends on it) but not a `bottlenecks` entry because the threshold is >8 direct dependents; the script reserves that label for genuine gridlock.
 
-Model config demo: the user said "cheap model for the mechanical nodes, strong for the codegen ones". Top-level `"model": "cheap"` covers `read-spec`, `wire-routes`, `gen-tests`, and `run-tests`; `gen-types` and `gen-handlers` override with `"model": "strong"`. Node wins over top-level; unmentioned plans get no `model` field at all and run on the harness default.
+Model config demo: the user said "cheap model for the mechanical nodes, strong for the codegen ones". Top-level `--model cheap` covers `read-spec`, `wire-routes`, `gen-tests`, and `run-tests`; `gen-types` and `gen-handlers` override with `--model strong`. Node wins over top-level; unmentioned plans get no `model` field at all and run on the harness default.
 
-Skill config demo: the user said "preload ponytail everywhere, and tdd for the test node". Top-level `"skills": ["ponytail"]` applies to every node; `gen-tests` overrides with `"skills": ["tdd"]` (override replaces, not merges — the user asked for tdd there, not ponytail + tdd). Plans without a skill mention carry no `skills` field and nodes run without skill instructions.
+Skill config demo: the user said "preload ponytail everywhere, and tdd for the test node". Top-level `--skills ponytail` applies to every node; `gen-tests` overrides with `--skills tdd` (override replaces, not merges — the user asked for tdd there, not ponytail + tdd). Plans without a skill mention carry no `skills` field and nodes run without skill instructions.
 
 ## Example 2: "Refactor this 800-line function into smaller functions"
 
