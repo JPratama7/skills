@@ -32,21 +32,28 @@ Picked Redis as the cache layer. Tested four options against the load profile in
 
 ---
 
-Implement token-bucket rate limiting on `POST /api/posts` per the spec in `docs/rate-limit-spec.md`. Endpoint currently has no throttling; spec calls for 10 req/min per user, 429 with Retry-After on overflow. Match the existing middleware pattern in `src/middleware/auth.ts`.
+Implement token-bucket rate limiting on `POST /api/posts`. Start at `src/middleware/auth.ts` — copy its pattern. Spec in `docs/rate-limit-spec.md`; full brief below.
 
 ## State
-- Done: spec written, infra decision (use redis token buckets, see Decision)
-- Pending: implementation, tests, integration with auth middleware
-- Files: `docs/rate-limit-spec.md` — full requirements; `src/middleware/auth.ts` — pattern to follow; `src/redis.ts` — existing client wrapper
+- Done: spec written, infra decision (Redis token buckets — see Decisions)
+- Pending: implementation, tests, auth middleware integration
+- Files: `src/middleware/auth.ts` — pattern to follow (read first); `docs/rate-limit-spec.md` — requirements; `src/redis.ts` — existing client wrapper
 
 ## Decisions
 - Redis over in-process counters — multiple app instances, in-process can't enforce global limit
 - Token bucket over fixed window — burst handling per spec §3
 
 ## Constraints
-- Do NOT touch `src/middleware/auth.ts` itself — extend with a new file, not edits to auth
-- Use `ioredis`, not `redis` package — already a project dep
-- Match existing error response shape: `{error: string, code: string}`
+- Critical:
+  - Do NOT touch `src/middleware/auth.ts` itself — extend with a new file, not edits
+  - Use `ioredis`, not `redis` package — already a project dep
+- Required:
+  - Match existing error response shape: `{error: string, code: string}`
+  - 429 responses MUST include `Retry-After` header per spec §3
+  - Tests: happy path, 429 on overflow, header presence
+
+## Open
+- Question: rate-limit key shape (per-IP vs per-user vs both)? Default: per-user via `req.user.id`, fall back to IP for unauthenticated requests. Override if spec says otherwise.
 
 ## Context
 - Goal: protect DB from write-storms on /api/posts (saw 3 incidents last month)
@@ -54,7 +61,7 @@ Implement token-bucket rate limiting on `POST /api/posts` per the spec in `docs/
 
 ---
 
-**Why this works:** prose says exactly what to do and where to look. Constraints come BEFORE context because they're the hard rules the subagent must not violate. Open section is omitted because nothing is blocked.
+**Why this works:** first sentence is the task + start-here file (subagent knows what to open in 15 words). Constraints are split Critical/Required so the subagent sees the load-bearing rules first. The single Open question has a default so the subagent doesn't stall. Whole brief fits on one screen (~250 words).
 
 ## 3. Peer → peer (chained)
 

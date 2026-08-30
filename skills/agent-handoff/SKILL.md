@@ -5,37 +5,27 @@ description: Produce a compressed handoff brief for passing work from one agent 
 
 # Agent Handoff
 
-A handoff is the act of compressing everything one agent knows into a brief another agent can consume cold. The challenge: humans read handoffs, but agents need *recoverable* state — task context, decisions made, file state, open questions. A good handoff is dense enough to fit in context but readable enough to skim.
+A handoff compresses everything one agent knows into a brief another agent can consume cold. Agents need *recoverable* state — task context, decisions made, file state, open questions — dense enough to fit in context but readable enough to skim.
 
-## When to use
-
-Trigger this skill when ANY of these are true:
-
-- An agent finishes work and needs to report results to a calling/parent agent
-- A parent agent is delegating a subtask and needs to brief the subagent
-- Two peer agents at the same level pass work between each other
-- You're writing notes for a future agent or future session that will pick up where you left off
-- The user explicitly asks for a "handoff", "brief", "context dump for next agent", "delegation note", or similar
-
-Do NOT use for: user-facing status updates (write prose), commit messages (use git), or final deliverables (the actual artifact, not a handoff).
+Use this format whenever work crosses an agent boundary. Do NOT use it for user-facing status updates (write prose), commit messages (use git), or final deliverables (ship the artifact, not a description of it).
 
 ## The format
 
-Every handoff is **prose summary first, structured tail second**. The prose reads like a sentence a human would write to another human. The tail is a tight reference block an agent (or human) can scan without re-reading the prose.
+**Prose summary first, structured tail second.** The prose reads like a sentence a human would write to another human; the tail is a scanable reference block. Use the sections you need and omit empty ones. If the handoff is trivial (one bullet of state, no open questions), skip the headers entirely and just write the prose.
 
 ```
-[One-paragraph prose: what was done, what's the current state, what's next]
+[One-paragraph prose: what was done, current state, what's next]
 
 ## State
-- Done: <bullet of completed work>
-- Pending: <bullet of work not yet done>
+- Done: <completed work>
+- Pending: <work not yet done>
 - Files: <path> — <one-line purpose>  (only files that matter)
 - Decisions: <choice made> — <one-line why>
 
 ## Open
 - Blocker: <what's stuck and why>
 - Question: <what needs an answer before next step>
-- Risk: <what could go wrong if next agent proceeds without knowing>
+- Risk: <what could go wrong if the next agent proceeds without knowing>
 
 ## Context
 - Goal: <the actual objective, restated>
@@ -43,41 +33,61 @@ Every handoff is **prose summary first, structured tail second**. The prose read
 - Assumptions: <things assumed but not verified>
 ```
 
-That's the whole format. Use the sections you need; omit empty ones. If the handoff is trivial (one bullet of state, no open questions), skip the headers entirely and just write the prose.
+## Lead by direction
 
-## How to write it well
+The first sentence of the prose is the only thing the reader is guaranteed to see — it must answer "what do I do now?". What that means depends on how much context the reader already has:
 
-**Lead with the verdict.** The first sentence of the prose should answer "where are we?" — done, in progress, blocked, or handed off cleanly. If the next agent reads only one sentence, they should know the status.
+- **Subagent → parent (report-back):** lead with the verdict — which option, what shipped, what's blocked. The parent knows the context; they need the outcome and a pointer to evidence. *"Pick: pino. Reasoning in State. Two open questions."*
+- **Parent → subagent (delegation):** lead with the start-here signal — the task and the file to open first. The subagent has zero context and must know where to begin in under 20 words. Delegations also get extra rules (below).
+- **Peer → peer (chained):** lead with what changed and what didn't. The peer is mid-context but lost the thread — confirm what's stable, then surface the deltas.
+- **Session → future session:** lead with status and where to pick up. Future-you is past-you with amnesia — status (done / blocked / in-progress) + the next concrete step.
 
-**State is fact, prose is judgment.** The prose captures *why* and *what it means*; the tail captures *what exists*. Don't repeat yourself across the two — if it's in the tail, the prose just references it.
+## Delegation rules
 
-**Decisions need a "why".** A handoff that says "chose Postgres" is useless; "chose Postgres over SQLite because dataset exceeds 1GB and we need concurrent writes" lets the next agent reverse it correctly if constraints change.
+Delegations are the most failure-prone handoff: the subagent has zero context and can't ask clarifying questions until it's minutes deep. On top of the general format:
 
-**Files only when they matter.** Don't list every file touched — list files the next agent will need to read, modify, or be aware exist. One-line purpose each. Use absolute paths when the next agent isn't in the same directory.
+- **One page max** — ≤400 words / ≤30 lines. Longer means you're dumping context instead of briefing; move detail into linked files the subagent can read on demand.
+- **Start-here first** — first sentence names the task and the file/endpoint to open (~15 words).
+- **Constraints before Context** — the subagent scans top-to-bottom, so load-bearing rules must precede soft narrative. Order the tail: State → Decisions → Constraints → Open → Context.
+- **Prioritize, don't enumerate** — a flat list of MUSTs says none matter most. Split into **Critical** (must not violate, 1-3 max) and **Required** (must do, your choice how).
+- **Default on every question** — the point of delegating is that the subagent moves; each Question carries a `Default:` it can act on. A question with no safe default becomes a `Blocker` so it stops instead of guessing.
+- **No implementation code** — the brief is *what to build and why*, not *how*. Code blocks get copy-pasted instead of thought through.
 
-**Open questions are gold.** A handoff that hides a blocker wastes the next agent's first 5 minutes. Surface anything you couldn't figure out, anything you assumed, and anything that could blow up later.
+```
+## Constraints
+- Critical:
+  - Auth required on every request; reuse `@login_required` from siblings — do NOT write a new decorator
+- Required:
+  - Stream the response; match existing error shape; tests for auth happy path + 401
 
-**Constraints beat goals.** If the next agent only reads one section, it should be constraints. Goals can be inferred; constraints (deadlines, format requirements, things not to touch) cannot.
+## Open
+- Question: which fields in the export? Default: profile + orders (see assumption below). Override if a spec exists in /docs.
+```
 
-## Compression rules
+## Writing rules
 
-The skill is token-aware. Apply these when the handoff would otherwise be long:
+- **Prose is judgment, State is fact.** The prose carries *why* and *what it means*; the tail lists *what exists*. Don't repeat across the two — if it's in the tail, the prose just references it.
+- **Decisions need a why.** "Chose Postgres" is useless; "chose Postgres over SQLite because the dataset exceeds 1GB and we need concurrent writes" lets the next agent reverse it correctly if constraints change.
+- **Files only when they matter.** List files the next agent must read, modify, or know exist — one-line purpose each, absolute paths when the reader isn't in the same directory.
+- **Surface blockers early.** Hiding a blocker wastes the next agent's first 5 minutes. Anything you couldn't figure out, assumed, or that could blow up later belongs in Open.
 
-- **Drop completed subtasks entirely** if their outcome is in the prose. Don't recap work the next agent can see in git/files.
-- **Inline small state** (single file, single decision) into the prose; only break out into bullets when there are 3+ items.
-- **Use one-line entries**, never multi-line bullets in the tail. If an entry needs more than one line, it belongs in the prose.
-- **Reference, don't quote.** "See `auth.py:42-58` for token refresh logic" beats pasting the code.
-- **Omit obvious context.** Don't tell the next agent what `package.json` is.
+## Compression
 
-Target: a typical handoff fits in 200-500 tokens. A complex multi-stage handoff with several open questions can go to ~1000 tokens. If you're past 1500, you're dumping context instead of handing off.
+A typical handoff fits in 200-500 tokens; a complex multi-stage one can go to ~1000 (delegations cap at 400 words). Past 1500 you're dumping context instead of handing off.
+
+- Drop completed subtasks whose outcome is in the prose — don't recap what the reader can see in git/files.
+- Inline small state (single file, single decision) into the prose; break out bullets only at 3+ items.
+- One-line entries only in the tail — anything needing more than a line belongs in the prose.
+- Reference, don't quote: "see `auth.py:42-58` for token refresh" beats pasting the code.
+- Omit obvious context — don't explain what `package.json` is.
 
 ## Anti-patterns
 
-- **The transcript dump.** Pasting your full work history. The next agent doesn't need it.
+- **The transcript dump.** Full work history pasted. The next agent doesn't need it.
 - **The vague summary.** "Made progress on the feature." Where? What progress? What's left?
-- **The decision-less handoff.** "Set up the database." Set up *which* database, with *what* schema, and *why* that one?
-- **The buried blocker.** Mentioning a critical issue in bullet 7 of a 10-bullet list. Lead with it in the prose.
-- **The everything-matters file list.** 15 files with no priority. The next agent doesn't know where to start.
+- **The decision-less handoff.** "Set up the database." Which one, what schema, why?
+- **The buried blocker.** Critical issue in bullet 7 of a 10-bullet list. Lead with it in the prose.
+- **The everything-matters file list.** 15 files, no priority — the next agent can't tell where to start.
 
 ## Reference files
 
