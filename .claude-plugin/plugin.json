@@ -8,6 +8,7 @@
     "./skills/graph-decompose",
     "./skills/graph-execute",
     "./skills/indexer",
-    "./skills/planning"
+    "./skills/planning",
+    "./skills/agent-handoff"
   ]
 }
