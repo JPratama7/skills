@@ -20,3 +20,4 @@ npx skills add <owner>/skills
 - `graph-execute` — execute a `graph-decompose` plan by walking its DAG in waves: parallel node spawn, dep-respecting, verify-before-fan-out, stop-on-failure
 - `planning` — turn any goal into a concrete, executable plan; three modes (coding, personal/task, agile sprint); plan-only
 - `agent-handoff` — produce a compressed handoff brief for passing work from one agent to another (subagent→parent, parent→subagent, peer, chained) without losing context
+- `brainstorming` — structured probe → diverge → converge sessions that turn a vague idea into a chosen direction and a concrete artifact (PRD, system design, one-pager, writeup)
