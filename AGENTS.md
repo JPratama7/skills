@@ -23,6 +23,12 @@ README.md                 # public index of skills
 feedback file goes there — never in the tracked tree. See
 [Iteration artifacts](#iteration-artifacts) for the exact layout.
 
+**Rule: nothing eval-related goes inside `skills/<name>/`.** No evals, test
+fixtures, workspaces, outputs, grading files, or scratch scripts. The skill
+directory ships only `SKILL.md` and `references/` — anything else belongs in
+`.local/`. If a run needs fixture files, generate them under the eval's
+`.local/` workspace, not beside the skill.
+
 ## Skill anatomy
 
 A skill is a directory under `skills/` containing at minimum a `SKILL.md`:
@@ -65,9 +71,9 @@ The `skill-creator` skill (`~/.claude/skills/skill-creator/`) drives this
 loop. The core sequence:
 
 1. **Write evals** — 2-3 realistic test prompts saved to
-   `.local/.<skill>-evals/evals.json`. Each eval has `id`, `name`, `prompt`,
-   `expected_output`, `files`, and `assertions` (objectively verifiable
-   checks with descriptive names).
+   `.local/.<skill>-evals/evals.json` — never inside `skills/<name>/`. Each
+   eval has `id`, `name`, `prompt`, `expected_output`, `files`, and
+   `assertions` (objectively verifiable checks with descriptive names).
 2. **Spawn runs in parallel** — for each eval, run two subagents in the same
    turn: one *with* the skill, one *baseline*. For a new skill the baseline is
    no-skill (`without_skill/`); for improving an existing skill the baseline

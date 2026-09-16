@@ -10,6 +10,7 @@
     "./skills/indexer",
     "./skills/planning",
     "./skills/agent-handoff",
-    "./skills/brainstorming"
+    "./skills/brainstorming",
+    "./skills/subagent-manager"
   ]
 }
