@@ -11,6 +11,7 @@
     "./skills/planning",
     "./skills/agent-handoff",
     "./skills/brainstorming",
-    "./skills/subagent-manager"
+    "./skills/subagent-manager",
+    "./skills/doc-builder"
   ]
 }
