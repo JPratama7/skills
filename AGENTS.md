@@ -12,7 +12,7 @@ skills/
 │   ├── SKILL.md          # required — frontmatter + instructions
 │   └── references/       # optional — load-on-demand docs
 ├── writing-coach/        # reference example of a mature skill
-└── jira-ticket/          # reference example of a mature skill
+└── doc-builder/          # reference example of a mature skill
 .local/                   # gitignored — ALL iteration artifacts live here
 AGENTS.md                 # this file
 README.md                 # public index of skills
@@ -48,7 +48,7 @@ Followed by markdown instructions. Optional bundled resources:
   push depth into reference files and index them from `SKILL.md` with a
   "Reference files (load on demand)" section. Each entry is
   `- <trigger condition> → \`references/<file>.md\``. See
-  `skills/writing-coach/SKILL.md` and `skills/jira-ticket/SKILL.md` for the
+  `skills/writing-coach/SKILL.md` and `skills/doc-builder/SKILL.md` for the
   established pattern.
 
 ## Writing a skill

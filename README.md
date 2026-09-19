@@ -13,7 +13,6 @@ npx skills add <owner>/skills
 ## Skills
 
 - `writing-coach` — guides/critiques blog post & technical article writing process
-- `jira-ticket` — generate Jira ticket or PR description from compact templates
 - `discussion` — technical sparring partner that pressure-tests decisions before you commit
 - `skill-generator` — create, evaluate, iterate, and package agent skills for any harness
 - `graph-decompose` — decompose a task into a strict DAG of atomic, parallel-executable graph nodes (JSON + Mermaid plan; plan only, does not execute)
@@ -22,5 +21,5 @@ npx skills add <owner>/skills
 - `agent-handoff` — produce a compressed handoff brief for passing work from one agent to another (subagent→parent, parent→subagent, peer, chained) without losing context
 - `brainstorming` — structured probe → diverge → converge sessions that turn a vague idea into a chosen direction and a concrete artifact (PRD, system design, one-pager, writeup)
 - `subagent-manager` — manager-style standard for the full delegation lifecycle: when to delegate, how to brief, parallel launch, and verify-before-integrate (harness-agnostic)
-- `doc-builder` — interview-driven structured docs: root cause analyses, reports, requirements docs; proven templates, no blank page
+- `doc-builder` — interview-driven structured docs: root cause analyses, reports, requirements docs, Jira/GitHub tickets, PR descriptions; proven templates, no blank page
 - `git-commit` — safely stage and commit working-tree changes; deliberate staging, secret screening, convention-matched messages, per-VCS command references
