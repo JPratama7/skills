@@ -1,12 +1,14 @@
 ---
 name: doc-builder
-version: 1.0.0
-description: Create structured documents — root cause analyses, reports, and
-  requirements docs — by interviewing the user and filling proven templates.
-  Use whenever the user asks to write, draft, or create an RCA, incident
-  review, postmortem, status/project report, requirements doc, PRD, or spec —
-  even if they only say "write a doc" or "document this". Never let the user
-  start from a blank page.
+version: 1.1.0
+description: Create structured documents — root cause analyses, reports,
+  requirements docs, tracker tickets, and PR descriptions — by interviewing
+  the user and filling proven templates. Use whenever the user asks to
+  write, draft, or create an RCA, incident review, postmortem,
+  status/project report, requirements doc, PRD, spec, Jira ticket, GitHub
+  issue, bug report, story, or PR description — even if they only say
+  "write a doc" or "document this". Never let the user start from a blank
+  page.
 ---
 
 # doc-builder
@@ -31,7 +33,9 @@ needed to fill it.
    metrics, dates, or names.
 5. **Save the doc** — markdown file, named after the doc (e.g.
    `rca-payment-outage-2026-09.md`, `requirements-search-v2.md`). Ask where
-   to save if the repo has no obvious docs location.
+   to save if the repo has no obvious docs location. Tickets and PR
+   descriptions are the exception — output them ready to paste into the
+   tracker/PR form instead of saving a file, unless the user asks to save.
 
 ## Doc types
 
@@ -40,6 +44,8 @@ needed to fill it.
 | Root cause analysis | Incident, outage, bug postmortem, "why did X happen" | `references/root-cause-analysis.md` |
 | Report | Status update, progress summary, investigation findings, periodic review | `references/report.md` |
 | Requirements | New feature/system spec, PRD, "what should we build" | `references/requirements.md` |
+| Ticket | Jira task/bug/story, GitHub issue, "file a bug", "write a ticket" | `references/ticket.md` |
+| PR description | Drafting the description when opening a PR | `references/pr-description.md` |
 
 ## Rules
 
@@ -54,6 +60,9 @@ needed to fill it.
   scannable, requirements are testable statements.
 - If the user's request spans types ("RCA plus a report for leadership"),
   produce both docs rather than merging them — the audiences differ.
+- Tickets and PR descriptions are paste-ready output for the tracker/PR
+  form — do not save them as repo files unless asked. Repo-resident docs
+  (RCA, report, requirements) get saved as files.
 - Diagrams are Mermaid — fenced ` ```mermaid ` blocks, never ASCII art.
   ASCII breaks in renderers and drifts from the text it describes. Each
   reference names the diagram its doc type requires.
@@ -63,3 +72,8 @@ needed to fill it.
 - Incident, outage, bug postmortem, "why did X happen" → `references/root-cause-analysis.md`
 - Status update, progress summary, investigation findings → `references/report.md`
 - Feature/system spec, PRD, "what should we build" → `references/requirements.md`
+- Jira ticket, GitHub issue, task/bug/story, "file a bug" → `references/ticket.md`
+- PR description when opening a PR → `references/pr-description.md`
+- Ticket acceptance criteria vague or untestable → `references/acceptance-criteria.md`
+- Ticket scope contains hedges, TBDs, or fuzzy boundaries → `references/scope.md`
+- Ticket/PR draft feels off, needs a strong/weak contrast → `references/examples.md`
