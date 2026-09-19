@@ -12,6 +12,7 @@
     "./skills/agent-handoff",
     "./skills/brainstorming",
     "./skills/subagent-manager",
-    "./skills/doc-builder"
+    "./skills/doc-builder",
+    "./skills/git-commit"
   ]
 }

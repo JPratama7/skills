@@ -23,3 +23,4 @@ npx skills add <owner>/skills
 - `brainstorming` — structured probe → diverge → converge sessions that turn a vague idea into a chosen direction and a concrete artifact (PRD, system design, one-pager, writeup)
 - `subagent-manager` — manager-style standard for the full delegation lifecycle: when to delegate, how to brief, parallel launch, and verify-before-integrate (harness-agnostic)
 - `doc-builder` — interview-driven structured docs: root cause analyses, reports, requirements docs; proven templates, no blank page
+- `git-commit` — safely stage and commit working-tree changes; deliberate staging, secret screening, convention-matched messages, per-VCS command references
