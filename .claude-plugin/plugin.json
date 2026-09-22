@@ -12,6 +12,7 @@
     "./skills/brainstorming",
     "./skills/subagent-manager",
     "./skills/doc-builder",
-    "./skills/git-commit"
+    "./skills/git-commit",
+    "./skills/devops"
   ]
 }
