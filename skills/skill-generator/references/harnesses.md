@@ -1,69 +1,65 @@
-# Harness Adaptation
+# Harness Adaptation and Description Optimization
 
-A **harness** is the agent runtime that loads and invokes skills. The core skill workflow is the same everywhere; this file covers the differences.
+## Harness capabilities
 
----
+The workflow is identical everywhere; only these mechanics differ. Detect at
+runtime rather than assuming — capability beats naming.
 
-## Claude Code
+| Harness | Subagents | Viewer | Install path | Packaging |
+|---------|-----------|--------|--------------|-----------|
+| Claude Code | yes | server or `--static` | `~/.claude/skills/` or repo `skills/` | `.skill` zip or dir |
+| Claude.ai | no | none | upload / paste | `.skill` zip |
+| Cowork | yes | `--static` HTML | same as Claude Code | `.skill` zip |
+| Devin | yes | browser preview | `.devin/skills/<name>/` or `.agents/skills/<name>/` | copy directory |
+| Vercel skills CLI | no | none | `npx skills add <dir-or-owner>/<repo>` | dir with SKILL.md |
+| Custom | ? | ? | per harness docs | ship the folder; zip only if required |
 
-- **Subagents**: yes
-- **Browser / viewer**: yes
-- **Install paths**: `~/.claude/skills/` or `skills/` inside a repo
-- **Packaging**: `.skill` zip via `scripts/package_skill.py`
-- **Description optimizer**: `claude -p` (see `references/description-optimization.md`)
-- **Notes**: run with-skill and baseline in parallel. Use `eval-viewer/generate_review.py` for review; in headless mode use `--static`.
+Rules of thumb:
 
----
+- No subagents → inline runs, skip baselines (see SKILL.md step 4).
+- No filesystem → evals are limited to what the model can produce in chat;
+  rely on human review.
+- Install = copy the skill folder (minus evals/scratch) to the harness's
+  skill path. Use `scripts/package_skill.py` only when the target harness
+  consumes `.skill` zips.
 
-## Claude.ai
+## Packaging
 
-- **Subagents**: no
-- **Browser / viewer**: limited; no local server
-- **Install paths**: read-only for built-in skills; upload `.skill` files or paste `SKILL.md`
-- **Packaging**: `.skill` zip
-- **Description optimizer**: skip — `claude -p` is not available
-- **Notes**: run test prompts inline, one at a time, following the skill yourself. Present outputs in the chat and ask for feedback. Skip baselines.
+```bash
+python SG/scripts/quick_validate.py <skill-dir>     # frontmatter + naming checks
+python SG/scripts/package_skill.py <skill-dir> -o <output-dir>   # -> <name>.skill zip
+```
 
----
+`package_skill.py` validates first and excludes `evals/`, caches, and
+`.local/` from the zip.
 
-## Cowork
+## Description optimization
 
-- **Subagents**: yes
-- **Browser / viewer**: headless; generate a static HTML review with `--static`
-- **Install paths**: same as Claude Code
-- **Packaging**: `.skill` zip
-- **Description optimizer**: `claude -p` works, but run it only after the skill is solid
-- **Notes**: feedback is downloaded as `feedback.json` from the static viewer. Request access to the file before reading it.
+The frontmatter `description` is the primary trigger. Optimize only after the
+skill body is solid.
 
----
+**1. Generate ~20 trigger queries** and save as JSON:
 
-## Devin
+```json
+[
+  {"query": "realistic user prompt with concrete context", "should_trigger": true},
+  {"query": "near-miss prompt that shares keywords but needs a different workflow", "should_trigger": false}
+]
+```
 
-- **Subagents**: yes
-- **Browser / viewer**: browser preview tool available
-- **Install paths**: `.devin/skills/<name>/` or `.agents/skills/<name>/`
-- **Packaging**: copy the skill directory to the install path; `.skill` zips are not used
-- **Description optimizer**: not available as a CLI; optimize manually
-- **Notes**: use Devin-specific memory rules if present. Avoid Claude-only paths in the skill body.
+- Should-trigger: varied phrasings of the intent, including prompts that
+  never name the skill; mix lengths, typos, casual phrasing.
+- Negatives: near-misses. Bad negative: "write a fibonacci function" (tests
+  nothing). Good negative: mentions the skill's domain but actually needs a
+  different workflow or a different tool entirely.
 
----
+**2. Review the query set with the user** — bad queries produce bad
+descriptions. Let them edit, add, remove.
 
-## Vercel skills CLI
+**3. Test candidate descriptions.** With subagents: run each query against a
+fresh agent holding only the skill's frontmatter (3 runs per query), count
+trigger rate. Without: judge each query yourself against the description.
+Split 60/40 train/test when optimizing; pick by test score, not train.
 
-- **Subagents**: no
-- **Browser / viewer**: no
-- **Install paths**: `npx skills add ./skills` or `npx skills add <owner>/skills`
-- **Packaging**: `.skill` zip or a directory with `SKILL.md`
-- **Description optimizer**: none
-- **Notes**: the CLI loads skills by frontmatter. Keep the `description` self-contained and the body under the harness's context limits.
-
----
-
-## Generic / custom harness
-
-- **Subagents**: maybe
-- **Browser / viewer**: maybe
-- **Install paths**: follow the harness docs
-- **Packaging**: at minimum, ship the skill folder; wrap in a zip if the harness expects it
-- **Description optimizer**: manual unless the harness exposes one
-- **Notes**: if the harness cannot run subagents, run evals inline. If it cannot serve HTML, present results as markdown and ask for feedback.
+**4. Apply** the winning description to the frontmatter; show before/after
+and the scores.
