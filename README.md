@@ -10,6 +10,13 @@ npx skills add ./skills
 npx skills add <owner>/skills
 ```
 
+This repo is also a Claude Code plugin — `.claude-plugin/plugin.json` lists
+every skill. Load them all for a session with:
+
+```bash
+claude --plugin-dir ./skills
+```
+
 ## Skills
 
 - `writing-coach` — guides/critiques blog post & technical article writing process
@@ -24,3 +31,4 @@ npx skills add <owner>/skills
 - `doc-builder` — interview-driven structured docs: root cause analyses, reports, requirements docs, Jira/GitHub tickets, PR descriptions; proven templates, no blank page
 - `git-commit` — safely stage and commit working-tree changes; deliberate staging, secret screening, convention-matched messages, per-VCS command references
 - `devops` — deploy and operate apps: deploy-path routing (Docker/compose, Railway, Fly.io, Cloud Run, ECS, Kubernetes, VPS, static hosts), CI/CD pipelines, secrets and environments, health checks and observability
+- `layman` — persistent plain-English mode: jargon translated to everyday words, code/commands kept exact, short answers without over-explaining; lite/full/ultra intensity levels; also writes plain-English documents (READMEs, guides, reports)

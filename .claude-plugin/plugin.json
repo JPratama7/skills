@@ -13,6 +13,7 @@
     "./skills/subagent-manager",
     "./skills/doc-builder",
     "./skills/git-commit",
-    "./skills/devops"
+    "./skills/devops",
+    "./skills/layman"
   ]
 }
