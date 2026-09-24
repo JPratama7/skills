@@ -213,17 +213,21 @@ context — decide deliberately.
 ## Compose for local dev
 
 `compose.yml` runs the app plus its dependencies locally. It is not the
-production deploy mechanism unless the target is a plain VPS you control.
+production deploy mechanism on managed platforms — but see `vps.md` for its
+second, optional role on a plain VPS.
 
 ### When to write one
 
 - The app needs a database, cache, queue, or other sibling service to run.
 - The user asks for `docker compose up` to work.
+- The deploy target is a plain VPS — a minimal prod compose file is a
+  legitimate convenience even for one service (see `vps.md`), provided the
+  plain `docker run` equivalent always works too.
 - The repo already has one — extend it.
 
-Skip it when the service is standalone, or when dependencies are managed
-externally (hosted Postgres, etc.) — a compose file that only wraps `docker
-run` adds indirection without value.
+Skip it when the service is standalone and the target is a managed platform,
+or when dependencies are managed externally (hosted Postgres, etc.) — a
+compose file that only wraps `docker run` adds indirection without value.
 
 ### Shape
 

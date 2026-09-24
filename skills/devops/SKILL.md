@@ -91,7 +91,7 @@ Close every deploy with: the exact commands run, required env vars and where to 
 ## Hard rules
 
 - Never commit or echo secrets — not in git, not in images, not in CI logs. `.env.example` carries placeholders only.
-- Don't build infrastructure the app doesn't need — no Kubernetes for a hobby site, no compose for a standalone service, no Docker for a static page. Recommend the simpler path when it applies.
+- Don't build infrastructure the app doesn't need — no Kubernetes for a hobby site, no Docker for a static page. Compose earns its place running sibling services locally; on a plain VPS it's also a legitimate *optional* deploy wrapper for a single service — offer it, never require it, and always show the plain `docker run` path alongside.
 - Match the repo's conventions — extend existing infra config instead of adding a parallel system.
 - Report the measurable facts — image size, build time, pipeline duration, deploy URL. They regress silently.
 - Verify before handing over — build the image, curl the endpoint. If a tool is unavailable in the environment, say so explicitly and give the user the exact commands to run.

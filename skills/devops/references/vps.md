@@ -1,7 +1,10 @@
-# Plain VPS (docker compose on the host)
+# Plain VPS
 
-The user controls a server and runs Docker on it. Compose is the production
-mechanism here.
+The user controls a server and runs Docker on it. Compose is the convenient
+production mechanism here — restart policy, ports, and env in one declarative
+file — but for a single service it's optional. Always show the equivalent
+`docker run -d --restart unless-stopped -p ...` so the user isn't locked into
+the compose plugin.
 
 ## Deploy
 
@@ -10,6 +13,10 @@ mechanism here.
 docker compose pull && docker compose up -d
 # or build on the host:
 docker compose up -d --build
+
+# without compose (single service):
+docker run -d --name app --restart unless-stopped -p 127.0.0.1:3000:3000 \
+  --env-file .env REGISTRY/IMAGE:TAG
 ```
 
 ## Production compose shape
