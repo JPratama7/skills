@@ -1,14 +1,14 @@
 ---
 name: doc-builder
-version: 1.1.0
+version: 1.2.0
 description: Create structured documents — root cause analyses, reports,
-  requirements docs, tracker tickets, and PR descriptions — by interviewing
-  the user and filling proven templates. Use whenever the user asks to
-  write, draft, or create an RCA, incident review, postmortem,
-  status/project report, requirements doc, PRD, spec, Jira ticket, GitHub
-  issue, bug report, story, or PR description — even if they only say
-  "write a doc" or "document this". Never let the user start from a blank
-  page.
+  requirements docs, decision records, tracker tickets, and PR
+  descriptions — by interviewing the user and filling proven templates.
+  Use whenever the user asks to write, draft, or create an RCA, incident
+  review, postmortem, status/project report, requirements doc, PRD, spec,
+  ADR or any decision record, Jira ticket, GitHub issue, bug report,
+  story, or PR description — even if they only say "write a doc" or
+  "document this". Never let the user start from a blank page.
 ---
 
 # doc-builder
@@ -44,6 +44,7 @@ needed to fill it.
 | Root cause analysis | Incident, outage, bug postmortem, "why did X happen" | `references/root-cause-analysis.md` |
 | Report | Status update, progress summary, investigation findings, periodic review | `references/report.md` |
 | Requirements | New feature/system spec, PRD, "what should we build" | `references/requirements.md` |
+| Decision record | Any consequential choice — technical, product, process, org; ADR, "record why we chose X" | `references/decision-record.md` |
 | Ticket | Jira task/bug/story, GitHub issue, "file a bug", "write a ticket" | `references/ticket.md` |
 | PR description | Drafting the description when opening a PR | `references/pr-description.md` |
 
@@ -62,7 +63,7 @@ needed to fill it.
   produce both docs rather than merging them — the audiences differ.
 - Tickets and PR descriptions are paste-ready output for the tracker/PR
   form — do not save them as repo files unless asked. Repo-resident docs
-  (RCA, report, requirements) get saved as files.
+  (RCA, report, requirements, decision records) get saved as files.
 - Diagrams are Mermaid — fenced ` ```mermaid ` blocks, never ASCII art.
   ASCII breaks in renderers and drifts from the text it describes. Each
   reference names the diagram its doc type requires.
@@ -72,6 +73,7 @@ needed to fill it.
 - Incident, outage, bug postmortem, "why did X happen" → `references/root-cause-analysis.md`
 - Status update, progress summary, investigation findings → `references/report.md`
 - Feature/system spec, PRD, "what should we build" → `references/requirements.md`
+- Any consequential decision — ADR, product/process/org choice, "record why we chose X" → `references/decision-record.md`
 - Jira ticket, GitHub issue, task/bug/story, "file a bug" → `references/ticket.md`
 - PR description when opening a PR → `references/pr-description.md`
 - Ticket acceptance criteria vague or untestable → `references/acceptance-criteria.md`

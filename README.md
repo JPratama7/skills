@@ -28,7 +28,7 @@ claude --plugin-dir ./skills
 - `agent-handoff` — produce a compressed handoff brief for passing work from one agent to another (subagent→parent, parent→subagent, peer, chained) without losing context
 - `brainstorming` — structured probe → diverge → converge sessions that turn a vague idea into a chosen direction and a concrete artifact (PRD, system design, one-pager, writeup)
 - `subagent-manager` — manager-style standard for the full delegation lifecycle: when to delegate, how to brief, parallel launch, and verify-before-integrate (harness-agnostic)
-- `doc-builder` — interview-driven structured docs: root cause analyses, reports, requirements docs, Jira/GitHub tickets, PR descriptions; proven templates, no blank page
+- `doc-builder` — interview-driven structured docs: root cause analyses, reports, requirements docs, decision records, Jira/GitHub tickets, PR descriptions; proven templates, no blank page
 - `git-commit` — safely stage and commit working-tree changes; deliberate staging, secret screening, convention-matched messages, per-VCS command references
 - `devops` — deploy and operate apps: deploy-path routing (Docker/compose, Railway, Fly.io, Cloud Run, ECS, Kubernetes, VPS, static hosts), CI/CD pipelines, secrets and environments, health checks and observability
 - `layman` — persistent plain-English mode: jargon translated to everyday words, code/commands kept exact, short answers without over-explaining; lite/full/ultra intensity levels; also writes plain-English documents (READMEs, guides, reports)
