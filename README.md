@@ -32,3 +32,4 @@ claude --plugin-dir ./skills
 - `git-commit` — safely stage and commit working-tree changes; deliberate staging, secret screening, convention-matched messages, per-VCS command references
 - `devops` — deploy and operate apps: deploy-path routing (Docker/compose, Railway, Fly.io, Cloud Run, ECS, Kubernetes, VPS, static hosts), CI/CD pipelines, secrets and environments, health checks and observability
 - `layman` — persistent plain-English mode: jargon translated to everyday words, code/commands kept exact, short answers without over-explaining; lite/full/ultra intensity levels; also writes plain-English documents (READMEs, guides, reports)
+- `research` — Graph-of-Thought research: asks how to execute first (mode/breadth/depth), decomposes a question into sub-question nodes, explores branches with parallel research agents, merges/scores/prunes, then ships a cited markdown report plus the visible thought graph
