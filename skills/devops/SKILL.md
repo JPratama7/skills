@@ -1,6 +1,6 @@
 ---
 name: devops
-version: 2.0.0
+version: 2.1.0
 description: Deploy, containerize, and operate applications, plus the DevOps around them — CI/CD pipelines, secrets and environment management, health checks, and monitoring. Use whenever the user wants to deploy a service, dockerize or containerize an app, write a Dockerfile or compose setup, set up GitHub Actions or any CI pipeline, manage env vars or secrets across environments, write Kubernetes manifests, or asks "how do I get this into production" or "why won't it deploy" — even if they only say "deploy this" or "set up CI". Covers Docker/compose, Railway, Fly.io, Cloud Run, ECS, Kubernetes, plain VPS, and static hosts; defers to platform-specific skills or MCPs when the harness has them.
 ---
 
@@ -8,15 +8,29 @@ description: Deploy, containerize, and operate applications, plus the DevOps aro
 
 Take the app in front of you to a running, verifiable deployment — and wire up what surrounds it (CI, secrets, health checks) so it stays running.
 
-## Scope check first
+## Read the app, then interview the user
 
-DevOps requests rarely name their full scope. "Deploy this" might mean containerize + CI + secrets + monitoring, or just one command. Establish three things before writing files:
+A deploy has two inputs, and they come from different places. The repo tells you the app — read it. The deploy itself — where it runs, who triggers it, where secrets live — only the user can tell you. **Never infer deploy details from repo clues**: an existing Dockerfile doesn't say which platform builds it, and a guessed target produces work the user throws away.
 
-1. **The app** — runtime and version from manifests and lock files (`package.json` engines, `.nvmrc`, `pyproject.toml`, `go.mod`, `Cargo.toml`, `Gemfile`, `pom.xml`, `composer.json`), framework and build step, the port it actually listens on (check code and config; do not guess), and external dependencies with the env vars they need.
-2. **The target** — where this runs. If unstated, ask. The target changes the packaging shape: some platforms inject `$PORT`, some run their own health probes, static frontends may not need a server at all.
-3. **The scope** — deploy only, or deploy + CI + secrets + observability? Do the smallest thing that satisfies the request; name the next step rather than building it unasked.
+### Read from the repo
+
+Runtime and version from manifests and lock files (`package.json` engines, `.nvmrc`, `pyproject.toml`, `go.mod`, `Cargo.toml`, `Gemfile`, `pom.xml`, `composer.json`), framework and build step, the port it actually listens on (check code and config; do not guess), and external dependencies with the env vars they need.
 
 Existing infra config (Dockerfile, compose, CI workflows, k8s manifests, Terraform) means *improve*, not replace. Read it first and preserve intentional choices.
+
+### Interview the user — always, before writing files
+
+Ask before building anything, even when the repo has clues. Batch the questions into one numbered message so the user can answer fast; skip items the request or existing infra already settles, and say which you're skipping and why.
+
+1. **Target** — where should this run? Platform, cluster, VPS, or "recommend one" — a recommendation request is a valid answer; make it and confirm before building.
+2. **Scope** — deploy only, or deploy + CI + secrets + observability? Build the smallest thing that satisfies the request; name the next step rather than building it unasked.
+3. **Environments** — is this dev, staging, or prod? Do several environments exist or is this the only one?
+4. **Trigger** — manual deploy, on merge, on tag? Existing CI pipeline that must stay?
+5. **Traffic** — public URL or internal service? Domain and TLS already set up, or part of this work?
+6. **Secrets and config** — which env vars does it need, and where do the real values live today (platform UI, `.env` file, vault)?
+7. **State and access** — database, volumes, or other services it must reach? Who applies changes to the target — the user's SSH session, CI, or the platform itself?
+
+If every question is already settled, list what's settled in one line and proceed. Asking anyway is how the skill earns trust — a two-line confirmation costs nothing next to a wrong-target rebuild.
 
 ## Workflow
 
@@ -29,7 +43,7 @@ Existing infra config (Dockerfile, compose, CI workflows, k8s manifests, Terrafo
 
 ### 1. Choose the deploy path
 
-Route before building:
+The interview answers the target; this step routes on it:
 
 - **Static site, no server logic** → static host/CDN (Cloudflare Pages, Netlify, Vercel, S3+CDN). Docker adds a server nobody needs — say so when it applies.
 - **Framework-native** (Next.js on Vercel, etc.) → the platform builds and deploys the repo directly; a Dockerfile opts you out of its edge features.
@@ -90,6 +104,7 @@ Close every deploy with: the exact commands run, required env vars and where to 
 
 ## Hard rules
 
+- Ask before you build — deploy details come from the user, not repo clues or defaults.
 - Never commit or echo secrets — not in git, not in images, not in CI logs. `.env.example` carries placeholders only.
 - Don't build infrastructure the app doesn't need — no Kubernetes for a hobby site, no Docker for a static page. Compose earns its place running sibling services locally; on a plain VPS it's also a legitimate *optional* deploy wrapper for a single service — offer it, never require it, and always show the plain `docker run` path alongside.
 - Match the repo's conventions — extend existing infra config instead of adding a parallel system.
