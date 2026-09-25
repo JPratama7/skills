@@ -67,8 +67,8 @@ Followed by markdown instructions. Optional bundled resources:
 ## The eval loop
 
 Skills are improved iteratively: draft → test → review → improve → repeat.
-The `skill-creator` skill (`~/.claude/skills/skill-creator/`) drives this
-loop. The core sequence:
+The `skill-generator` skill (`~/.config/devin/skills/skill-generator/`)
+drives this loop. The core sequence:
 
 1. **Write evals** — 2-3 realistic test prompts saved to
    `.local/.<skill>-evals/evals.json` — never inside `skills/<name>/`. Each
@@ -88,27 +88,23 @@ loop. The core sequence:
    in each run directory using fields `text`, `passed`, `evidence` (the viewer
    depends on these exact field names). For programmatically checkable
    assertions, write a script rather than eyeballing.
-6. **Aggregate** — from the skill-creator directory:
+6. **Aggregate**:
    ```bash
-   python -m scripts.aggregate_benchmark \
+   python ~/.config/devin/skills/skill-generator/scripts/aggregate_benchmark.py \
      .local/.<skill>-workspace/iteration-<N> --skill-name <skill>
    ```
    Produces `benchmark.json` and `benchmark.md`.
 7. **Generate the eval viewer** — always do this before self-reviewing:
    ```bash
-   python ~/.claude/skills/skill-creator/eval-viewer/generate_review.py \
-     .local/.<skill>-workspace/iteration-<N> \
-     --skill-name <skill> \
-     --benchmark .local/.<skill>-workspace/iteration-<N>/benchmark.json \
-     --static .local/.<skill>-workspace/iteration-<N>/review.html
+   python ~/.config/devin/skills/skill-generator/scripts/make_review.py \
+     .local/.<skill>-workspace/iteration-<N> --skill-name <skill>
    ```
-   For iteration 2+, add
-   `--previous-workspace .local/.<skill>-workspace/iteration-<N-1>`.
-   Use `--static` to write a standalone HTML file (this environment has no
-   display server).
+   Writes a standalone `review.html` into the iteration directory (no
+   server needed). For iteration 2+, add
+   `--previous-feedback .local/feedback.json` to carry over prior comments.
 8. **User reviews** — the user opens `review.html`, clicks through outputs,
-   leaves feedback, clicks "Submit All Reviews". Feedback downloads as
-   `feedback.json` — copy it into `.local/` for the next iteration to pick up.
+   leaves feedback, clicks "Download feedback.json". Copy the downloaded
+   file into `.local/` for the next iteration to pick up.
 9. **Read feedback, improve, repeat** — empty feedback means the eval was
    fine. Focus on evals with specific complaints. Generalize from feedback
    rather than overfitting to the test cases. Then rerun into
@@ -163,20 +159,21 @@ found, changes applied, and explicit next steps.
 ## Description optimization (optional, last step)
 
 After the skill body is finalized, optimize the `description` frontmatter for
-triggering accuracy. This requires the `claude` CLI:
+triggering accuracy:
 
-```bash
-python -m scripts.run_loop \
-  --eval-set .local/.<skill>-trigger-eval.json \
-  --skill-path skills/<skill> \
-  --model <model-id> \
-  --max-iterations 5 \
-  --verbose
-```
+1. Generate ~20 trigger queries (8-10 should-trigger, 8-10 near-miss
+   negatives — realistic, concrete, some that never name the skill). Save to
+   `.local/.<skill>-trigger-eval.json` as
+   `[{"query": "...", "should_trigger": true|false}]`.
+2. Review the query set with the user before testing.
+3. Test candidate descriptions: spawn a fresh subagent per query holding
+   only the skill's frontmatter (3 runs per query) and count the trigger
+   rate. Split queries 60/40 train/test; pick the winner by test score.
+4. Apply the winning description to the frontmatter; show the user
+   before/after with scores.
 
-Generate 20 trigger eval queries (mix of should-trigger / should-not-trigger,
-realistic and concrete, with near-miss negatives). Review with the user before
-running. Apply `best_description` from the output to the frontmatter.
+See `~/.config/devin/skills/skill-generator/references/harnesses.md` for the
+full procedure.
 
 ## Key paths
 
@@ -184,7 +181,9 @@ running. Apply `best_description` from the output to the frontmatter.
 |------|------|
 | Skills (repo) | `skills/<name>/SKILL.md` |
 | Iteration artifacts | `.local/` (gitignored) |
-| skill-creator scripts | `~/.claude/skills/skill-creator/scripts/` |
-| eval viewer generator | `~/.claude/skills/skill-creator/eval-viewer/generate_review.py` |
-| grader / analyzer agents | `~/.claude/skills/skill-creator/agents/` |
-| schema reference | `~/.claude/skills/skill-creator/references/schemas.md` |
+| skill-generator | `~/.config/devin/skills/skill-generator/` |
+| benchmark aggregator | `~/.config/devin/skills/skill-generator/scripts/aggregate_benchmark.py` |
+| eval viewer generator | `~/.config/devin/skills/skill-generator/scripts/make_review.py` |
+| validate / package | `~/.config/devin/skills/skill-generator/scripts/{quick_validate,package_skill}.py` |
+| eval schema reference | `~/.config/devin/skills/skill-generator/references/evals.md` |
+| harness + trigger-opt notes | `~/.config/devin/skills/skill-generator/references/harnesses.md` |
