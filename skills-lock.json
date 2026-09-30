@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "skills": {
+    "doc-builder": {
+      "source": "/home/xoid/projects/private/skills/skills/doc-builder",
+      "sourceType": "local",
+      "computedHash": "1fd17d76fa156b1f1c2c782f75989640cebe82cc28d96b8d66039798a8eef5c9"
+    },
+    "layman": {
+      "source": "/home/xoid/projects/private/skills/skills/layman",
+      "sourceType": "local",
+      "computedHash": "68f84ac9f5a3c3a8bb01bf71a010ea4c98800a6c4fff206d66ef2cfe1c40a721"
+    }
+  }
+}

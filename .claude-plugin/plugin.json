@@ -15,6 +15,7 @@
     "./skills/git-commit",
     "./skills/devops",
     "./skills/layman",
-    "./skills/research"
+    "./skills/research",
+    "./skills/active-recall"
   ]
 }
