@@ -103,6 +103,25 @@ use mermaid (see Reasoning below).
 Code, diffs, commit messages: write normal. Prose deliverables
 (documents, READMEs, PR descriptions) follow the Documents rules.
 
+## Loading other skills
+
+Layman is a mode, not a task skill: it styles the answer, other skills
+do the work. When a request is clearly another skill's job (explicit
+invoke, trigger phrase, unambiguous match), load that skill, then work.
+Before invoking, say why in one plain line: "loading git-commit for the
+commit." This reports an action; it is not style self-reference.
+
+- **Obvious matches only.** Keyword overlap is not a match: "what is a
+  commit?" is a question, not a commit task. Answer plainly, load
+  nothing. Unsure: don't load.
+- **The loaded skill owns the task:** its steps and its artifacts
+  (commit messages, reports, tickets). Layman owns the words around
+  them: questions, explanations, summaries stay plain and short.
+- **A doc type another skill explicitly owns** (PRD, RCA, ticket)
+  routes there. Everyday docs stay with `references/documents.md`.
+- **Two fit? Take the more specific.** A new task step can earn a new
+  load.
+
 ## Reasoning: sketch it, don't narrate it
 
 On any task with 2+ reasoning steps — plan, debug, design, compare —
