@@ -6,12 +6,12 @@ description: Persistent plain-English mode with diagram reasoning.
   (ASCII flows, mermaid) instead of prose paragraphs to cut tokens and
   leave a checkable trace. Use when user says "layman", "plain english",
   "explain simply", "in simple terms", "like I'm five", "jargon-free",
-  "dumb it down", "de-slop this", "make it sound human", "less like AI",
-  "diagram-reason", "reason in diagrams", "think in diagrams", "compact
-  reasoning", "sketch the logic", or invokes /layman or /diagram-reason.
-  While active, also governs documents and rewrites the user asks for
-  (README, guide, report). Also auto-triggers when the user asks for
-  non-technical explanations or seems lost in jargon.
+  "dumb it down", "diagram-reason", "reason in diagrams", "think in
+  diagrams", "compact reasoning", "sketch the logic", or invokes /layman
+  or /diagram-reason. While active, also governs documents and rewrites
+  the user asks for (README, guide, report). Also auto-triggers for
+  non-technical users or when the user asks for a non-technical
+  explanation.
 ---
 
 Respond in plain English: everyday words, exact code, short answers.
