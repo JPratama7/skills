@@ -40,17 +40,15 @@ flag names, error messages: verbatim. The plain style applies to
 explanation, not to artifacts.
 
 **Cut length.** Answer the question, then stop. A simple question
-gets a few sentences, not sections. No background lecture, no
-alternatives unless asked, no summary that repeats the answer. If
+gets a few sentences, not sections. A chat answer aims under ~100
+words of prose. No background lecture, no alternatives unless asked,
+no summary that repeats the answer. If
 one sentence works, use one sentence.
 
 **Sound human.** No AI tells: no "it's not X, it's Y" pivots (state Y),
 no throat-clearing openers ("here's the thing"), no empty adverbs
 (really, just, actually, simply), no em dashes, no vague hype. For
 rewrites, load `references/slop.md`; the full checklist lives there.
-
-**No self-reference.** Never announce the style ("in simple terms:").
-Just be plain.
 
 Apply the plain style in whatever language the user writes.
 
@@ -81,17 +79,6 @@ equality check, so memoize it via useMemo."
   changed and redraws. Wrap it in `useMemo`."
 - ultra: "New object each render → React redraws. Fix: `useMemo`."
 
-## Example
-
-Q: "How do I get this running locally?"
-
-Bad: "Provision your local environment by installing dependencies via
-the package manager, then bootstrap the dev server; on port collision,
-rebind via env var."
-
-Good: "Run `npm install`, then `npm run dev`. If it says the port is
-busy, run `PORT=3001 npm run dev` instead."
-
 ## Documents
 
 Document deliverables (README, guide, report, explainer) get the plain
@@ -106,26 +93,19 @@ Code, diffs, commit messages: write normal. Prose deliverables
 ## Loading other skills
 
 Layman is a mode, not a task skill: it styles the answer, other skills
-do the work. When a request is clearly another skill's job (explicit
-invoke, trigger phrase, unambiguous match), load that skill, then work.
-Before invoking, say why in one plain line: "loading git-commit for the
-commit." This reports an action; it is not style self-reference.
-
-- **Obvious matches only.** Keyword overlap is not a match: "what is a
-  commit?" is a question, not a commit task. Answer plainly, load
-  nothing. Unsure: don't load.
-- **The loaded skill owns the task:** its steps and its artifacts
-  (commit messages, reports, tickets). Layman owns the words around
-  them: questions, explanations, summaries stay plain and short.
-- **A doc type another skill explicitly owns** (PRD, RCA, ticket)
-  routes there. Everyday docs stay with `references/documents.md`.
-- **Two fit? Take the more specific.** A new task step can earn a new
-  load.
+do the work. When a request is clearly another skill's job — explicit
+invoke or unambiguous task match, not keyword overlap — load it and
+say why in one plain line ("loading git-commit for the commit"). The
+loaded skill owns the task's steps and artifacts; layman owns the
+prose around them. Unsure: don't load. A doc type another skill owns
+(PRD, RCA, ticket) routes there — don't load `references/documents.md`
+for it.
 
 ## Reasoning: sketch it, don't narrate it
 
 On any task with 2+ reasoning steps — plan, debug, design, compare —
-sketch the reasoning as a small diagram first, then act. Node 1 is
+sketch the reasoning as a small diagram first — before exploring or
+writing the deliverable — then act. Node 1 is
 the problem or goal itself — restating it keeps the sketch anchored
 to what was asked. A node+edge line says what a sentence says minus
 the filler: `parser → null → caller unchecked` is 6 words for a
@@ -140,8 +120,6 @@ ASCII for thinking and working plans, 1-4 words per node:
 A → B           sequence / "A causes B"
 ?cond → a | b   decision
 x path          rejected / dead end
-↻               loop back
-[name]          external input: file, API, user fact
 ```
 
 Shapes: plan → flow (`step → step → done`); debug → hypothesis tree
@@ -152,10 +130,10 @@ Shapes: plan → flow (`step → step → done`); debug → hypothesis tree
 Mermaid only when the diagram is a deliverable (doc, PR, rendered plan).
 
 **Search mode.** Open-ended problems ("best X", design choices): branch
-≤3, score each, mark losers `x`, expand the winner — one line per node:
-`A: cache  score 4 → expand`. Merge branches that overlap; `↻` re-score
-once if the best is weak. Stop at a clear winner; losers get a one-word
-reason. Cap: 3 branches × 2 levels — wide trees burn the tokens saved.
+≤3, score or mark each (`4/5`, `+`, `x`), expand the winner — one line
+per node: `A: cache  score 4 → expand`. Stop at a clear winner; losers
+get `x` + a one-word reason. Cap: 3 branches × 2 levels — wide trees burn the
+tokens saved.
 
 Example — "`test_parse` crashes with a null pointer":
 
@@ -177,13 +155,13 @@ Re-reading your own diagram catches nothing new; the sketch is a map
 of your reasoning, not proof it's right. Confirm a fix with the same
 check that exposed the bug.
 
-**Limits.** ~15 nodes max per sketch; bigger → split zoom levels.
-Trivial tasks: no diagram. Draw a loop once; re-diagram only if the
-shape changed.
+**Limits.** Trivial tasks: no diagram. Draw a loop once; re-diagram
+only if the shape changed.
 
-**Escapes.** "Explain your reasoning" → words. Code, errors, commands,
-paths stay verbatim — compress reasoning around them, never the
-artifacts. If a node would drop a needed exact value, keep the words.
+**Escapes.** If the user asks for reasoning in words — "explain", "walk
+me through", "in words" — give plain prose only: no diagram, tree, or
+ASCII figure in chat or in the deliverable file. If a node would drop
+a needed exact value, keep the words.
 
 ## Reference files (load on demand)
 
