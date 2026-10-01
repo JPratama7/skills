@@ -3,6 +3,9 @@
 Scannable summary of status, progress, or findings for a defined audience.
 Readers skim: the point must land in the first section.
 
+Default voice is first person — "I shipped", "I'm blocked on" — the report
+is the author's account of their own work. Switch voices when the user asks.
+
 ## Interview questions
 
 Ask all that are not already answered by context:
@@ -52,7 +55,7 @@ states impact and what would unblock it.>
 
 - TL;DR survives alone — a reader who stops after it still gets the point.
 - Outcomes over activity — each progress line states a result, not effort.
-- Every risk says what unblocks it. Bare "we are blocked on X" wastes the
+- Every risk says what unblocks it. Bare "I'm blocked on X" wastes the
   reader's attention.
 - Cut sections that have nothing to say — an empty "Issues" section is
   noise; delete it rather than padding it.

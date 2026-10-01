@@ -7,6 +7,10 @@ who need the *why* after everyone forgets the meeting. The *what* is
 already visible in the code, the plan, or the org chart; this doc
 preserves what isn't.
 
+Default voice is first person — "I decided", "I will do X" — the record is
+the decider's own account. When the deciders are a group, name them and say
+who actually chose. If the user asks for another voice, use that instead.
+
 ## Interview questions
 
 Ask all that are not already answered by context:
@@ -67,7 +71,7 @@ flowchart LR
 ```
 
 ## Decision
-<The chosen option as an active sentence — "We will do X" — then the
+<The chosen option as an active sentence — "I will do X" — then the
 reasoning: which drivers mattered most, which cons were accepted
 knowingly.>
 
@@ -89,7 +93,7 @@ starting at 0001.
 ## Quality bar
 
 - The decision is one active sentence a reader could disagree with —
-  "We will ship monthly pricing only", not "pricing stuff". If it cannot
+  "I will ship monthly pricing only", not "pricing stuff". If it cannot
   be argued against, it isn't a decision.
 - Rejected options carry real reasons — the "why not" is the most valuable
   part of the record years later.
