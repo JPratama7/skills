@@ -4,6 +4,11 @@ Blameless, factual account of an incident: what happened, why, and what
 prevents recurrence. Readers are engineers who were not there and reviewers
 checking that prevention is real.
 
+Default voice is first person — "I deployed", "I noticed", "I rolled back" —
+the author owns the timeline. State your own actions as facts without fault
+language, and name systems, not people, for causes. If the user asks for
+another voice, use that instead.
+
 ## Interview questions
 
 Ask all that are not already answered by context:

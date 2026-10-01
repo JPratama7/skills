@@ -132,9 +132,12 @@ def build_benchmark(results: dict, skill_name: str, skill_path: str) -> dict:
         }
 
     configs = list(results.keys())
-    if len(configs) >= 2:
-        primary = run_summary[configs[0]]
-        baseline = run_summary[configs[1]]
+    # Delta reads as "candidate - baseline": prefer with_skill as primary so
+    # improvement evals (vs old_skill/without_skill) get a positive delta.
+    order = ["with_skill"] + [c for c in configs if c != "with_skill"]
+    if len(order) >= 2:
+        primary = run_summary[order[0]]
+        baseline = run_summary[order[1]]
     elif configs:
         primary = run_summary[configs[0]]
         baseline = {}

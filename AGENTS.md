@@ -79,15 +79,22 @@ drives this loop. The core sequence:
    no-skill (`without_skill/`); for improving an existing skill the baseline
    is the old version (`old_skill/`), snapshotted before editing. Save outputs
    to `.local/.<skill>-workspace/iteration-<N>/eval-<id>-<name>/{with_skill,baseline}/outputs/`.
+   Give each run agent only the skill path, prompt, and input files — never
+   the expected output.
 3. **Draft assertions while runs are in progress** — don't idle. Write
    quantitative assertions, update `eval_metadata.json` and `evals.json`.
 4. **Capture timing** — when each subagent completes, save `total_tokens` and
    `duration_ms` from the notification to `timing.json` in the run directory.
    This data is not persisted elsewhere.
-5. **Grade** — evaluate each assertion against outputs. Save to `grading.json`
-   in each run directory using fields `text`, `passed`, `evidence` (the viewer
-   depends on these exact field names). For programmatically checkable
-   assertions, write a script rather than eyeballing.
+5. **Grade** — spawn an independent verifier subagent per run (protocol:
+   `skills/skill-generator/references/verification.md`). It sees only the
+   eval prompt, inputs, and `outputs/` — never the skill or
+   `expected_output` — and derives its own checks, persisted under
+   `.local/.<skill>-verifier/` so they co-evolve across iterations. Save
+   `grading.json` in each run directory using fields `text`, `passed`,
+   `evidence` (the viewer depends on these exact field names); failed checks
+   also get a `diagnosis.md` (Actual / Expected / Root cause / Fix) that
+   feeds step 9.
 6. **Aggregate**:
    ```bash
    python ~/.config/devin/skills/skill-generator/scripts/aggregate_benchmark.py \
@@ -130,7 +137,8 @@ named `<skill>`:
 │   │       ├── eval_metadata.json
 │   │       ├── with_skill/
 │   │       │   ├── outputs/                    # skill-produced files
-│   │       │   ├── grading.json                # assertion results
+│   │       │   ├── grading.json                # verifier results
+│   │       │   ├── diagnosis.md                # per-failure root causes
 │   │       │   └── timing.json
 │   │       └── without_skill/  (or old_skill/)
 │   │           ├── outputs/
@@ -138,6 +146,8 @@ named `<skill>`:
 │   │           └── timing.json
 │   ├── iteration-2/
 │   └── ...
+├── .<skill>-verifier/
+│   └── eval-<id>/checks.py                     # persisted, refined each iteration
 ├── feedback.json                               # user feedback from viewer
 ├── grade_iter<N>.py                            # grading scripts (if any)
 └── SESSION_SUMMARY.md                          # running notes across sessions

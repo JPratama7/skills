@@ -1,6 +1,6 @@
 ---
 name: doc-builder
-version: 1.2.0
+version: 1.3.0
 description: Create structured documents — root cause analyses, reports,
   requirements docs, decision records, tracker tickets, and PR
   descriptions — by interviewing the user and filling proven templates.
@@ -59,6 +59,13 @@ needed to fill it.
   auditors, stakeholders) rely on it.
 - Match formality to the type: RCA is factual and blameless, report is
   scannable, requirements are testable statements.
+- Narrative docs (RCA, report, decision record) are first-person by
+  default: "I deployed", "I found", "I decided". The author owns the
+  account — first person keeps responsibility visible where passive voice
+  hides it, and it does not conflict with blameless framing ("I ran the
+  migration" states a fact, not fault). Any explicit user request — "we",
+  third person, a house style — overrides this. Tickets, requirements, and
+  PR descriptions keep their conventional voice.
 - If the user's request spans types ("RCA plus a report for leadership"),
   produce both docs rather than merging them — the audiences differ.
 - Tickets and PR descriptions are paste-ready output for the tracker/PR
