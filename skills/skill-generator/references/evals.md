@@ -102,7 +102,15 @@ Written by aggregate_benchmark.py. Shape:
 
 Keep `configuration` (not `config`) and nest metrics under `result`.
 
-## Grading procedure (inline or as a subagent prompt)
+## Grading procedure
+
+Default: spawn an **independent verifier** per run — a fresh agent that sees
+only the prompt, inputs, and `outputs/` (never the skill or
+`expected_output`), derives its own executable checks, and persists them
+under `<scratch>/<skill>-verifier/`. Full protocol, boundaries, and the
+`diagnosis.md` format: `verification.md`.
+
+Fallback (inline or lightweight grader subagent — see `agent-roles.md`):
 
 1. Read the run's `eval_metadata.json` (prompt + assertions) and `outputs/`.
 2. For each assertion, search outputs for concrete evidence → PASS/FAIL.
@@ -118,8 +126,9 @@ write a grading script instead of judging by eye.
 
 ## Optional: blind comparison and analysis
 
-When a human is not in the loop, spawn a comparator agent: give it both
+When a human is not in the loop, spawn a comparator subagent: give it both
 outputs unlabeled (A/B), the eval prompt, and the assertions; ask for a
-winner with reasoning. Follow with an analyzer pass on the loser's skill +
-transcript to produce prioritized improvement suggestions. Skip both when a
-human reviews — their feedback is the higher-signal path.
+winner with reasoning. Follow with an analyzer pass over `benchmark.json`
+plus the losing config's run diffs for prioritized improvement suggestions.
+Prompt templates: `agent-roles.md`. Skip both when a human reviews — their
+feedback is the higher-signal path.

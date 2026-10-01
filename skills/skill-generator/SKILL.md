@@ -96,6 +96,10 @@ Goal on every harness: compare skill-on vs skill-off.
 - baseline: new skill → no skill (`without_skill/`); improved skill → the
   pre-edit snapshot (`old_skill/`)
 
+Give each run agent only the skill path, prompt, and input files — never the
+expected output or why the eval exists. A fresh agent is only isolation if
+the prompt doesn't leak the answer key.
+
 While they run, draft assertions and write `eval_metadata.json` per eval.
 When each completes, save `total_tokens`/`duration_ms` to `timing.json`
 (nulls if the harness hides them).
@@ -107,9 +111,16 @@ baselines; save outputs under `eval-<id>-<name>/`. Human review compensates.
 
 Let `SG` = this skill's directory.
 
-1. Grade each run against its assertions. Prefer a script over eyeballing.
-   Save `grading.json` in the run dir; each assertion needs `text`, `passed`,
-   `evidence`.
+1. Grade each run with an **independent verifier** — a fresh agent that sees
+   only the prompt, inputs, and outputs, never the skill or expected output
+   (protocol + prompt template: `references/verification.md`). The agent that
+   wrote the skill grading its own evals passes its own blind spots. The
+   verifier writes `grading.json` (`text`/`passed`/`evidence` + `summary`),
+   a `diagnosis.md` per failure (Actual / Expected / Root cause / Fix), and
+   persists its checks under `<scratch>/<skill>-verifier/` so they refine
+   across iterations rather than regenerate. For subjective evals where
+   executable checks don't apply, use the grader / blind-comparator /
+   analyzer roles in `references/agent-roles.md`.
 2. Aggregate: `python SG/scripts/aggregate_benchmark.py iteration-N --skill-name <skill>`
    → `benchmark.json` + `benchmark.md` (or compute pass rates by hand).
 3. Review: `python SG/scripts/make_review.py iteration-N --skill-name <skill>`
@@ -122,6 +133,11 @@ Let `SG` = this skill's directory.
 
 Loop until the user is happy or feedback is empty:
 
+- Feed each run's `diagnosis.md` into the revision — it's denser than
+  pass/fail: every failure arrives with a root cause and a concrete fix.
+- When feedback contradicts a verifier verdict (a pass that's actually wrong,
+  or vice versa), update the persisted checks too — they co-evolve with the
+  skill.
 - Generalize from specific feedback; don't overfit to test prompts.
 - Cut sections that don't change behavior in runs.
 - Prefer explaining *why* over stacking rules.
@@ -149,6 +165,8 @@ that consume them. Update the repo README index if one exists.
 ## Reference files (load on demand)
 
 - Eval JSON schemas, run directory layout, grading format → `references/evals.md`
+- Independent verification protocol, diagnosis format, persistent checks → `references/verification.md`
+- Grader / blind-comparator / analyzer subagent prompts → `references/agent-roles.md`
 - Harness install paths, capabilities, packaging → `references/harnesses.md`
 
 ## Avoid
