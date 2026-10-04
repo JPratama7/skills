@@ -108,7 +108,7 @@ def main():
         print(f"Usage: {sys.argv[0]} <skill-directory>")
         sys.exit(1)
 
-    valid, message = validate_skill(sys.argv[1])
+    valid, message = validate_skill(Path(sys.argv[1]))
     print(message)
     sys.exit(0 if valid else 1)
 

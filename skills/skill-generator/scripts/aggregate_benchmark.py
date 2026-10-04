@@ -9,7 +9,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 
-def stats(values: list[float]) -> dict:
+def stats(values: list) -> dict:
+    values = [v for v in values if isinstance(v, (int, float))]
     if not values:
         return {"mean": 0.0, "stddev": 0.0, "min": 0.0, "max": 0.0}
     n = len(values)
@@ -31,6 +32,64 @@ def load_grading(path: Path) -> dict:
         return json.load(f)
 
 
+def normalize_checks(grading: dict) -> list:
+    """The checks list, named `expectations` (documented) or `checks` (variant)."""
+    checks = grading.get("expectations") or grading.get("checks") or []
+    return checks if isinstance(checks, list) else []
+
+
+def normalize_summary(grading: dict) -> dict:
+    """Coerce grading.json into the canonical summary dict.
+
+    Verifiers in the wild write `summary` as either the documented dict
+    ({passed, failed, total, pass_rate}) or a human-readable string. When
+    stats are missing, derive them from the checks list, which may be
+    named `expectations` (documented) or `checks` (common variant).
+    """
+    checks = normalize_checks(grading)
+    summary = grading.get("summary")
+    if isinstance(summary, dict) and "total" in summary:
+        passed = summary.get("passed", 0)
+        total = summary.get("total", 0)
+        pass_rate = summary.get("pass_rate")
+        if not isinstance(pass_rate, (int, float)):
+            pass_rate = passed / total if total else 0.0
+        return {
+            "passed": passed,
+            "failed": summary.get("failed", total - passed),
+            "total": total,
+            "pass_rate": pass_rate,
+        }
+    total = len(checks)
+    passed = sum(1 for c in checks if isinstance(c, dict) and c.get("passed"))
+    failed = total - passed
+    return {
+        "passed": passed,
+        "failed": failed,
+        "total": total,
+        "pass_rate": passed / total if total else 0.0,
+    }
+
+
+def normalize_timing(grading: dict, timing_file: Path) -> dict:
+    timing = grading.get("timing")
+    if not isinstance(timing, dict):
+        timing = {}
+    if not timing and timing_file.exists():
+        try:
+            with open(timing_file) as f:
+                loaded = json.load(f)
+                if isinstance(loaded, dict):
+                    timing = loaded
+        except (json.JSONDecodeError, OSError):
+            pass
+    seconds = timing.get("total_duration_seconds")
+    if not isinstance(seconds, (int, float)):
+        ms = timing.get("duration_ms")
+        seconds = ms / 1000.0 if isinstance(ms, (int, float)) else 0.0
+    return {"total_duration_seconds": seconds}
+
+
 def collect_runs(benchmark_dir: Path) -> dict:
     """Collect results grouped by configuration name."""
     results: dict[str, list] = {}
@@ -46,7 +105,7 @@ def collect_runs(benchmark_dir: Path) -> dict:
                 with open(metadata_path) as f:
                     meta = json.load(f)
                     eval_id = meta.get("eval_id", 0)
-                    eval_name = meta.get("eval_name", eval_dir.name)
+                    eval_name = meta.get("eval_name") or meta.get("name") or eval_dir.name
             except (json.JSONDecodeError, OSError):
                 pass
 
@@ -70,30 +129,26 @@ def collect_runs(benchmark_dir: Path) -> dict:
                     print(f"Warning: cannot read {grading_file}: {e}")
                     continue
 
-                summary = grading.get("summary", {})
-                timing = grading.get("timing", {})
-                if not timing and timing_file.exists():
-                    try:
-                        with open(timing_file) as f:
-                            timing = json.load(f)
-                    except (json.JSONDecodeError, OSError):
-                        pass
+                summary = normalize_summary(grading)
+                timing = normalize_timing(grading, timing_file)
 
                 metrics = grading.get("execution_metrics", {})
+                if not isinstance(metrics, dict):
+                    metrics = {}
 
                 results[config].append({
                     "eval_id": eval_id,
                     "eval_name": eval_name,
                     "run_number": int(run_dir.name.split("-")[1]) if run_dir.name.startswith("run-") else 1,
-                    "pass_rate": summary.get("pass_rate", 0.0),
-                    "passed": summary.get("passed", 0),
-                    "failed": summary.get("failed", 0),
-                    "total": summary.get("total", 0),
-                    "time_seconds": timing.get("total_duration_seconds", 0.0),
+                    "pass_rate": summary["pass_rate"],
+                    "passed": summary["passed"],
+                    "failed": summary["failed"],
+                    "total": summary["total"],
+                    "time_seconds": timing["total_duration_seconds"],
                     "tokens": metrics.get("output_chars", 0),
                     "tool_calls": metrics.get("total_tool_calls", 0),
                     "errors": metrics.get("errors_encountered", 0),
-                    "expectations": grading.get("expectations", []),
+                    "expectations": normalize_checks(grading),
                     "notes": [],
                 })
 

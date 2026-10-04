@@ -112,8 +112,18 @@ def build_run(root: Path, run_dir: Path) -> dict | None:
     if grading_file.exists():
         data = load_json(grading_file)
         if isinstance(data, dict):
-            grading = data if "expectations" in data else {"expectations": data.get("expectations", []),
-                                                           "summary": data.get("summary", {})}
+            # checks may be named `expectations` (documented) or `checks`
+            # (common variant); summary may be a dict or a plain string.
+            exps = data.get("expectations") or data.get("checks") or []
+            if not isinstance(exps, list):
+                exps = []
+            summary = data.get("summary")
+            if not isinstance(summary, dict):
+                total = len(exps)
+                passed = sum(1 for e in exps if isinstance(e, dict) and e.get("passed"))
+                summary = {"passed": passed, "failed": total - passed, "total": total,
+                           "pass_rate": passed / total if total else 0.0}
+            grading = {"expectations": exps, "summary": summary}
 
     timing = None
     timing_file = run_dir / "timing.json"
@@ -125,7 +135,7 @@ def build_run(root: Path, run_dir: Path) -> dict | None:
         "dir": run_dir,
         "config": run_dir.name,
         "eval_id": meta.get("eval_id", 0),
-        "eval_name": meta.get("eval_name", run_dir.parent.name),
+        "eval_name": meta.get("eval_name") or meta.get("name") or run_dir.parent.name,
         "prompt": meta.get("prompt", ""),
         "outputs": collect_outputs(run_dir / "outputs"),
         "grading": grading,
@@ -149,14 +159,14 @@ def find_runs(root: Path) -> list[dict]:
 
 def render_run(run: dict) -> str:
     parts = [f'<div class="run"><h3>{esc(run["config"])}</h3>']
-    if run.get("timing") and run["timing"].get("duration_ms") is not None:
+    if isinstance(run.get("timing"), dict) and run["timing"].get("duration_ms") is not None:
         parts.append(f'<div class="muted">timing: {esc(run["timing"])}</div>')
     exps = (run.get("grading") or {}).get("expectations") or []
     if exps:
         rows = "".join(
             f'<tr><td class="{"ok" if e.get("passed") else "bad"}">'
             f'{"PASS" if e.get("passed") else "FAIL"}</td>'
-            f'<td>{esc(e.get("text", ""))}</td>'
+            f'<td>{esc(e.get("text") or e.get("name") or "")}</td>'
             f'<td>{esc(e.get("evidence", ""))}</td></tr>'
             for e in exps
         )
