@@ -24,6 +24,24 @@ Python, no installs).
 Repeat 4-6 until the user is satisfied or feedback is empty. Skip steps the
 harness cannot support.
 
+## Two roles, one loop
+
+Every iteration alternates between two roles. Keep them separate — the
+ambiguity this prevents is an agent quietly grading its own work.
+
+**Generator (you, the main agent):** capture intent, draft/edit the skill,
+write evals, spawn run agents, improve the skill, optimize the description,
+package. You own the loop and the conversation with the user.
+
+**Grader (always a fresh subagent):** verification, aggregation, review
+artifacts. Grading is *delegated, never performed inline by the generator* —
+the agent that wrote the skill or produced a run passes its own blind spots.
+When step 4 finishes, switch roles by handing each run's prompt, inputs, and
+`outputs/` to an independent verifier (protocol: `references/verification.md`).
+You consume its `grading.json` and `diagnosis.md` in step 6; you do not write
+them yourself. The only exception is a harness with no subagents, where human
+review replaces the grader entirely.
+
 **Artifact rule:** evals, workspaces, grading scripts, and feedback live in a
 gitignored scratch dir (`.local/` if present) — never inside the skill folder.
 A shipped skill contains only `SKILL.md`, `references/`, `scripts/`, `assets/`.
@@ -107,27 +125,38 @@ When each completes, save `total_tokens`/`duration_ms` to `timing.json`
 **No subagents** — run each prompt inline, following the skill yourself; skip
 baselines; save outputs under `eval-<id>-<name>/`. Human review compensates.
 
-## 5. Grade, aggregate, review
+## 5. Grade, aggregate, review (grader role)
+
+State your role: "Role: coordinator." If your next action is reading outputs
+and writing a pass/fail verdict yourself, stop — you are about to grade
+inline. Spawn a fresh verifier subagent instead.
 
 Let `SG` = this skill's directory.
 
-1. Grade each run with an **independent verifier** — a fresh agent that sees
-   only the prompt, inputs, and outputs, never the skill or expected output
-   (protocol + prompt template: `references/verification.md`). The agent that
-   wrote the skill grading its own evals passes its own blind spots. The
-   verifier writes `grading.json` (`text`/`passed`/`evidence` + `summary`),
-   a `diagnosis.md` per failure (Actual / Expected / Root cause / Fix), and
-   persists its checks under `<scratch>/<skill>-verifier/` so they refine
-   across iterations rather than regenerate. For subjective evals where
-   executable checks don't apply, use the grader / blind-comparator /
-   analyzer roles in `references/agent-roles.md`.
-2. Aggregate: `python SG/scripts/aggregate_benchmark.py iteration-N --skill-name <skill>`
-   → `benchmark.json` + `benchmark.md` (or compute pass rates by hand).
-3. Review: `python SG/scripts/make_review.py iteration-N --skill-name <skill>`
-   → standalone `review.html` with embedded outputs, grading, and a feedback
-   download (`feedback.json`). Works headless; no server needed.
-4. No browser at all → present results as markdown tables and collect
-   feedback in chat.
+### 5.1 Delegate grading (must be a fresh agent)
+
+Spawn one **independent verifier** per run — a fresh agent that sees only
+the prompt, inputs, and outputs, never the skill or expected output
+(protocol + prompt template: `references/verification.md`). The agent that
+wrote the skill grading its own evals passes its own blind spots. The
+verifier writes `grading.json` (`text`/`passed`/`evidence` + `summary`),
+a `diagnosis.md` per failure (Actual / Expected / Root cause / Fix), and
+persists its checks under `<scratch>/<skill>-verifier/` so they refine
+across iterations rather than regenerate. For subjective evals where
+executable checks don't apply, use the grader / blind-comparator /
+analyzer roles in `references/agent-roles.md`.
+
+### 5.2 Aggregate (deterministic — you may run this directly)
+
+`python SG/scripts/aggregate_benchmark.py iteration-N --skill-name <skill>`
+→ `benchmark.json` + `benchmark.md` (or compute pass rates by hand).
+
+### 5.3 Review
+
+`python SG/scripts/make_review.py iteration-N --skill-name <skill>`
+→ standalone `review.html` with embedded outputs, grading, and a feedback
+download (`feedback.json`). Works headless; no server needed. No browser
+at all → present results as markdown tables and collect feedback in chat.
 
 ## 6. Improve
 

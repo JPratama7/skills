@@ -73,6 +73,12 @@ Nulls are fine when the harness hides them.
 depends on these names. `summary` is what aggregate_benchmark.py reads.
 Optional extras: `execution_metrics`, `timing`, `claims`, `eval_feedback`.
 
+The tooling tolerates common variants: a check list named `checks` instead
+of `expectations`, per-check `name` instead of `text`, a `summary` written
+as a plain string, and null timing values. Stats are then derived from the
+check list. Prefer the canonical schema above; the fallbacks exist so a
+verifier's output never crashes aggregation.
+
 Grading discipline: burden of proof is on the expectation — pass only on
 genuine evidence in outputs, not surface compliance. Flag assertions that
 would also pass for clearly wrong outputs.
@@ -101,6 +107,26 @@ Written by aggregate_benchmark.py. Shape:
 ```
 
 Keep `configuration` (not `config`) and nest metrics under `result`.
+
+## Role separation eval assertion
+
+Add one assertion per eval that checks the conversation log or agent trace for
+any instance of the main agent grading its own runs without delegation. The
+assertion passes only if all grading was performed by a fresh verifier
+subagent. Purpose: catch role-confusion drift that the SKILL.md instruction
+alone won't prevent.
+
+Example:
+```json
+{
+  "text": "main-agent-never-graded-inline",
+  "passed": true,
+  "evidence": "All 3 evals graded by a fresh verifier subagent, confirmed by trace"
+}
+```
+
+When this assertion fails, the fix is not to patch the output — it is to
+re-run step 5 correctly with a delegated verifier.
 
 ## Grading procedure
 
