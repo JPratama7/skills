@@ -51,7 +51,14 @@ chat answers, explanations, documents, rewrites, any language.
   no throat-clearing openers ("here's the thing"), no rhetorical
   setups ("what if...", "think about it").
 - Active voice with a human actor. No passive ("mistakes were made"),
-  no false agency ("the decision emerges"; a person decides).
+  no false agency ("the decision emerges"; a person decides). Note the
+  models go the other way: they under-use plain passives, so naming
+  the actor pushes back against the default.
+- Use plain copulas. "Is", "has", "was" - not "serves as", "stands
+  as", "marks", "boasts", "features", "refers to". This is the single
+  most reliable machine tell there is, measured at the corpus level.
+- No trailing participle clauses ("...reflecting its importance",
+  "...ensuring accuracy"). Delete or promote to a real verb.
 - No adverbs (really, just, actually, simply, genuinely...) and no
   lazy extremes (every, always, never) doing vague work.
 - Be specific. No vague declaratives ("the implications are
@@ -60,6 +67,20 @@ chat answers, explanations, documents, rewrites, any language.
   hand-holding, no lines that sound like pull-quotes.
 - Vary rhythm: mix sentence lengths, two items beat three, vary how
   paragraphs end. No em dashes.
+- Stay unpredictable. Detectors score two signals: surprising word
+  choice (perplexity) and varied sentence shape (burstiness). Machine
+  prose takes the safest continuation every time. When two plain
+  words both fit, take the one you'd say out loud. Every few
+  sentences, break the run with a very short one.
+- Say what you know. The largest tell is not a word or a structure,
+  it is a text with no specifics, no position, and no admitted
+  uncertainty. Fix that with real material; no edit pass substitutes
+  for it.
+
+These patterns come from instruction tuning, which is why they shift
+between model families and years - treat any list of them as
+rotatable, and prefer rules that describe the shape of the problem
+over fixed banned words.
 
 For documents, rewrites, or any output longer than a few sentences,
 load `references/slop.md`; the full checklist lives there.

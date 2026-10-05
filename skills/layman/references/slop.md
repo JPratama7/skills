@@ -3,6 +3,33 @@
 The extended checklist behind SKILL.md's always-on "Sound human" rules.
 Load for documents, rewrites, or any output longer than a few sentences.
 
+## Why these patterns exist
+
+Instruction tuning creates them. Base models written before that
+tuning show human-like rates of these features; the tuned versions
+that users actually meet do not. That is why tells shift between model
+families and between years: each new tuned model inherits a fresh set.
+
+Consequence for editing: a fixed banned-word list goes stale. Prefer
+rules that describe the *shape* of the problem, plus a short list of
+the current offenders, treating the list as rotatable.
+
+Two findings to keep in mind while editing:
+
+- **The biggest tell is missing content, not style.** Tells below remove
+  the machine flavor. They cannot add specifics, a stake, or an opinion.
+  A text with nothing to say reads dead after every fix below is applied.
+- **Style tells travel badly across domains.** Non-native English writers
+  and students show several of the same features as machine output, so a
+  feature that flags machine prose can also flag a human writing plainly.
+  Do not use these rules to judge a person's writing; use them to edit
+  your own output.
+- **Detectors score predictability, not patterns.** The two measurable
+  signals are perplexity (how surprising the next word is) and
+  burstiness (how much sentence length varies). The edits above help
+  only where they raise one of the two: varied rhythm does, and so does
+  choosing the word a person would say over the safest continuation.
+
 ## Phrases to delete
 
 - Throat-clearing openers: "here's the thing", "here's what/this/that",
@@ -51,7 +78,75 @@ vague work: name the specifics instead.
 | Pull-quote phrasing (sounds quotable out of context) | Rewrite it plain |
 | Question answered in the same breath | Let it breathe or cut it |
 
+## Grammar-level tells
+
+These are the most reliable and the most generalizable, because they are
+measured properties of machine prose rather than vocabulary choices. The
+first one is the best-documented tell in the literature.
+
+| Pattern | Fix |
+|---------|-----|
+| Copula avoidance: "serves as", "stands as", "marks", "boasts", "features", "operates as", "refers to" where "is"/"has"/"was" fits | Use the plain verb. "Serves as a hub" -> "is a hub" |
+| Trailing present-participle clauses: "…reflecting its importance", "…ensuring accuracy", "…highlighting the trend" | Delete, or promote to a real verb in its own clause |
+| Nominalizations: "the implementation of", "a reduction in", "performs optimization of" | Verb: "we implemented", "it shrank" |
+| Agentless passive: "mistakes were made", "the decision was reached" | Name who did it |
+| Uniform sentence length; a run of same-shape sentences | Break it: put a short sentence next to a long one |
+| Hedging with no content: "it is important to note", "may potentially suggest" | Cut it, or say the actual point |
+
+Note the direction on the first two: machine prose uses copula
+alternatives and trailing participles *more* than human prose does, but
+agentless passives *less*. So the fix for passives is to add the actor,
+while the fix for the other two is to remove the decoration.
+
+## Vocabulary to cut
+
+Short list, deliberately: it is a sample of the current generation's
+offenders, not a permanent set. Rotate it as models change.
+
+delve, tapestry, testament to, underscores (verb), pivotal, crucial
+(filler), fostering, bolstering, showcasing, enhancing, intricate,
+meticulous, seamless, robust (filler), vibrant, rich (filler),
+underscoring, leveraging, "a testament to", "stands as", "marks a
+shift", "evolving landscape", "the broader", "setting the stage for",
+"furthermore" as a connector, "additionally" as a sentence opener.
+
+Keep the plain word that a person would reach for instead. "Pivotal" ->
+"decisive". "Tapestry" -> "mix". "Underscores" -> "shows".
+
+## Factual tells
+
+Not style, and more reliable than any tell above: check claims that a
+model gets wrong regardless of fluency, because they survive every
+editing pass above.
+
+- Citations and references that do not resolve. Fabricated references
+  are the single most common failure and the easiest to check.
+- Facts the author could not have known if the text came from a model
+  with a training cutoff — very recent events, anything after the
+  cutoff date.
+- Claims stated confidently with no source and no way to verify.
+- Invented specificity: precise numbers, dates, and quotes with no
+  origin.
+
+
 ## Before delivering prose
 
 Re-scan the output against the lists above. If a paragraph still reads
 like AI wrote it, revise once more.
+
+Then the check that matters more than any of them: does the text have
+something to say? Strip the tells off a text with no specifics, no
+position, and no admission of difficulty, and it still reads dead. When
+that is the case, the fix is to supply real material, not more editing:
+
+- Name the specific thing instead of the category. "It was slow" needs
+  a number, a file, a date, or a symptom.
+- If there is an opinion, state it, with the reason. Do not manufacture
+  balance where there is none.
+- If something is uncertain, say what is uncertain and what would
+  resolve it. Do not split the difference to sound safe.
+- Keep the awkward true detail. A strange specific fact reads human;
+  a smooth generalization reads generated.
+- Cut the scope the writer cannot support. Machine prose tends to
+  overstate how generally a point applies, because that is the safest
+  continuation. Claim less than you feel; claim only what you can back.
