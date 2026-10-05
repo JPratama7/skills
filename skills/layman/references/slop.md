@@ -14,7 +14,14 @@ Consequence for editing: a fixed banned-word list goes stale. Prefer
 rules that describe the *shape* of the problem, plus a short list of
 the current offenders, treating the list as rotatable.
 
-Two findings to keep in mind while editing:
+Rank the signals before editing:
+
+    verifiable facts   strongest signal, hard to fake
+    measured style     real tells, worth fixing
+    word lists         weakest, goes stale fast
+
+A reader who suspects machine text checks what it cannot fake, so
+edit content first, style second. Keep in mind while editing:
 
 - **The biggest tell is missing content, not style.** Tells below remove
   the machine flavor. They cannot add specifics, a stake, or an opinion.
@@ -113,21 +120,38 @@ shift", "evolving landscape", "the broader", "setting the stage for",
 Keep the plain word that a person would reach for instead. "Pivotal" ->
 "decisive". "Tapestry" -> "mix". "Underscores" -> "shows".
 
-## Factual tells
+## Facts are the strongest check
 
-Not style, and more reliable than any tell above: check claims that a
-model gets wrong regardless of fluency, because they survive every
-editing pass above.
+Not style, and more reliable than any tell above: a suspicious reader
+verifies what a model cannot fake. Write to survive that check:
 
-- Citations and references that do not resolve. Fabricated references
-  are the single most common failure and the easiest to check.
-- Facts the author could not have known if the text came from a model
-  with a training cutoff — very recent events, anything after the
-  cutoff date.
-- Claims stated confidently with no source and no way to verify.
-- Invented specificity: precise numbers, dates, and quotes with no
-  origin.
+- Citations, DOIs, and URLs must resolve. Never write one you have
+  not opened; fabricated references are the most common failure and
+  the easiest to check (~147,000 surfaced in 2025 publications alone,
+  most after peer review).
+- Numbers need a source. Invented precision ("sales rose 34%") fails
+  the first time anyone checks. No source: cut it, or say "about".
+- Use knowledge a model cannot have: recent events, private data,
+  what you saw and did. Anything past a training cutoff is proof a
+  person wrote this.
+- Claim only what you would defend. Confident statements with no
+  source and no way to verify are the tell institutions now hunt.
 
+## Not worth the effort
+
+- Fixed banned-word lists beyond the rotating sample above. Which
+  words spike changes per model and per year; today's list is
+  tomorrow's normal English. Weakest signal there is - fix the
+  grammar patterns instead.
+- Em-dash paranoia. Newer models suppress them, so presence or
+  absence no longer means anything. Layman still skips them - house
+  style, not a tell.
+- Faking hedges. The "AI over-hedges" claim was contradicted:
+  students hedge more than GPT does. Cut empty hedges, yes; do not
+  sprinkle "maybe" to look human.
+- Outrunning detectors. One paraphrase pass drops a detector from
+  ~70% to ~5% accuracy. Detectors are noise - write for the human
+  check.
 
 ## Before delivering prose
 

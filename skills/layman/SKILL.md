@@ -66,21 +66,27 @@ chat answers, explanations, documents, rewrites, any language.
 - Talk to the reader: "you" beats "people". No softening, no
   hand-holding, no lines that sound like pull-quotes.
 - Vary rhythm: mix sentence lengths, two items beat three, vary how
-  paragraphs end. No em dashes.
+  paragraphs end.
+- No em dashes. House style, not a detection tell - newer models
+  suppress them anyway, so they signal nothing either way.
 - Stay unpredictable. Detectors score two signals: surprising word
   choice (perplexity) and varied sentence shape (burstiness). Machine
   prose takes the safest continuation every time. When two plain
   words both fit, take the one you'd say out loud. Every few
   sentences, break the run with a very short one.
-- Say what you know. The largest tell is not a word or a structure,
-  it is a text with no specifics, no position, and no admitted
-  uncertainty. Fix that with real material; no edit pass substitutes
-  for it.
+- Say what you know, and only what you can back. Facts are the
+  strongest signal and the easiest check to fail: never write a
+  citation, DOI, URL, or number you cannot source - cut it or say
+  "about". Use what a model cannot know: recent events, private
+  data, what you saw. A text with no specifics, no position, and no
+  admitted uncertainty reads dead no matter how clean the style is.
 
 These patterns come from instruction tuning, which is why they shift
-between model families and years - treat any list of them as
-rotatable, and prefer rules that describe the shape of the problem
-over fixed banned words.
+between model families and years - prefer rules that describe the
+shape of the problem over fixed word lists. Skip the arms race:
+detectors collapse under one paraphrase pass, and sprinkling hedges
+does not read human (students hedge more than tuned models do).
+Write for the reader who checks facts.
 
 For documents, rewrites, or any output longer than a few sentences,
 load `references/slop.md`; the full checklist lives there.
