@@ -1,6 +1,6 @@
 ---
 name: brainstorming
-version: 1.0.0
+version: 1.2.1
 description: Brainstorm an idea, feature, product, or system from multiple angles before committing to a direction. Use whenever the user wants to explore options, think through a problem, "brainstorm", "ideate", "help me think about", "what are my options for", "explore approaches to", or is about to design something and hasn't settled the shape yet. Also trigger when the user has a vague goal and needs help turning it into something concrete — whether that ends up as an explanatory doc, a PRD, a system design, or a simple writeup. The output format is flexible and chosen with the user at the end.
 ---
 
@@ -10,7 +10,7 @@ Turn a vague idea into a well-understood problem with a chosen direction and a c
 
 ## Why this skill exists
 
-Most "brainstorming" failures come from one of two patterns: jumping to the first plausible idea without exploring alternatives, or generating a long flat list of options without ever committing to one. This skill forces a three-phase shape — probe, diverge, converge — so the user ends with a direction they chose for stated reasons, not a pile of possibilities.
+Most brainstorming fails one of two ways: jumping to the first plausible idea, or listing options forever without committing. The three-phase shape — probe, diverge, converge — forces a direction the user chose for stated reasons.
 
 ## Session flow
 
@@ -65,6 +65,44 @@ Goal: pick a direction (or a synthesis) and turn it into a concrete artifact.
 4. Produce the artifact in the chosen format, grounded in everything surfaced in phases 1–2. It should read as if the brainstorming already happened — the artifact is the *output*, not a re-narration of the process.
 5. End with an explicit "what's next" — the smallest concrete step that moves this forward.
 
+## Token discipline
+
+The session shape costs tokens; keep it lean without cutting substance. Terse ≠ thin — cut redundancy and narration, never decision-bearing detail: risks, evidence, and mechanism-level specifics stay in.
+
+- Say it once. Don't recap the user's answers back at length — one line of confirmation, then move.
+- Keep probe questions to a line or two each. Directions stay compact: name, core idea, strongest for, strongest against — no preamble, no summary paragraph.
+- Detour returns are summaries — the minimum that grounds the next step, not the companion skill's full output.
+- Reference files load only when their trigger fits — never "just in case".
+
+## Companion skills
+
+The probe-diverge-converge core is yours — never route it. Some moments call for a specialist, though. When a trigger fits, invoke the named skill through your harness's skill mechanism, then come back — a routing is a detour, not a hand-off. If the skill isn't installed, note that and do a lean version inline rather than blocking.
+
+### In-session detours
+
+| Trigger | Skill | What it brings back |
+|---|---|---|
+| The user's *decision* hinges on facts they can't supply — they'd pick differently depending on what competitors, the market, or prior art actually look like | `research` | Cited findings that ground the divergence |
+| The brainstorm is converging on an API, module, or interface shape | `design-an-interface` | Parallel radically-different designs to fold into the option spread |
+| The problem is adversarial — a conflict, negotiation, or opponent to outmaneuver | `perspective-reversal` | The opponent's likely moves and your counters |
+| A direction hinges on a question a throwaway build answers cheaper than debate ("would this flow feel right?") | `prototype` | A working sketch that resolves the question. Offer first — a mid-session build needs a yes |
+| The leading direction is high-stakes and the user wants it attacked before committing | `discussion` | Counterarguments that stress-test the pick |
+
+One detour at a time. When it returns, resume the phase you left.
+
+Relevance isn't enough — nearly any brainstorm touches facts someone could look up. Route when the pick would change with the answer. When a fact is merely nice-to-have, fold it into the direction as a flagged assumption ("unverified: whether gyms allow this") and keep moving instead of pausing the session to offer a detour.
+
+### After the artifact
+
+Brainstorming ends at the artifact. These carry the user forward — offer them, don't auto-run:
+
+| Trigger | Skill |
+|---|---|
+| They want a format outside the list — report, RCA, tracker ticket, PR description | `doc-builder` |
+| The initiative is big enough to need a full PRD build-out | `prd-development` |
+| "So what are the actual steps" | `planning` |
+| Steps with deadlines and reminders | `actionize` |
+
 ## Hard rules
 
 - **Never produce the artifact before phase 3.** Producing a doc mid-brainstorm anchors the user to whatever shape it took.
@@ -74,6 +112,8 @@ Goal: pick a direction (or a synthesis) and turn it into a concrete artifact.
 - **Name the frameworks you're using.** Silent frameworks are just you thinking out loud; named frameworks let the user reuse the method later.
 - **One sentence problem statement before diverging.** No exceptions. A fuzzy frame produces fuzzy options.
 - **Ask, don't assume, the output format.** Even when the topic strongly implies a format, confirm — the user may want a one-pager when you'd default to a PRD.
+- **Routing is a detour, not a hand-off.** After a companion skill returns, resume the phase you were in. The session shape stays yours — companions do specialist work, they don't run the brainstorm.
+- **Route or admit, never fabricate.** If the *decision* hinges on facts you don't have and can't derive, either run the `research` detour or say plainly that the fact is missing. If the fact is only nice-to-have, flag it as an unverified assumption and move on. Invented market numbers and fake competitor names poison every direction built on them.
 
 ## Anti-patterns to catch in yourself
 
@@ -82,6 +122,7 @@ Goal: pick a direction (or a synthesis) and turn it into a concrete artifact.
 - Long flat lists of options with no recommendation, no weaknesses, no synthesis. This is brainstorming theater.
 - Producing a polished artifact that papers over an unresolved decision. If a decision is still open, say so in the artifact and flag it.
 - Skipping the probe because the user "already explained it." The probe is where the real problem gets found.
+- Doing a specialist's job badly instead of routing — guessing at the competitive landscape or hand-waving an adversary's moves are exactly what the companion table is for.
 
 ## Reference files (load on demand)
 
