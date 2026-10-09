@@ -31,6 +31,7 @@ claude --plugin-dir ./skills
 - `git-commit` — stage and commit with secret screening, conventional message formatting, and VCS-specific guidance
 - `devops` — deploy and operate apps across Docker, Railway, Fly.io, Cloud Run, ECS, Kubernetes, VPS, and static hosts; CI/CD, secrets, health checks, observability
 - `layman` — explain jargon in plain English, keep code and commands exact; lite, full, or ultra mode
+- `dev-companion` — `/dev-companion init|implement|review|explain`; evidence-based repository conventions, minimal coding, plain-English explanations, and lite/full/ultra modes
 - `research` — break questions apart, research in parallel, combine findings into a cited markdown report
 - `indexer` — scan a repo for docs, code, symbols, comments, reviews, and TODOs, merge into one searchable file
 - `active-recall` — build spaced-repetition flashcard decks from source material; deterministic SM-2 scheduler; export to Anki, Obsidian SR, Mochi, or plain markdown
