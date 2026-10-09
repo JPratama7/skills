@@ -14,7 +14,8 @@ Python, no installs).
 
 ## Workflow
 
-1. Capture intent
+1. For a new skill idea, ground and design the solution before drafting; for an
+   existing skill, capture the requested change
 2. Draft or edit `SKILL.md`
 3. Write evals
 4. Run test cases (with-skill vs baseline)
@@ -22,40 +23,63 @@ Python, no installs).
 6. Improve
 
 Repeat 4-6 until the user is satisfied or feedback is empty. Skip steps the
-harness cannot support.
+harness cannot support. The design flow applies to new skills and substantial
+new capabilities; skip it for narrow edits and eval/packaging requests.
 
-## Two roles, one loop
+## 1. Capture intent and design new skills
 
-Every iteration alternates between two roles. Keep them separate — the
-ambiguity this prevents is an agent quietly grading its own work.
+Extract intent from the conversation first and ask only for missing information.
+For a new skill, work through these checkpoints before drafting `SKILL.md`:
 
-**Generator (you, the main agent):** capture intent, draft/edit the skill,
-write evals, spawn run agents, improve the skill, optimize the description,
-package. You own the loop and the conversation with the user.
+1. **Ground the problem.** Identify the pain point and request 2-3 concrete
+   examples of current inputs, deliverables, or manual workflows. If none are
+   available, ask one focused question about the main pain point or help the
+   user identify a representative, anonymized or synthetic example. Keep the
+   exchange incremental; don't turn the first follow-up into a full requirements
+   questionnaire. Pause solution design and drafting until there is a concrete
+   example to analyze.
+2. **Check existing coverage.** Inspect the names and descriptions of relevant
+   skills or tools in the current repository/harness. Identify overlaps and
+   gaps without reading unrelated implementations. For each plausibly relevant
+   asset, record its role and decide whether to reuse, extend, call, or keep it
+   separate; don't imply reuse merely because an adjacent asset exists.
+3. **Confirm the gap.** Summarize the problem, existing coverage, and missing
+   capability, then ask whether that gap is correct. Stop here until the user
+   confirms or corrects it; do not propose approaches or architecture in the
+   same turn as this confirmation request.
+4. **Analyze examples and separate work by nature.** After confirmation, extract
+   repeated steps, decisions, and failure points. Make mechanical, repeatable
+   work deterministic (scripts, validators, parsers) where practical; reserve
+   skill instructions for judgment, synthesis, and ambiguous cases.
+5. **Compare approaches.** Offer 2-3 plausible approaches, lead with a
+   recommendation, and state what each makes deterministic, what needs model
+   judgment, the trade-offs, and which existing assets each reuses or keeps
+   separate. After an approach is selected, define:
+   - **Table stakes** — required baseline behaviors.
+   - **Differentiators** — value beyond an unassisted model.
+   - **Anti-features** — boundaries that prevent scope creep.
+6. **Sketch the architecture.** Decide whether this is one skill or needs a
+   larger construct supported by the target harness. For each selected asset,
+   state its responsibility, how the workflow invokes or composes it, and what
+   data it receives and returns. Note important unavailable, malformed, or
+   inconclusive-input behavior. Distinguish confirmed interfaces from
+   assumptions; don't imply an asset was inspected when only its name or
+   description was available. Keep the first version minimal and park
+   nonessential ideas as deferred work.
+7. **Hand off to drafting.** Recap the agreed problem, examples, scope, and
+   architecture as a concise design brief in the conversation or scratch space;
+   use it to draft the skill and its evals. Don't create a separate handoff file
+   unless it will help resume or coordinate work across sessions.
 
-**Grader (always a fresh subagent):** verification, aggregation, review
-artifacts. Grading is *delegated, never performed inline by the generator* —
-the agent that wrote the skill or produced a run passes its own blind spots.
-When step 4 finishes, switch roles by handing each run's prompt, inputs, and
-`outputs/` to an independent verifier (protocol: `references/verification.md`).
-You consume its `grading.json` and `diagnosis.md` in step 6; you do not write
-them yourself. The only exception is a harness with no subagents, where human
-review replaces the grader entirely.
+Keep discussion incremental: ask one focused question at a time when input is
+missing, offer choices when the options are clear, and validate major decisions
+before proceeding. Keep design summaries brief. For an existing skill revision,
+extract the requested outcome and use the eval loop; don't repeat this design
+process unless the change introduces a substantially new capability.
 
-**Artifact rule:** evals, workspaces, grading scripts, and feedback live in a
-gitignored scratch dir (`.local/` if present) — never inside the skill folder.
-A shipped skill contains only `SKILL.md`, `references/`, `scripts/`, `assets/`.
-
-## 1. Capture intent
-
-Extract from the conversation first; ask only what is missing:
-
-- What should the skill enable? When should it trigger (realistic prompts)?
-- What does a good output look like?
-- Are outputs objectively verifiable (files, code, data) or subjective
-  (style, advice)? Verifiable → evals are worth it; subjective → rely on
-  human review.
-- Target harness? If unknown, assume the current one.
+For every request, establish the trigger context and desired output, determine
+whether results are objectively verifiable or need human review, and identify
+the target harness (assume the current one if unspecified).
 
 ## 2. Draft the SKILL.md
 
