@@ -64,6 +64,16 @@ Followed by markdown instructions. Optional bundled resources:
 4. **Stay lean** — every section earns its place. Remove things that aren't
    pulling their weight. If a rule isn't changing behavior in evals, cut it.
 
+## Install and ship
+
+Only create or edit skills under `skills/<name>/` in this repository. You may
+read or copy an existing skill from `$XDG_HOME/.agents/skills/<name>/` into
+`skills/<name>/` as a starting point. If `XDG_HOME` is unset, use
+`~/.agents/skills/<name>/`. Never edit the source or any installed copy outside
+this repository. After an update passes validation and any requested evals,
+report the repository source path and the steps to install it. Do not install
+or propagate it on the user's behalf.
+
 ## The eval loop
 
 Skills are improved iteratively: draft → test → review → improve → repeat.
