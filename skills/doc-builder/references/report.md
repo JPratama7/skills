@@ -23,7 +23,15 @@ Ask all that are not already answered by context:
 
 ```markdown
 # <Report title>
-<Period or scope> · <date> · <author>
+<Period or scope> · <date if known> · <author if known>
+
+<One- or two-sentence plain intro stating what this report covers and why.>
+
+Attention Conservation Notice
+For: <audience>
+What: <subject and scope>
+Action: <review, decide, note, or nothing>
+Skip if: <legitimate exit condition, or None>
 
 ## TL;DR
 <2-3 sentences. The headline result and anything the reader must act on.
@@ -59,6 +67,9 @@ states impact and what would unblock it.>
   reader's attention.
 - Cut sections that have nothing to say — an empty "Issues" section is
   noise; delete it rather than padding it.
+- Omit unknown optional metadata such as date or author rather than leaving
+  visible TODO markers; ask only when the missing field materially changes the
+  report.
 - Match jargon to audience — a leadership report explains acronyms, a team
   report does not.
 - If a picture earns its place (process flow, architecture, dependency),

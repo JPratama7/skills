@@ -37,6 +37,14 @@ Ask all that are not already answered by context:
 | Deciders | <names or roles> |
 | Reversibility | Easy / Costly / Irreversible |
 
+<One- or two-sentence plain intro stating what choice this record captures and why.>
+
+Attention Conservation Notice
+For: <audience>
+What: <decision and scope>
+Action: <review, decide, note, or nothing>
+Skip if: <legitimate exit condition, or None>
+
 ## Context
 <The forces at play: why a decision is needed now, constraints, prior
 decisions in scope. Name the drivers — the criteria that actually decide

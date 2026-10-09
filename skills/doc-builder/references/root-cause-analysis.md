@@ -35,6 +35,14 @@ Ask all that are not already answered by context:
 | Status | Draft / Final |
 | Authors | <names> |
 
+<One- or two-sentence plain intro stating what happened and why this RCA exists.>
+
+Attention Conservation Notice
+For: <audience>
+What: <incident and scope>
+Action: <review, decide, note, or nothing>
+Skip if: <legitimate exit condition, or None>
+
 ## Summary
 <2-3 sentences: what broke, who/what was affected, current state.>
 

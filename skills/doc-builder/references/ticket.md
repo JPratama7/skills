@@ -33,6 +33,15 @@ gaps emerge:
 **Summary:** `[BE|FE|INFRA] <short description>`
 
 ```
+<One- or two-sentence plain intro stating the ticket outcome and why it matters.>
+
+Attention Conservation Notice
+For: <audience>
+What: <work item and scope>
+Action: <what the assignee/reviewer should do>
+Skip if: <legitimate exit condition, or None>
+
+
 ## Context
 <1-2 sentences: why this task exists, what it's part of>
 
@@ -55,6 +64,14 @@ gaps emerge:
 **Summary:** `[BUG] <short description>`
 
 ```
+<One- or two-sentence plain intro stating the bug and why it matters.>
+
+Attention Conservation Notice
+For: <audience>
+What: <bug and affected scope>
+Action: <what the assignee/reviewer should do>
+Skip if: <legitimate exit condition, or None>
+
 ## Reproduction
 *Steps:*
 # <step 1>
@@ -83,6 +100,14 @@ gaps emerge:
 **Summary:** `[STORY] <short description>`
 
 ```
+<One- or two-sentence plain intro stating the user outcome and why it matters.>
+
+Attention Conservation Notice
+For: <audience>
+What: <story and scope>
+Action: <what the assignee/reviewer should do>
+Skip if: <legitimate exit condition, or None>
+
 ## User Story
 As a <role>,
 I want <capability>,
@@ -110,6 +135,10 @@ so that <benefit>.
 
 ## Quality bar
 
+- **Notice is complete** — the intro is followed by the exact heading
+  `Attention Conservation Notice` and all four labeled lines (`For:`,
+  `What:`, `Action:`, `Skip if:`). Having the four labels without the heading
+  is incomplete.
 - **No duplication** — the tracker already records assignee, priority,
   sprint, epic link, labels. Templates don't restate them.
 - **Omit what you don't know** — if the user didn't provide info for a

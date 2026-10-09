@@ -1,6 +1,6 @@
 ---
 name: doc-builder
-version: 1.3.0
+version: 1.4.0
 description: Create structured documents — root cause analyses, reports,
   requirements docs, decision records, tracker tickets, and PR
   descriptions — by interviewing the user and filling proven templates.
@@ -28,14 +28,29 @@ needed to fill it.
    one turn. Skip questions the conversation or codebase already answers;
    state what you inferred instead of re-asking. Unanswered questions become
    `TODO:` markers in the draft, never silently invented content.
-4. **Fill the template** — every section gets real content or an explicit
+4. **Apply the accessibility guide** — load `references/accessibility.md` and
+   use its opening and readability rules for every type. Each type reference
+   includes the required opening order; draft that opening before filling other
+   sections. Preserve each type's required sections and conventions; the guide
+   adds a shared accessibility layer, not a replacement template.
+5. **Fill the template** — every section gets real content or an explicit
    `TODO:` with what is missing. No placeholder lorem ipsum, no invented
    metrics, dates, or names.
-5. **Save the doc** — markdown file, named after the doc (e.g.
+6. **Check the opening before delivery** — verify the intro and all four
+   `Attention Conservation Notice` lines (`For:`, `What:`, `Action:`,
+   `Skip if:`) appear in the required position for that type. Do not deliver
+   the document until they are present; they are required content, not optional
+   guidance. Also confirm the existing type-specific structure is intact.
+7. **Save the doc** — markdown file, named after the doc (e.g.
    `rca-payment-outage-2026-09.md`, `requirements-search-v2.md`). Ask where
    to save if the repo has no obvious docs location. Tickets and PR
    descriptions are the exception — output them ready to paste into the
    tracker/PR form instead of saving a file, unless the user asks to save.
+
+## Reference files (load on demand)
+
+- Every document type, including tickets and PR descriptions →
+  `references/accessibility.md`
 
 ## Doc types
 
@@ -50,6 +65,13 @@ needed to fill it.
 
 ## Rules
 
+- Every generated document starts with a one- or two-sentence plain intro and
+  an `Attention Conservation Notice` containing exactly `For:`, `What:`,
+  `Action:`, and `Skip if:` lines. This applies to every type, including bug
+  tickets, stories, and PR descriptions. Preserve required identifiers first:
+  ticket Summary, then intro and notice; PR Ticket reference, then intro and
+  notice; other types, intro and notice immediately after required title or
+  metadata. Do not deliver a draft missing this opening.
 - Interview before drafting. A template filled with guesses is worse than a
   short list of questions — wrong facts in an RCA or requirements doc get
   treated as truth later.

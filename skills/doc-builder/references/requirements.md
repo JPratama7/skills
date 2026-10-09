@@ -28,6 +28,14 @@ Ask all that are not already answered by context:
 | Author | <name> |
 | Date | YYYY-MM-DD |
 
+<One- or two-sentence plain intro stating what this document specifies and why.>
+
+Attention Conservation Notice
+For: <audience>
+What: <subject and scope>
+Action: <review, decide, note, or nothing>
+Skip if: <legitimate exit condition, or None>
+
 ## Background
 <The problem: who hurts, how much, why now. 2-4 sentences. Link prior art.>
 

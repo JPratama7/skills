@@ -23,6 +23,14 @@ answer:
 ## Ticket
 <Jira link / issue ref>
 
+<One- or two-sentence plain intro stating what the PR changes and why.>
+
+Attention Conservation Notice
+For: <reviewers>
+What: <change and scope>
+Action: <review, decide, note, or nothing>
+Skip if: <legitimate exit condition, or None>
+
 ## What changed
 <summary of changes, 2-5 bullets>
 
@@ -43,9 +51,11 @@ If the user mentions a repo name, include it in the Ticket line (e.g.
   values. Explain *why* the chosen approach makes sense — what failure mode
   it prevents, what alternatives were considered, how the pieces interact.
   A reader should understand the design, not just the config.
-- **Test plan covers edge cases and error scenarios**, not just the happy
-  path — verify failure modes ("non-retryable errors are not retried",
-  "breaker transitions to half-open after timeout"), not just that features
-  work.
+- **Test plan covers edge cases and error scenarios** when behavior is
+  specified by the change or established contract. When details are unknown,
+  ask what is intended or phrase the check as inspecting the implementation
+  against its documented contract; do not turn plausible behavior into an
+  asserted requirement.
 - **No meta-commentary** — the description is the output, nothing else. No
-  "Assumptions made" or "Notes" sections.
+  "Assumptions made" or "Notes" sections. If a material detail is unresolved,
+  ask before drafting; do not leave avoidable TODOs in paste-ready output.
