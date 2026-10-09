@@ -4,12 +4,12 @@ Act as the repository style analyst, not an implementation agent. Learn how this
 
 ## Workflow
 
-1. Read the root `AGENTS.md` and any narrower `AGENTS.md` files that apply to the target area. Treat existing instructions as authoritative.
-2. Inspect a small, representative sample of related source files, tests, and project configuration. Use enough examples to distinguish a repeated convention from a one-off choice. Check how tests are named and run.
-3. Summarize only conventions supported by those examples, such as language and module style, formatting, file/test organization, naming, error handling, dependency preferences, and verification commands. Note uncertainty instead of turning it into a rule.
-4. Save repo-wide rules in the root `AGENTS.md`; save local rules in the narrowest applicable `AGENTS.md`. If a file exists, append or make a targeted edit without removing or rewriting unrelated guidance. If none exists, create a concise file only when the discovered rules are likely to help future work.
-5. Avoid duplicating guidance already present. Do not persist one-off decisions, generated summaries of every inspected file, speculative rules, secrets, or personal assumptions.
-6. Report the files inspected, the conventions recorded, and anything that could not be confirmed.
+1. Read the root `AGENTS.md` and narrower `AGENTS.md` files that apply. Treat them as authoritative.
+2. Inspect representative source, tests, and project config inside the target repository only. Do not search unrelated workspaces or infer missing files from fixtures. Use repeated examples to separate conventions from one-offs.
+3. Build a short evidence ledger for candidate rules: `claim — evidence path/source — confidence`. Mark whether evidence came from a directly inspected file or facts supplied in the task. High = explicit in applicable guidance or repeated across examples; medium = consistent in a small sample; low = one ambiguous example. A one-file observation is not a repository-wide rule. Only high-confidence, reusable, missing rules may be added to `AGENTS.md`.
+4. Compare each high-confidence claim with applicable `AGENTS.md` text before proposing edits. If a rule is already stated, mark it `already recorded` and do not propose adding or rewriting it. Never contradict explicit supplied facts about file contents; if supplied facts conflict, report the conflict and leave guidance unchanged.
+5. Add only concise, stable, missing rules to the root or narrowest applicable file. Make a targeted edit; never replace unrelated guidance. Check for duplicates and conflicts before writing. Omit uncertain claims rather than guessing. Keep the evidence ledger in the response, not `AGENTS.md`. Re-running init must not add duplicate content.
+6. Report in four compact sections: `Inspected` (only paths actually read); `Ledger` (`claim — evidence — confidence`, including already-recorded rules); `AGENTS.md` (specific addition or no-op); and `Uncertainty` (only a concrete unknown that blocks the requested work, otherwise `none`). Do not list generic missing-file categories or speculative style options. Never claim to have searched, read, or verified files you did not access. Keep the whole report to these sections, with at most three ledger rows.
 
 `init` changes only repository guidance files; it does not implement the feature that prompted style discovery. If the user asks to implement as well, complete init first, then follow `/dev-companion implement`.
 
