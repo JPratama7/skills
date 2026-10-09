@@ -1,6 +1,6 @@
 ---
 name: skill-generator
-version: 2.0.0
+version: 2.1.0
 description: Create, evaluate, iterate, and package agent skills for any harness. Use whenever the user wants to build a new skill, improve an existing one, run skill evals, benchmark skill performance, optimize a skill description, or package a skill for distribution. Trigger on phrases like "make a skill", "build a skill", "improve this skill", "skill eval", "skill benchmark", "package this skill", or any request involving skill development. Works in any harness that loads SKILL.md-based skills.
 ---
 
@@ -42,7 +42,9 @@ For a new skill, work through these checkpoints before drafting `SKILL.md`:
    skills or tools in the current repository/harness. Identify overlaps and
    gaps without reading unrelated implementations. For each plausibly relevant
    asset, record its role and decide whether to reuse, extend, call, or keep it
-   separate; don't imply reuse merely because an adjacent asset exists.
+   separate — decide tentatively now and revise after concrete examples arrive;
+   don't imply reuse merely because an adjacent asset exists, and don't
+   withhold the decision until examples exist.
 3. **Confirm the gap.** Summarize the problem, existing coverage, and missing
    capability, then ask whether that gap is correct. Stop here until the user
    confirms or corrects it; do not propose approaches or architecture in the
@@ -140,7 +142,11 @@ Goal on every harness: compare skill-on vs skill-off.
 
 Give each run agent only the skill path, prompt, and input files — never the
 expected output or why the eval exists. A fresh agent is only isolation if
-the prompt doesn't leak the answer key.
+the prompt doesn't leak the answer key. Sandbox every run agent: it may
+write only inside its own run's `outputs/` directory and must not modify
+any existing file anywhere else (evals, session summaries, fixtures, the
+skill itself) — a run agent that can rewrite its own eval definitions can
+weaken its assertions.
 
 While they run, draft assertions and write `eval_metadata.json` per eval.
 When each completes, save `total_tokens`/`duration_ms` to `timing.json`
@@ -165,8 +171,11 @@ the prompt, inputs, and outputs, never the skill or expected output
 wrote the skill grading its own evals passes its own blind spots. The
 verifier writes `grading.json` (`text`/`passed`/`evidence` + `summary`),
 a `diagnosis.md` per failure (Actual / Expected / Root cause / Fix), and
-persists its checks under `<scratch>/<skill>-verifier/` so they refine
-across iterations rather than regenerate. For subjective evals where
+persists its checks under `<scratch>/<skill>-verifier/eval-<id>/<config>/`
+(one directory per run configuration) so they refine across iterations
+rather than regenerate. The two arms of one eval must not share a checks
+file — a shared path races, and the second verifier finds checks
+calibrated for the wrong arm. For subjective evals where
 executable checks don't apply, use the grader / blind-comparator /
 analyzer roles in `references/agent-roles.md`.
 

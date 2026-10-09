@@ -41,7 +41,10 @@ Encode this in the subagent prompt (template below).
    invariants. These are the sources of truth for expected values.
 3. **Outputs** — read the produced artifacts.
 4. **Checks** — where outputs allow it, write an executable check script to
-   `<scratch>/<skill>-verifier/eval-<id>/checks.py`; otherwise a structured
+   `<scratch>/<skill>-verifier/eval-<id>/<config>/checks.py` (one directory
+   per run configuration — the arms of one eval must not share a checks
+   file, or they race and the second verifier inherits checks calibrated
+   for the wrong arm); otherwise a structured
    checklist. Layer the checks:
    existence → format parses → structure/schema → stated constraints →
    derived correctness (recompute from inputs) → completeness →
@@ -83,9 +86,13 @@ Persist verifier checks across iterations at `<scratch>/<skill>-verifier/`:
 
 ```
 .<skill>-verifier/
-├── eval-<id>/checks.py    # refined each iteration, not regenerated
+├── eval-<id>/<config>/checks.py  # per run configuration, refined each iteration
 └── notes.md               # known blind spots of the checks
 ```
+
+The two arms of one eval (e.g. with_skill / old_skill) keep separate
+checks: a shared path races, and the second verifier inherits checks
+calibrated for the wrong arm's expected behavior.
 
 - Iteration 1: verifier writes checks from scratch.
 - Iteration N+1: it loads the persisted checks and revises where the task
@@ -111,11 +118,12 @@ Outputs to verify: <run_dir>/outputs/
 Assertion contract (minimum — derive additional checks yourself):
 <assertions>
 
-Prior checks to refine (do not restart from scratch): <verifier dir>/eval-<id>/checks.py
+Prior checks to refine (do not restart from scratch): <verifier dir>/eval-<id>/<config>/checks.py
+(<config> = this run's configuration: with_skill / without_skill / old_skill)
 or: none — write them fresh.
 
 Workflow: enumerate every requirement → inspect inputs and derive expected
-properties → inspect outputs → write/run checks under <verifier dir>/eval-<id>/
+properties → inspect outputs → write/run checks under <verifier dir>/eval-<id>/<config>/
 → reflect that each requirement has a check → for each failure write a
 diagnosis block (Actual / Expected / Root cause / Fix suggestion).
 
@@ -123,5 +131,5 @@ Write:
 - <run_dir>/grading.json  (expectations[{text,passed,evidence}] + summary;
   your own derived checks as expectations prefixed "verifier:")
 - <run_dir>/diagnosis.md  (only if failures)
-- updated checks at <verifier dir>/eval-<id>/checks.py
+- updated checks at <verifier dir>/eval-<id>/<config>/checks.py
 ```
