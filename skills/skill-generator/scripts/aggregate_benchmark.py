@@ -87,7 +87,12 @@ def normalize_timing(grading: dict, timing_file: Path) -> dict:
     if not isinstance(seconds, (int, float)):
         ms = timing.get("duration_ms")
         seconds = ms / 1000.0 if isinstance(ms, (int, float)) else 0.0
-    return {"total_duration_seconds": seconds}
+    tokens = timing.get("total_tokens")
+    return {
+        "total_duration_seconds": seconds,
+        "total_tokens": tokens if isinstance(tokens, (int, float)) else None,
+        "model": timing.get("model"),
+    }
 
 
 def collect_runs(benchmark_dir: Path) -> dict:
@@ -145,7 +150,9 @@ def collect_runs(benchmark_dir: Path) -> dict:
                     "failed": summary["failed"],
                     "total": summary["total"],
                     "time_seconds": timing["total_duration_seconds"],
-                    "tokens": metrics.get("output_chars", 0),
+                    "tokens": timing["total_tokens"] if timing["total_tokens"] is not None
+                    else metrics.get("output_chars", 0),
+                    "model": timing["model"],
                     "tool_calls": metrics.get("total_tool_calls", 0),
                     "errors": metrics.get("errors_encountered", 0),
                     "expectations": normalize_checks(grading),
@@ -164,6 +171,7 @@ def build_benchmark(results: dict, skill_name: str, skill_path: str) -> dict:
                 "eval_name": r["eval_name"],
                 "configuration": config,
                 "run_number": r["run_number"],
+                "model": r["model"],
                 "result": {
                     "pass_rate": r["pass_rate"],
                     "passed": r["passed"],

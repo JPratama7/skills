@@ -1,238 +1,44 @@
 ---
 name: skill-generator
-version: 2.1.0
-description: Create, evaluate, iterate, and package agent skills for any harness. Use whenever the user wants to build a new skill, improve an existing one, run skill evals, benchmark skill performance, optimize a skill description, or package a skill for distribution. Trigger on phrases like "make a skill", "build a skill", "improve this skill", "skill eval", "skill benchmark", "package this skill", or any request involving skill development. Works in any harness that loads SKILL.md-based skills.
+version: 2.2.3
+description: Create, evaluate, improve, and package SKILL.md-based agent skills. Trigger whenever users ask to build or revise a skill, run evals or benchmarks, optimize its description, or package it for any harness.
 ---
 
 # Skill Generator
 
-Build, test, and ship agent skills. A **skill** is a directory with a `SKILL.md`
-(YAML frontmatter + instructions) plus optional `references/`, `scripts/`,
-`assets/`. A **harness** is any runtime that loads skills. This skill is
-self-contained: every tool it needs ships in its own `scripts/` (stdlib-only
-Python, no installs).
+Build and ship skills. Keep repeatable work deterministic in stdlib scripts; reserve model judgment for subjective decisions.
 
 ## Workflow
 
-1. For a new skill idea, ground and design the solution before drafting; for an
-   existing skill, capture the requested change
-2. Draft or edit `SKILL.md`
-3. Write evals
-4. Run test cases (with-skill vs baseline)
-5. Grade, aggregate, review with the user
-6. Improve
+1. Capture the requested outcome, output, target harness (default: current), and objective vs. subjective criteria; ask only for missing information.
+2. For a new skill or substantial capability, use `references/design.md`; otherwise make the requested change directly.
+3. Draft `SKILL.md` in concise, imperative, why-focused language. Keep it under ~500 lines; move depth to indexed, on-demand references.
+4. Define 2–3 evals using the documented schema. Separate mechanical `assertions` from qualitative `review_criteria`; keep `expected_output` evaluator-only.
+5. Compare candidate with baseline (new skill: no skill; revision: pre-edit snapshot) using fresh isolated agents, identical prompts, and writes limited to each run's `outputs/`. Never expose answer keys. Use the requested model exactly; if unavailable, stop rather than substitute. Record model, token, and timing data.
+6. Run deterministic checks first and preserve their scores. Use a fresh verifier for independent audits; never let it overwrite canonical results. Aggregate and review, then fix general causes and repeat until satisfied, feedback is empty, or gains stall.
+7. Validate/package when requested or appropriate; update an existing repository index.
 
-Repeat 4-6 until the user is satisfied or feedback is empty. Skip steps the
-harness cannot support. The design flow applies to new skills and substantial
-new capabilities; skip it for narrow edits and eval/packaging requests.
+## Objective checks
 
-## 1. Capture intent and design new skills
+Before runs, use the documented schema (include empty fields) and define one supported assertion per objective requirement. Assert each required output exists. Use flat `{id,type,file}` checks only. For exact headers, rows, and values, use anchored regex or parsed equality; substrings admit near-misses. Validate JSON and run `scripts/check_outputs.py`. Keep qualitative criteria out of scores and `expected_output` out of prompts. Full schema and types: `references/evals.md`.
 
-Extract intent from the conversation first and ask only for missing information.
-For a new skill, work through these checkpoints before drafting `SKILL.md`:
+## Grading
 
-1. **Ground the problem.** Identify the pain point and request 2-3 concrete
-   examples of current inputs, deliverables, or manual workflows. If none are
-   available, ask one focused question about the main pain point or help the
-   user identify a representative, anonymized or synthetic example. Keep the
-   exchange incremental; don't turn the first follow-up into a full requirements
-   questionnaire. Pause solution design and drafting until there is a concrete
-   example to analyze.
-2. **Check existing coverage.** Inspect the names and descriptions of relevant
-   skills or tools in the current repository/harness. Identify overlaps and
-   gaps without reading unrelated implementations. For each plausibly relevant
-   asset, record its role and decide whether to reuse, extend, call, or keep it
-   separate — decide tentatively now and revise after concrete examples arrive;
-   don't imply reuse merely because an adjacent asset exists, and don't
-   withhold the decision until examples exist.
-3. **Confirm the gap.** Summarize the problem, existing coverage, and missing
-   capability, then ask whether that gap is correct. Stop here until the user
-   confirms or corrects it; do not propose approaches or architecture in the
-   same turn as this confirmation request.
-4. **Analyze examples and separate work by nature.** After confirmation, extract
-   repeated steps, decisions, and failure points. Make mechanical, repeatable
-   work deterministic (scripts, validators, parsers) where practical; reserve
-   skill instructions for judgment, synthesis, and ambiguous cases.
-5. **Compare approaches.** Offer 2-3 plausible approaches, lead with a
-   recommendation, and state what each makes deterministic, what needs model
-   judgment, the trade-offs, and which existing assets each reuses or keeps
-   separate. After an approach is selected, define:
-   - **Table stakes** — required baseline behaviors.
-   - **Differentiators** — value beyond an unassisted model.
-   - **Anti-features** — boundaries that prevent scope creep.
-6. **Sketch the architecture.** Decide whether this is one skill or needs a
-   larger construct supported by the target harness. For each selected asset,
-   state its responsibility, how the workflow invokes or composes it, and what
-   data it receives and returns. Note important unavailable, malformed, or
-   inconclusive-input behavior. Distinguish confirmed interfaces from
-   assumptions; don't imply an asset was inspected when only its name or
-   description was available. Keep the first version minimal and park
-   nonessential ideas as deferred work.
-7. **Hand off to drafting.** Recap the agreed problem, examples, scope, and
-   architecture as a concise design brief in the conversation or scratch space;
-   use it to draft the skill and its evals. Don't create a separate handoff file
-   unless it will help resume or coordinate work across sessions.
+State `Role: coordinator.` Never grade your own runs inline when an independent verifier is available. For objective evals, deterministic checks own `grading.json`; fresh verifiers write separate audits, diagnoses, and per-config checks. For subjective-only evals, delegate grading or request human review, labeling judgments clearly. Aggregate with `scripts/aggregate_benchmark.py`; build a review with `scripts/make_review.py`, or show a table if no browser is available.
 
-Keep discussion incremental: ask one focused question at a time when input is
-missing, offer choices when the options are clear, and validate major decisions
-before proceeding. Keep design summaries brief. For an existing skill revision,
-extract the requested outcome and use the eval loop; don't repeat this design
-process unless the change introduces a substantially new capability.
+Use diagnoses and feedback to fix general causes; update verifier checks when evidence exposes a gap. Snapshot the pre-edit skill before each iteration.
 
-For every request, establish the trigger context and desired output, determine
-whether results are objectively verifiable or need human review, and identify
-the target harness (assume the current one if unspecified).
+## References (load on demand)
 
-## 2. Draft the SKILL.md
-
-Frontmatter — `name` and `description` required, rest optional:
-
-```yaml
----
-name: kebab-case-name        # <=64 chars
-version: 1.0.0               # semver
-description: What it does AND when to trigger. Pushy — this is the trigger mechanism.
-compatibility: only if the skill needs subagents, browser, MCP, or filesystem
----
-```
-
-Body rules:
-
-- Imperative voice; goal first; explain the *why* behind rules, not just MUST.
-- Keep under ~500 lines; push depth into `references/*.md` and index each with
-  a trigger condition under "Reference files (load on demand)".
-- Show example inputs/outputs for non-obvious formats.
-- If a deterministic step repeats across runs, bundle it as `scripts/*.py`.
-
-## 3. Write evals
-
-Save 2-3 realistic test prompts to `<scratch>/<skill>-evals/evals.json`:
-
-```json
-{
-  "skill_name": "example-skill",
-  "version": "1.0.0",
-  "evals": [
-    {
-      "id": 1,
-      "name": "descriptive-name",
-      "prompt": "The user's task",
-      "expected_output": "What good looks like",
-      "files": [],
-      "assertions": []
-    }
-  ]
-}
-```
-
-Start without assertions; add objective, quantitatively checkable ones after
-the first run. Never test subjective quality with boolean assertions. Field
-reference: `references/evals.md`.
-
-## 4. Run test cases
-
-Goal on every harness: compare skill-on vs skill-off.
-
-**Harness has subagents** — for each eval, spawn two agents in the same turn:
-
-- with_skill: skill path + prompt + input files →
-  `<scratch>/<skill>-workspace/iteration-N/eval-<id>-<name>/with_skill/outputs/`
-- baseline: new skill → no skill (`without_skill/`); improved skill → the
-  pre-edit snapshot (`old_skill/`)
-
-Give each run agent only the skill path, prompt, and input files — never the
-expected output or why the eval exists. A fresh agent is only isolation if
-the prompt doesn't leak the answer key. Sandbox every run agent: it may
-write only inside its own run's `outputs/` directory and must not modify
-any existing file anywhere else (evals, session summaries, fixtures, the
-skill itself) — a run agent that can rewrite its own eval definitions can
-weaken its assertions.
-
-While they run, draft assertions and write `eval_metadata.json` per eval.
-When each completes, save `total_tokens`/`duration_ms` to `timing.json`
-(nulls if the harness hides them).
-
-**No subagents** — run each prompt inline, following the skill yourself; skip
-baselines; save outputs under `eval-<id>-<name>/`. Human review compensates.
-
-## 5. Grade, aggregate, review (grader role)
-
-State your role: "Role: coordinator." If your next action is reading outputs
-and writing a pass/fail verdict yourself, stop — you are about to grade
-inline. Spawn a fresh verifier subagent instead.
-
-Let `SG` = this skill's directory.
-
-### 5.1 Delegate grading (must be a fresh agent)
-
-Spawn one **independent verifier** per run — a fresh agent that sees only
-the prompt, inputs, and outputs, never the skill or expected output
-(protocol + prompt template: `references/verification.md`). The agent that
-wrote the skill grading its own evals passes its own blind spots. The
-verifier writes `grading.json` (`text`/`passed`/`evidence` + `summary`),
-a `diagnosis.md` per failure (Actual / Expected / Root cause / Fix), and
-persists its checks under `<scratch>/<skill>-verifier/eval-<id>/<config>/`
-(one directory per run configuration) so they refine across iterations
-rather than regenerate. The two arms of one eval must not share a checks
-file — a shared path races, and the second verifier finds checks
-calibrated for the wrong arm. For subjective evals where
-executable checks don't apply, use the grader / blind-comparator /
-analyzer roles in `references/agent-roles.md`.
-
-### 5.2 Aggregate (deterministic — you may run this directly)
-
-`python SG/scripts/aggregate_benchmark.py iteration-N --skill-name <skill>`
-→ `benchmark.json` + `benchmark.md` (or compute pass rates by hand).
-
-### 5.3 Review
-
-`python SG/scripts/make_review.py iteration-N --skill-name <skill>`
-→ standalone `review.html` with embedded outputs, grading, and a feedback
-download (`feedback.json`). Works headless; no server needed. No browser
-at all → present results as markdown tables and collect feedback in chat.
-
-## 6. Improve
-
-Loop until the user is happy or feedback is empty:
-
-- Feed each run's `diagnosis.md` into the revision — it's denser than
-  pass/fail: every failure arrives with a root cause and a concrete fix.
-- When feedback contradicts a verifier verdict (a pass that's actually wrong,
-  or vice versa), update the persisted checks too — they co-evolve with the
-  skill.
-- Generalize from specific feedback; don't overfit to test prompts.
-- Cut sections that don't change behavior in runs.
-- Prefer explaining *why* over stacking rules.
-- Snapshot the pre-edit skill as the next iteration's baseline, then rerun.
-
-## 7. Description optimization (optional, last)
-
-A skill that never triggers is useless. Generate ~20 trigger queries
-(8-10 should-trigger, 8-10 near-miss negatives), review them with the user,
-then test candidate descriptions against the queries — spawn a fresh agent
-per query if the harness allows, else judge inline — and keep the best
-trigger rate on held-out negatives. Query format: `references/harnesses.md`.
-
-## 8. Package and ship
-
-```bash
-python SG/scripts/quick_validate.py <skill-dir>          # frontmatter + naming checks
-python SG/scripts/package_skill.py <skill-dir> -o <out>  # -> <name>.skill zip
-```
-
-Harnesses that read skill folders directly (e.g. Devin) get the directory
-copied to their install path instead; `.skill` zips are only for harnesses
-that consume them. Update the repo README index if one exists.
-
-## Reference files (load on demand)
-
-- Eval JSON schemas, run directory layout, grading format → `references/evals.md`
-- Independent verification protocol, diagnosis format, persistent checks → `references/verification.md`
-- Grader / blind-comparator / analyzer subagent prompts → `references/agent-roles.md`
-- Harness install paths, capabilities, packaging → `references/harnesses.md`
+- New skills or substantial capabilities → `references/design.md`
+- Eval schema, assertion types, run layout, grading → `references/evals.md`
+- Blind verifier protocol and diagnosis → `references/verification.md`
+- Subjective grader/comparator/analyzer prompts → `references/agent-roles.md`
+- Harness install/package details and trigger queries → `references/harnesses.md`
 
 ## Avoid
 
-- Baking one harness's mechanics in as universal (paths, tools, viewers).
-- Writing the skill for the user unless asked.
+- Treating one harness's mechanics as universal.
+- Encoding subjective quality as boolean assertions or silently changing deterministic scores.
+- Writing a skill for the user unless asked.
 - Committing secrets, hardcoded paths, or eval artifacts into the skill.

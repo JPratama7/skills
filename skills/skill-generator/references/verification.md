@@ -40,21 +40,20 @@ Encode this in the subagent prompt (template below).
    independently: entity names/IDs, counts, value ranges, formats,
    invariants. These are the sources of truth for expected values.
 3. **Outputs** — read the produced artifacts.
-4. **Checks** — where outputs allow it, write an executable check script to
+4. **Audit checks** — first run the eval's deterministic assertion suite
+   unchanged and preserve its results as the canonical machine score. Then
+   derive additional checks independently and write them to
    `<scratch>/<skill>-verifier/eval-<id>/<config>/checks.py` (one directory
-   per run configuration — the arms of one eval must not share a checks
-   file, or they race and the second verifier inherits checks calibrated
-   for the wrong arm); otherwise a structured
-   checklist. Layer the checks:
-   existence → format parses → structure/schema → stated constraints →
-   derived correctness (recompute from inputs) → completeness →
-   anti-fabrication (output traces to real input, not invented).
-   One check per item or small group, so partial correctness produces a
-   partial score. Put a requirement→check mapping comment at the top.
-5. **Run** — execute, fix errors until the suite runs clean.
-6. **Reflect** — re-read the prompt end to end. Any requirement with no
-   check? Add it. Any assertion that would pass for clearly wrong output?
-   Note it in `eval_feedback` — that's a non-discriminating assertion.
+   per run configuration — never share a checks file across arms). Where
+   assertions are executable, reuse the deterministic checker rather than
+   reimplementing it; add new checks only for uncovered requirements. Layer
+   checks: existence → parse → schema → stated constraints → recompute from
+   inputs → completeness → anti-fabrication. Map each requirement to a check.
+5. **Run** — execute the checks read-only. Never alter outputs. Report
+   deterministic suite results separately from verifier-added audit findings.
+6. **Reflect** — re-read the prompt. Identify uncovered requirements and
+   assertions that accept clearly wrong outputs. Recommend contract changes
+   for future eval runs; do not change the current machine score retroactively.
 7. **Diagnose** — for each failed check, a 3–5 line block:
 
    ```markdown
@@ -73,12 +72,15 @@ stated. Never modify outputs to make verification easier.
 
 ## Outputs
 
-- `<run_dir>/grading.json` — standard schema (`expectations[]` with
-  `text`/`passed`/`evidence` + `summary`). Checks the verifier derived beyond
-  the assertion list go in as extra expectations, text prefixed `verifier:`.
+- `<run_dir>/verifier_audit.json` for objective evals — findings the verifier
+  derived beyond the deterministic suite, clearly labeled as audit checks.
+  Do not overwrite or revise deterministic `<run_dir>/grading.json`.
+- `<run_dir>/grading.json` for subjective-only evals — standard schema
+  (`expectations[]` with `text`/`passed`/`evidence` + `summary`), with each
+  judgment criterion identified as subjective.
 - `<run_dir>/diagnosis.md` — only when something failed.
-- `eval_feedback` field in grading.json — critique of weak or missing
-  assertions.
+- `eval_feedback` in the audit or subjective grading — critique weak or missing
+  assertions for a future iteration; do not back-edit this run's score.
 
 ## Co-evolving checks
 
@@ -128,8 +130,10 @@ properties → inspect outputs → write/run checks under <verifier dir>/eval-<i
 diagnosis block (Actual / Expected / Root cause / Fix suggestion).
 
 Write:
-- <run_dir>/grading.json  (expectations[{text,passed,evidence}] + summary;
-  your own derived checks as expectations prefixed "verifier:")
-- <run_dir>/diagnosis.md  (only if failures)
+- objective eval: <run_dir>/verifier_audit.json (your derived audit findings;
+  never overwrite deterministic grading.json)
+- subjective-only eval: <run_dir>/grading.json (expectations[{text,passed,evidence}]
+  + summary; identify judgment criteria as subjective)
+- <run_dir>/diagnosis.md (only if failures)
 - updated checks at <verifier dir>/eval-<id>/<config>/checks.py
 ```

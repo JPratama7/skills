@@ -19,33 +19,82 @@ Multiple runs per configuration use `run-1/`, `run-2/` inside the config dir.
 
 ## evals.json
 
-Skill-level eval set, one per skill: `<scratch>/<skill>-evals/evals.json`.
+Use one skill-level eval set at `<scratch>/<skill>-evals/evals.json`. JSON is
+parsed with Python's standard library, so evaluation adds no package dependency.
 
 ```json
 {
   "skill_name": "example-skill",
   "version": "1.0.0",
-  "evals": [
-    {
-      "id": 1,
-      "name": "descriptive-name",
-      "prompt": "The user's task prompt",
-      "expected_output": "What a good result looks like",
-      "files": ["path/to/input.file"],
-      "assertions": ["The output file exists", "The output contains X"]
-    }
-  ]
+  "evals": [{
+    "id": 1,
+    "name": "descriptive-name",
+    "prompt": "The user's task prompt",
+    "expected_output": "Evaluator-only description of a correct result",
+    "files": ["path/to/input.file"],
+    "assertions": [
+      {"id": "result-json", "type": "json_valid", "file": "result.json"},
+      {"id": "status", "type": "json_value_eq", "file": "result.json",
+       "path": "status", "expected": "complete"}
+    ],
+    "review_criteria": []
+  }]
 }
 ```
 
 - `skill_name`/`version` must match the skill's frontmatter.
 - `files` — optional input fixtures, copied into each run's workspace.
-- `assertions` — objective checks; add after the first run.
+- `assertions` — objective, mechanically decidable checks. Define these before
+  execution when the requirement is already objectively stated; never encode
+  prose quality or other judgment calls as boolean assertions.
+- `review_criteria` — optional qualitative criteria for human or independent
+  model review. Keep these separate from deterministic pass rates.
+
+## Deterministic assertion contract
+
+Pass the eval's assertion array in a `.json` file to
+`scripts/check_outputs.py` with the run's `outputs/` directory. Each assertion
+has a unique `id`, `type`, and relative `file` path. The checker rejects
+malformed contracts, unsupported types, and paths outside `outputs/`. It writes
+canonical JSON `grading.json`; exit status is 0 when all checks pass, 1 when a
+check fails, and 2 for an invalid contract or execution error.
+
+Supported types:
+
+| Type | Additional fields | Check |
+|---|---|---|
+| `file_exists` | — | File exists (directories do not count) |
+| `text_contains` | `text` | UTF-8 text contains the exact substring |
+| `regex` | `pattern` | Python regular expression matches UTF-8 text |
+| `json_valid` | — | File parses as JSON |
+| `json_value_eq` | `path`, `expected` | Dot-separated object keys / list indexes resolve to an exactly equal JSON value |
+| `csv_row_count` | `expected`, optional `header` (default `true`) | Number of CSV data rows equals `expected` |
+
+Example:
+
+```bash
+python SG/scripts/check_outputs.py assertions.json run/outputs -o run/grading.json
+```
+
+Use one assertion per requirement or small invariant group so partial results
+remain interpretable. Prefer exact values derived from input fixtures, schema
+parsing, row counts, bounds, and invariants over vague checks like "looks
+correct". A check must be falsifiable: ensure an obviously wrong artifact would
+fail it. Record inputs and expected values in the eval definition, not in
+agent-facing run prompts. Deterministic checker results are the reproducible
+score; independent verifier findings are a separately labeled audit and may
+reveal missing assertions, but must not silently rewrite deterministic scores.
+
+If no supported check fits, first decide whether the requirement is actually
+objective and can be checked with a small script. Otherwise move it to
+`review_criteria` and report the judgment separately; do not pretend it is a
+deterministic result.
+
 
 ## eval_metadata.json (per eval dir)
 
 ```json
-{"eval_id": 1, "eval_name": "descriptive-name", "prompt": "...", "assertions": ["..."]}
+{"eval_id": 1, "eval_name": "descriptive-name", "prompt": "...", "assertions": [{"id": "...", "type": "...", "file": "..."}]}
 ```
 
 ## timing.json (per run)
@@ -54,7 +103,7 @@ Skill-level eval set, one per skill: `<scratch>/<skill>-evals/evals.json`.
 {"total_tokens": 84852, "duration_ms": 23332}
 ```
 
-Nulls are fine when the harness hides them.
+Nulls are fine when the harness hides them. Record the model identifier when available. The benchmark reads `total_tokens` from timing metadata; if unavailable, legacy output-character metrics remain a fallback and must not be described as token counts.
 
 ## grading.json (per run)
 
