@@ -17,6 +17,8 @@ runtime rather than assuming — capability beats naming.
 Rules of thumb:
 
 - No subagents → inline runs, skip baselines (see SKILL.md step 4).
+- Token/usage export differs per harness — discover the mechanism before the
+  first run (see `evals.md` timing.json); do not assume a harness hides them.
 - No filesystem → evals are limited to what the model can produce in chat;
   rely on human review.
 - Install = copy the skill folder (minus evals/scratch) to the harness's
