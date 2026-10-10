@@ -1,6 +1,6 @@
 ---
 name: skill-generator
-version: 2.2.3
+version: 2.2.4
 description: Create, evaluate, improve, and package SKILL.md-based agent skills. Trigger whenever users ask to build or revise a skill, run evals or benchmarks, optimize its description, or package it for any harness.
 ---
 
@@ -14,7 +14,7 @@ Build and ship skills. Keep repeatable work deterministic in stdlib scripts; res
 2. For a new skill or substantial capability, use `references/design.md`; otherwise make the requested change directly.
 3. Draft `SKILL.md` in concise, imperative, why-focused language. Keep it under ~500 lines; move depth to indexed, on-demand references.
 4. Define 2–3 evals using the documented schema. Separate mechanical `assertions` from qualitative `review_criteria`; keep `expected_output` evaluator-only.
-5. Compare candidate with baseline (new skill: no skill; revision: pre-edit snapshot) using fresh isolated agents, identical prompts, and writes limited to each run's `outputs/`. Never expose answer keys. Use the requested model exactly; if unavailable, stop rather than substitute. Record model, token, and timing data.
+5. Before launching runs, discover how the target harness exports LLM statistics (tokens, duration, model id) — run notifications, transcript/export files, telemetry config, CLI stats commands; verify on a real run and cache the mechanism beside the eval artifacts (see `references/evals.md`). Then compare candidate with baseline (new skill: no skill; revision: pre-edit snapshot) using fresh isolated agents, identical prompts, and writes limited to each run's `outputs/`. Never expose answer keys. Use the requested model exactly; if unavailable, stop rather than substitute. Record model, token, and timing data.
 6. Run deterministic checks first and preserve their scores. Use a fresh verifier for independent audits; never let it overwrite canonical results. Aggregate and review, then fix general causes and repeat until satisfied, feedback is empty, or gains stall.
 7. Validate/package when requested or appropriate; update an existing repository index.
 

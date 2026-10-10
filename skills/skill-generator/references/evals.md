@@ -103,7 +103,20 @@ deterministic result.
 {"total_tokens": 84852, "duration_ms": 23332}
 ```
 
-Nulls are fine when the harness hides them. Record the model identifier when available. The benchmark reads `total_tokens` from timing metadata; if unavailable, legacy output-character metrics remain a fallback and must not be described as token counts.
+Before the first run of an iteration, discover how the harness exports LLM
+statistics — token totals, durations, model ids. Candidate sources, cheapest
+first: run/subagent completion notifications; session transcript or
+export-flag files carrying final token metrics; CLI stats/usage commands;
+telemetry config blocks (e.g. OpenTelemetry exporters); usage APIs. Verify the
+chosen source on a real run — inspect actual output fields rather than
+trusting docs — then write the working mechanism next to the eval artifacts so
+later iterations reuse it instead of rediscovering. Do not guess field names.
+
+Nulls are acceptable only after that discovery pass finds no usable source;
+record what was tried. Record the model identifier when available. The
+benchmark reads `total_tokens` from timing metadata; if unavailable, legacy
+output-character metrics remain a fallback and must not be described as token
+counts.
 
 ## grading.json (per run)
 
