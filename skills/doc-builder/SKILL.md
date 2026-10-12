@@ -1,6 +1,6 @@
 ---
 name: doc-builder
-version: 1.4.0
+version: 1.5.0
 description: Create structured documents — root cause analyses, reports,
   requirements docs, decision records, tracker tickets, and PR
   descriptions — by interviewing the user and filling proven templates.
@@ -35,12 +35,13 @@ needed to fill it.
    adds a shared accessibility layer, not a replacement template.
 5. **Fill the template** — every section gets real content or an explicit
    `TODO:` with what is missing. No placeholder lorem ipsum, no invented
-   metrics, dates, or names.
+   metrics, dates, or names. Write the prose to `references/writing-style.md`.
 6. **Check the opening before delivery** — verify the intro and all four
    `Attention Conservation Notice` lines (`For:`, `What:`, `Action:`,
    `Skip if:`) appear in the required position for that type. Do not deliver
    the document until they are present; they are required content, not optional
-   guidance. Also confirm the existing type-specific structure is intact.
+   guidance. Also confirm the existing type-specific structure is intact, and
+   run the pre-delivery scan in `references/writing-style.md`.
 7. **Save the doc** — markdown file, named after the doc (e.g.
    `rca-payment-outage-2026-09.md`, `requirements-search-v2.md`). Ask where
    to save if the repo has no obvious docs location. Tickets and PR
@@ -96,9 +97,14 @@ needed to fill it.
 - Diagrams are Mermaid — fenced ` ```mermaid ` blocks, never ASCII art.
   ASCII breaks in renderers and drifts from the text it describes. Each
   reference names the diagram its doc type requires.
+- Generated prose follows `references/writing-style.md`: active voice, no
+  em dashes, no banned filler words, sentence-case headings, specific
+  claims over vague ones. Where it conflicts with a doc type's conventions
+  or the accessibility guide, those win (see its Precedence section).
 
 ## Reference files (load on demand)
 
+- Drafting or revising prose in any generated document → `references/writing-style.md`
 - Incident, outage, bug postmortem, "why did X happen" → `references/root-cause-analysis.md`
 - Status update, progress summary, investigation findings → `references/report.md`
 - Feature/system spec, PRD, "what should we build" → `references/requirements.md`

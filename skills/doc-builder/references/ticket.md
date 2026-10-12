@@ -74,9 +74,9 @@ Skip if: <legitimate exit condition, or None>
 
 ## Reproduction
 *Steps:*
-# <step 1>
-# <step 2>
-# <step 3>
+1. <step 1>
+2. <step 2>
+3. <step 3>
 
 *Expected:* <what should happen>
 *Actual:* <what happens instead>

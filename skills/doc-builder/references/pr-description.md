@@ -28,7 +28,7 @@ answer:
 Attention Conservation Notice
 For: <reviewers>
 What: <change and scope>
-Action: <review, decide, note, or nothing>
+Action: <the specific check the reviewer makes, or nothing>
 Skip if: <legitimate exit condition, or None>
 
 ## What changed
@@ -51,6 +51,11 @@ If the user mentions a repo name, include it in the Ticket line (e.g.
   values. Explain *why* the chosen approach makes sense — what failure mode
   it prevents, what alternatives were considered, how the pieces interact.
   A reader should understand the design, not just the config.
+- **Action names the check**: point the reviewer at the specific code,
+  config, or behavior to verify, such as "Check the backoff bounds in
+  `retry.ts` and the `Idempotency-Key` on `POST /invoices`". Generic
+  actions ("Review and approve", "Request changes if needed") tell the reviewer
+  nothing.
 - **Test plan covers edge cases and error scenarios** when behavior is
   specified by the change or established contract. When details are unknown,
   ask what is intended or phrase the check as inspecting the implementation

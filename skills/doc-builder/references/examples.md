@@ -62,9 +62,9 @@ Summary: [BUG] Export CSV drops rows when description contains a comma
 
 ## Reproduction
 *Steps:*
-# Open the claims list, filter to status=paid
-# Click "Export CSV"
-# Open the file — 312 rows expected (matches filter count), 298 present
+1. Open the claims list, filter to status=paid
+2. Click "Export CSV"
+3. Open the file: 312 rows expected (matches filter count), 298 present
 
 *Expected:* Exported row count matches the filtered list count.
 *Actual:* 14 rows missing; every missing row has a comma in the description
