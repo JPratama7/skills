@@ -6,11 +6,14 @@ description: Persistent plain-English mode with concise answers and useful diagr
   user says "layman", "plain english",
   "explain simply", "in simple terms", "like I'm five", "jargon-free",
   "dumb it down", "diagram-reason", "reason in diagrams", "think in
-  diagrams", "compact reasoning", "sketch the logic", or invokes /layman
-  or /diagram-reason. While active, also governs documents and rewrites
-  the user asks for (README, guide, report). Also auto-triggers for
-  non-technical users or when the user asks for a non-technical
-  explanation.
+  diagrams", "compact reasoning", "sketch the logic", "don't
+  overthink", "think less", "stop overthinking", "save tokens",
+  "token-efficient reasoning", or invokes /layman or /diagram-reason.
+  Matches reasoning effort to question difficulty: direct answers on
+  easy questions, full effort on hard ones. While active, also governs
+  documents and rewrites the user asks for (README, guide, report).
+  Also auto-triggers for non-technical users or when the user asks for
+  a non-technical explanation.
 ---
 
 Respond in plain English: everyday words, exact code, short answers.
@@ -142,12 +145,35 @@ prose around them. Unsure: don't load. A doc type another skill owns
 (PRD, RCA, ticket) routes there — don't load `references/documents.md`
 for it.
 
-## Reasoning: do enough, show what's useful
+## Reasoning: match effort to difficulty, show what's useful
 
 Do the work needed to answer correctly. Brevity changes how much you say,
-not how carefully you inspect, test, or verify. Match the effort and checks
-to the task and its risks; never skip a needed check just to make the answer
-shorter.
+not how carefully you inspect, test, or verify. But effort should match
+difficulty: heavy process on easy questions wastes tokens and can even
+lower accuracy, while cutting thought on hard ones causes wrong answers.
+
+**Gate once, then commit.** At the start, judge the task trivial or hard.
+
+- Trivial (a fact, a one-step fix, an obvious answer): answer directly.
+  No plan, no option list, no re-check pass. The first pass captures
+  nearly all the accuracy; extra rounds add cost, not correctness.
+- Hard (multi-step, ambiguous, high stakes): keep full effort and every
+  needed check. Never trade correctness for brevity here.
+- Unsure which: treat as hard. Underthinking costs more than
+  overthinking.
+
+**Reason in terse notes, not prose.** When a task does need step-by-step
+thought, keep each step to a short phrase — a draft, not an essay. A
+small diagram often replaces a paragraph of walkthrough (see below). Cut
+the words spent reasoning, not the ideas considered: when the user asks
+for exploration, alternatives, or brainstorming, generate freely. The
+plain style applies to what you show, not what you think up.
+
+**Question the input once, then commit.** Sanity-check the request at
+the start. After that, don't loop on doubt cues — "wait", "let me
+verify", "reconsider" — they inflate reasoning without improving
+answers. If new evidence shows up mid-task, act on it; don't re-litigate
+settled points.
 
 - Work the problem directly. A multi-step task does not automatically need
 a pre-work diagram, a list of every possibility, scored branches, or a
@@ -155,6 +181,9 @@ play-by-play of your thinking. Use those tools only when they help.
 - Explore alternatives when the choice or uncertainty could change the
 answer. Check enough to make a sound choice, then stop; don't keep expanding
 possibilities after the evidence points to a reliable answer.
+- When you compare options, give each one a labeled downside: `Trade-off:`
+for the cost, or `Bad:` if you prefer. Use the same label for every option
+so the cost is easy to find. Name the word "trade-off" at least once.
 - For bugs and code changes, inspect relevant context and run the checks that
 can confirm the cause or fix. For advice or factual answers, verify important
 claims when tools or source material are available. Choose checks by their
