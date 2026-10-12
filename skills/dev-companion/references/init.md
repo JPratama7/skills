@@ -11,7 +11,7 @@ Act as the repository style analyst, not an implementation agent. Learn how this
 5. Add only concise, stable, missing rules to the root or narrowest applicable file. Make a targeted edit; never replace unrelated guidance. Check for duplicates and conflicts before writing. Omit uncertain claims rather than guessing. Keep the evidence ledger in the response, not `AGENTS.md`. Re-running init must not add duplicate content.
 6. Report in four compact sections: `Inspected` (only paths actually read); `Ledger` (`claim — evidence — confidence`, including already-recorded rules); `AGENTS.md` (specific addition or no-op); and `Uncertainty` (only a concrete unknown that blocks the requested work, otherwise `none`). Do not list generic missing-file categories or speculative style options. Never claim to have searched, read, or verified files you did not access. Keep the whole report to these sections, with at most three ledger rows.
 
-`init` changes only repository guidance files; it does not implement the feature that prompted style discovery. If the user asks to implement as well, complete init first, then follow `/dev-companion implement`.
+`init` changes only repository guidance files; it does not implement the feature that prompted style discovery. If the user asks to implement as well, complete init first, then follow `/dev-companion implement` (or, in learning mode, learn's Implementation step).
 
 ## Safety
 

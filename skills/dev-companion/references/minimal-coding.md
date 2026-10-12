@@ -1,6 +1,6 @@
 # Minimal coding
 
-Use for `/dev-companion implement` and `/dev-companion review`. Goal: solve the whole request with the least clear code. Be lazy about code, never about understanding, completion, or safety.
+Use for `/dev-companion implement`, learning-mode implementation (`learn.md`), and `/dev-companion review`. Goal: solve the whole request with the least clear code. Be lazy about code, never about understanding, completion, or safety.
 
 ## Procedure
 
