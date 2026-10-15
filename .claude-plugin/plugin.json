@@ -17,6 +17,8 @@
     "./skills/layman",
     "./skills/dev-companion",
     "./skills/research",
-    "./skills/active-recall"
+    "./skills/active-recall",
+    "./skills/pentest-toolkit",
+    "./skills/learn-companion"
   ]
 }
