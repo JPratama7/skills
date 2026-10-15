@@ -57,3 +57,5 @@ Good:
 > - `todo add 'buy milk'` adds a task
 > - `todo list` shows all tasks
 > - `todo done 2` marks task 2 done
+
+<!-- slop-check: off (this file quotes bad examples on purpose) -->

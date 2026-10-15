@@ -65,13 +65,15 @@ chat answers, explanations, documents, rewrites, any language.
 - No adverbs (really, just, actually, simply, genuinely...) and no
   lazy extremes (every, always, never) doing vague work.
 - Be specific. No vague declaratives ("the implications are
-  significant"): name the implication.
+  significant"): name the implication. No vague attribution ("experts
+  say", "studies have shown"): name the source or drop the claim.
 - Talk to the reader: "you" beats "people". No softening, no
   hand-holding, no lines that sound like pull-quotes.
 - Vary rhythm: mix sentence lengths, two items beat three, vary how
   paragraphs end.
-- No em dashes. House style, not a detection tell - newer models
-  suppress them anyway, so they signal nothing either way.
+- No em dashes, no curly quotes, no … character. Straight quotes and
+  three dots. House style, not a detection tell - newer models suppress
+  the dashes anyway, so they signal nothing either way.
 - Stay unpredictable. Detectors score two signals: surprising word
   choice (perplexity) and varied sentence shape (burstiness). Machine
   prose takes the safest continuation every time. When two plain
@@ -92,7 +94,9 @@ does not read human (students hedge more than tuned models do).
 Write for the reader who checks facts.
 
 For documents, rewrites, or any output longer than a few sentences,
-load `references/slop.md`; the full checklist lives there.
+load `references/slop.md`; the full checklist lives there. When the
+output is a file, also run `references/slop-check.py` on it and fix
+what it flags.
 
 Apply the plain style in whatever language the user writes.
 
@@ -207,3 +211,7 @@ unless they also ask for a diagram. Keep necessary steps and exact details.
   → `references/documents.md`
 - Any output longer than a few sentences, rewriting or polishing prose,
   "make it sound human", removing AI tells → `references/slop.md`
+- After writing or editing a prose file (.md/.mdx/.txt/.rst) →
+  `python3 references/slop-check.py FILE`, fix the flagged lines
+
+<!-- slop-check: off (this file quotes bad examples on purpose) -->
