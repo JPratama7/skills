@@ -1,6 +1,6 @@
 ---
 name: doc-builder
-version: 1.5.0
+version: 1.7.0
 description: Create structured documents — root cause analyses, reports,
   requirements docs, decision records, tracker tickets, and PR
   descriptions — by interviewing the user and filling proven templates.
@@ -41,7 +41,10 @@ needed to fill it.
    `Skip if:`) appear in the required position for that type. Do not deliver
    the document until they are present; they are required content, not optional
    guidance. Also confirm the existing type-specific structure is intact, and
-   run the pre-delivery scan in `references/writing-style.md`.
+   run the pre-delivery scan in `references/writing-style.md`: first
+   `python3 scripts/slop_check.py` on the doc (pipe unsaved ticket or PR
+   drafts through stdin), fix every hit or mark it `TODO:`, then the judgment
+   items the script cannot see.
 7. **Save the doc** — markdown file, named after the doc (e.g.
    `rca-payment-outage-2026-09.md`, `requirements-search-v2.md`). Ask where
    to save if the repo has no obvious docs location. Tickets and PR
@@ -98,9 +101,12 @@ needed to fill it.
   ASCII breaks in renderers and drifts from the text it describes. Each
   reference names the diagram its doc type requires.
 - Generated prose follows `references/writing-style.md`: active voice, no
-  em dashes, no banned filler words, sentence-case headings, specific
-  claims over vague ones. Where it conflicts with a doc type's conventions
-  or the accessibility guide, those win (see its Precedence section).
+  em dashes, straight quotes, no banned or AI-tell vocabulary, sentence-case
+  headings, specific claims over vague ones, varied sentence rhythm. Where it
+  conflicts with a doc type's conventions or the accessibility guide, those
+  win (see its Precedence section). `scripts/slop_check.py` enforces the
+  mechanical subset before delivery, merging house rules with the vendored
+  unslop phrase and structure scanners.
 
 ## Reference files (load on demand)
 
