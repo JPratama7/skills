@@ -5,7 +5,8 @@ to match. Rules:
 
 - **Prose, not bullets.** Findings are told as a story in sections, one per
   sub-question. Telegraphic prose — no transitions, no restating the
-  question. ~600 words is plenty for most questions.
+  question. ~1500 words is a guide, not a wall — length is earned claim by
+  claim. Run the tell-scan in `references/prose-hygiene.md` before saving.
 - **Citations inline as numbers** `[1]`; URLs appear only in Sources.
 - **Weak claims flagged inline** `[3, weak]` — a claim resting on a single
   or secondary source never passes silently.

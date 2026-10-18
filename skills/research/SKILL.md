@@ -1,6 +1,6 @@
 ---
 name: research
-version: 1.7.0
+version: 1.9.1
 description: Research a question by reasoning as an evolving graph of sub-questions — ask the user how to execute, decompose the question, explore branches with parallel research agents, merge, score, and prune — then deliver a cited markdown report plus the thought graph that produced it. Use whenever the user wants a topic investigated, facts or docs/API details gathered, a comparison made, contradictions between sources resolved, or reading legwork delegated — even if they just say "look into X", "find out whether", "dig into", "research this", or "how does X actually work".
 ---
 
@@ -57,9 +57,14 @@ carries a claim or a citation, no filler.
    Spawning a child agent is the loop's most expensive move — roughly the
    cost of everything else combined. Fan out only branches that need
    independent multi-source exploration; a branch you could resolve with
-   one or two direct fetches is an inline lookup, not a child. Once a
-   branch reports, do not re-read its sources: compile from its findings
-   and spot-check only the claims that decide the root answer.
+   one or two direct fetches is an inline lookup, not a child. Spawned
+   branches carry the `research-branch` profile — spec and instantiation
+   in `references/agent-profiles.md`. Cap spawned agents at 5 in flight;
+   past that, queue the branch and spawn it when a slot frees — more in
+   flight buys latency, not coverage. Once a branch reports, do not
+   re-read its sources: compile from its findings and spot-check only the
+   claims that decide the root answer — inline for one or two, a single
+   `claim-verifier` agent when the load-bearing set is larger.
 6. **Grow** — findings mutate the graph:
    - new question → spawn a child node
    - conflict with another branch → `contradicts` edge; resolve by source
@@ -89,16 +94,18 @@ Contradictions: <conflicts, or none>
 
 `New questions` feeds step 6 — evaluate each before aggregating. You keep
 the graph and run grow/score/synthesize; branches never see each other's
-work.
+work. A spawned branch gets the `research-branch` spec verbatim from
+`references/agent-profiles.md` — the same contract plus source
+discipline, on the agent side.
 
 ## Report
 
 Save one markdown file where the repo keeps research notes (match
 convention; else `docs/research/` or ask). The report is prose, not
 bullet claims — the findings told as a story — but stays telegraphic:
-~600 words, hard ceiling 800: if the draft runs over, cut the claims that
-don't change the root answer, never the citations. Match the worked
-example in the template:
+~1500 words as a guide, no hard cap — length is earned claim by claim;
+cut what doesn't change the root answer, never the citations. Match the
+worked example in the template:
 
 - Starting the report → `references/report-template.md`
 
@@ -128,6 +135,8 @@ Sections:
 ## Reference files (load on demand)
 
 - Writing the report → `references/report-template.md`
+- De-slopping report prose before saving → `references/prose-hygiene.md`
+- Spawning a branch agent or batch-verifying claims → `references/agent-profiles.md`
 
 ## Anti-patterns
 
@@ -137,6 +146,10 @@ Sections:
 - **Branch bloat** — spawning a child agent for a branch you could resolve
   with a direct fetch; a child costs roughly as much as the rest of the
   run.
+- **Bare spawn** — a branch launched without its profile spec returns
+  essays where the contract asks for finding lines.
+- **Single-claim verifier** — a spawn to check one URL; the spawn costs
+  more than the fetch.
 - **Re-reading** — fetching pages a branch already read; compile from its
   findings and spot-check only what decides the root.
 - **Ask-spam** — mode, breadth, and depth are one ask; three separate
@@ -151,3 +164,6 @@ Sections:
 - **Graph theater** — nodes nobody needed.
 - **Report padding** — restating the question, narrative filler, sources
   listed twice.
+- **Slop tells** — staged run-ups, not-X-but-Y, deep sayings, a recap
+  coda after Sources; the draft check lives in
+  `references/prose-hygiene.md`.
