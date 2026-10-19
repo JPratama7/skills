@@ -13,6 +13,7 @@ import os
 import re
 import sqlite3
 import sys
+from pathlib import Path
 
 DEFAULT_DB = "plan.db"
 
@@ -153,6 +154,7 @@ def cmd_export(args):
             print(f"[{rule}] {msg}", file=sys.stderr)
         die("plan has validation errors — fix before exporting")
     plan = build_plan(conn, nodes)
+    Path(args.json).parent.mkdir(parents=True, exist_ok=True)
     with open(args.json, "w") as f:
         json.dump(plan, f, indent=2)
         f.write("\n")
@@ -161,6 +163,7 @@ def cmd_export(args):
     if not mmd_path and args.json.endswith(".json"):
         mmd_path = args.json[: -len(".json")] + ".mmd"
     if mmd_path:
+        Path(mmd_path).parent.mkdir(parents=True, exist_ok=True)
         with open(mmd_path, "w") as f:
             f.write(mermaid)
     print(f"exported {len(nodes)} nodes -> {args.json}" + (f" + {mmd_path}" if mmd_path else ""))

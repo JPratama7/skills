@@ -104,10 +104,10 @@ python scripts/graph.py add-node --id read-spec --name "Extract schema" \
 python scripts/graph.py validate
 
 # 4. export — refuses to write if validation fails; computes summary from the graph
-python scripts/graph.py export --json plan.json [--mermaid plan.mmd]
+python scripts/graph.py export --json .graph-decompose/plan.json [--mermaid .graph-decompose/plan.mmd]
 ```
 
-The DB defaults to `./plan.db` (override with `--db`). It is scratch state — the exported `plan.json` + `plan.mmd` are the deliverables; the DB can be deleted after export.
+The DB defaults to `./plan.db` (override with `--db`) — put it in `/tmp/` (e.g. `/tmp/graph-decompose-<slug>.db`); it is scratch state, deleted after export. The exported `plan.json` + `plan.mmd` are the deliverables — default them to `.graph-decompose/` at the repo root (a hidden dir keeps the tree clean) unless the user names a path.
 
 ### Field rules (enforced by the script)
 
@@ -130,7 +130,7 @@ Full schema with field-level constraints and all validation rules: `references/s
 
 Tell the user the path of the exported `plan.json` (and `plan.mmd`). Then point at the next step:
 
-> Plan written to `plan.json` (+ `plan.mmd`). To execute it, invoke `graph-execute` and pass it the JSON path. To revise, edit nodes in the DB and re-export, or hand-edit the JSON.
+> Plan written to `.graph-decompose/plan.json` (+ `plan.mmd`). To execute it, invoke `graph-execute` and pass it the JSON path. To revise, edit nodes in the DB and re-export, or hand-edit the JSON.
 
 Do not execute the plan. Do not spawn subagents. Do not run nodes. This skill's output is the plan files and nothing more.
 

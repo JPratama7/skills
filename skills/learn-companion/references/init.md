@@ -25,6 +25,10 @@ directory without Git. Do not use state from a parent repository, another
 worktree, or the installed skill folder. Do not follow symlinked state
 directories or files; explain the issue instead.
 
+`.learn-companion/` is persistent state — profile, roadmap, and progress only.
+Scratch files (generated exercises, diagnostics, one-off notes) go in `/tmp/`
+so they don't accumulate on disk.
+
 If `profile.md` exists, read it, `roadmap.md`, and `progress.md`. Search all
 of `progress.md` for a pending decision or attempt, then read the complete
 relevant topic sections. An initial excerpt is not evidence that nothing is

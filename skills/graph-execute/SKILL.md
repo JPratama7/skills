@@ -72,6 +72,7 @@ Invariants — never violate these:
 - **Stop the wave on failure.** Do not fan out a bad output to its dependents. Surface the failure with the node's prompt + output, ask the user (retry / edit prompt / rework graph).
 - **Spawn all ready nodes in one turn.** Serializing the wave defeats the purpose. Parallel is the entire reason the plan exists.
 - **Capture outputs by name.** Downstream node prompts reference deps by `inputs` (`dep_id:artifact_name`). When spawning a dependent, read the named artifact from each completed dep and inline it into the dependent's prompt (or pass the file path if the artifact is a file the subagent can read).
+- **Artifacts vs. scratch.** Node `outputs` land at their plan-declared paths — they're deliverables. Your own executor scratch (resolved prompts, captured output dumps, run logs) goes in `/tmp/` — it's disposable once the wave finishes.
 
 ## Per-harness mechanics
 

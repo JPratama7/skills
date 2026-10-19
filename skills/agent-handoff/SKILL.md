@@ -71,6 +71,10 @@ Delegations are the most failure-prone handoff: the subagent has zero context an
 - **Files only when they matter.** List files the next agent must read, modify, or know exist — one-line purpose each, absolute paths when the reader isn't in the same directory.
 - **Surface blockers early.** Hiding a blocker wastes the next agent's first 5 minutes. Anything you couldn't figure out, assumed, or that could blow up later belongs in Open.
 
+## Where handoffs live
+
+Inline in the conversation when the receiving agent is a spawn away (parent → subagent brief, subagent → parent report). Write a file when the handoff must outlive the session — chained work, session → future session — default `.agent-handoff/<topic>.md` at the project root so it's findable but out of the tree. Never park a file handoff in `/tmp/` — handoffs exist to survive restarts, and `/tmp` doesn't.
+
 ## Compression
 
 A typical handoff fits in 200-500 tokens; a complex multi-stage one can go to ~1000 (delegations cap at 400 words). Past 1500 you're dumping context instead of handing off.

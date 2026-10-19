@@ -19,8 +19,11 @@ so progress survives across sessions.
 └── exports/       generated files: anki.tsv, deck.md, obsidian.md, mochi.md
 ```
 
-Default location: `decks/<topic-slug>/` under the working directory unless the
-user names a path. `SRS` below means `python3 <this-skill-dir>/scripts/srs.py`.
+Default location: `.active-recall/decks/<topic-slug>/` under the working
+directory unless the user names a path. The deck dir is persistent state —
+only `cards.jsonl`, `state.json`, and `exports/` live there. Draft card files
+and other throwaway intermediates go in `/tmp/` so they never pile up on disk.
+`SRS` below means `python3 <this-skill-dir>/scripts/srs.py`.
 
 ```
 SRS init <deck> [--name "Deck name"]        # create a deck

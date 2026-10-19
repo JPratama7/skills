@@ -50,6 +50,8 @@ needed to fill it.
    to save if the repo has no obvious docs location. Tickets and PR
    descriptions are the exception — output them ready to paste into the
    tracker/PR form instead of saving a file, unless the user asks to save.
+   Working drafts and scan intermediates go in `/tmp/` — only the delivered
+   doc persists.
 
 ## Reference files (load on demand)
 

@@ -74,6 +74,9 @@ itself is always excluded from discovery.
 
 - **Regenerate, don't append.** Re-running overwrites the whole document
   — deterministic, no duplicates.
+- **Intermediates go in `/tmp/`.** Scan dumps, redaction working files, and
+  any staging data are throwaway — the `INDEX.md` output is the only file
+  that should persist.
 - **Stable ordering.** Entries sorted by type (Docs → AI comments →
   TODOs), then category order, then source path, then line number, so IDs
   stay stable across runs.

@@ -98,6 +98,15 @@ work. A spawned branch gets the `research-branch` spec verbatim from
 `references/agent-profiles.md` — the same contract plus source
 discipline, on the agent side.
 
+## Working files
+
+Checkpoint working artifacts — the evolving graph, branch findings, scores —
+under `.research/<slug>/` at the repo root so a long run survives context
+loss and can be resumed or audited later. Bulk page dumps, fetched copies,
+and other one-shot scratch go in `/tmp/` — they're regenerated on demand and
+shouldn't pile up on disk. The report below is the deliverable; it goes where
+the repo keeps docs, not in the checkpoint dir.
+
 ## Report
 
 Save one markdown file where the repo keeps research notes (match

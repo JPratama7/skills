@@ -2,6 +2,10 @@
 
 Field names matter — the bundled scripts and the review viewer depend on them.
 
+`<scratch>` below means the repo's gitignored `.local/` dir — eval workspaces
+are checkpoints you review and iterate on, so they must survive reboots. Use
+`/tmp/` only for files safe to lose (one-shot scripts, caches, fetched copies).
+
 ## Run directory layout
 
 ```

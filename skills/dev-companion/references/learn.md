@@ -26,6 +26,9 @@ none, create `.dev-companion/` at the Git root, or current directory without Git
 state from a parent repository, another worktree, or the installed skill folder. Do not follow
 symlinked state directories or files; explain the issue instead.
 
+`.dev-companion/` is persistent state only. Scratch files (generated exercises,
+one-off diagnostics) go in `/tmp/` so they don't accumulate on disk.
+
 If `profile.md` exists, read it and `project-map.md`. Search the entire `progress.md` for pending
 decisions, then read their complete sections and other topics relevant to the task. An initial
 excerpt is not evidence that nothing is pending. Resume without repeating completed onboarding or
