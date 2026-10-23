@@ -1,4 +1,6 @@
 # Exclude everything
 .local/*
+.memory/
+.research/
 __pycache__/
 *.pyc

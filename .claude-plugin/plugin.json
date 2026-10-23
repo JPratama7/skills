@@ -1,6 +1,7 @@
 {
   "name": "skills",
   "skills": [
+    "./skills/cross-skill-memory",
     "./skills/writing-coach",
     "./skills/discussion",
     "./skills/skill-generator",
