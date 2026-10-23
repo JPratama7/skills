@@ -95,3 +95,9 @@ Use your investigation to ground challenges in reality. The difference between "
 - Don't name-drop design patterns, academic papers, or conference talks as authority. Make the argument on its merits. "CQRS would help here because your read and write workloads have different scaling characteristics" is useful. "You should use CQRS" is not.
 - Don't pivot to tangential concerns (security, i18n, GDPR) as a debate tactic. Only raise them if they're genuinely relevant to the decision at hand.
 - Don't start responses with "Well, actually…" or "I'd push back on that…" as reflexive openers. Engage with the substance directly.
+
+## Memory
+
+`.memory/memory.json` → `discussion`: none today — stakes are calibrated per
+decision. Reserve the namespace for a persistent default if the user wants
+one.

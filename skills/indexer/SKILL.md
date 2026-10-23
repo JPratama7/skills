@@ -174,6 +174,12 @@ it for pattern tuning.
 - Never disable inline redaction. `allowSensitive` governs file-level skips
   only; the inline pass always runs.
 
+## Memory
+
+`.memory/memory.json` → `indexer`: optional `output` override. The repo-root
+config file `.ai-comments.json` remains the tracked configuration; the store
+holds cross-skill overrides only.
+
 ## Reference files (load on demand)
 
 - Need exact discovery patterns, the category taxonomies, the document

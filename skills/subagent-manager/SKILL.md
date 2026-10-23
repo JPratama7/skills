@@ -43,7 +43,8 @@ Do it inline when:
 ## 2. Brief: the delegation prompt
 
 The brief is the entire world the subagent sees. Order matters — it reads top
-to bottom:
+to bottom. Before drafting, read the delegation lessons in `shared.lessons`
+(§6) — past failures and repo quirks shape the brief:
 
 ```
 Task: <one imperative sentence — what to do>
@@ -106,6 +107,8 @@ depth — use it for unusually complex delegations. For worked examples see
 - **Human-readable titles** so completion notifications stay legible.
 - **Cheapest capable profile** — a read-only agent that needs to write is dead
   on arrival.
+- **Log every spawn in `active.md` (§6)** — one line, so a restart can resume
+  the delegation.
 
 ## 4. Monitor
 
@@ -126,6 +129,33 @@ re-doing the work.
 - **On failure, fix the brief, not the work** — resume with the missing context
   or respawn with a corrected brief. Take over inline only when the remainder
   is trivial.
+- **Close the loop in memory (§6)** — mark the `active.md` entry done or
+  failed; append a lesson when the run failed or taught something.
+
+## 6. Persistent memory
+
+Delegation memory splits across two stores, per the `cross-skill-memory`
+protocol:
+
+- **Config and lessons** live in `.memory/memory.json` — namespace
+  `subagent-manager` holds defaults (`model`, `max_parallel`, `profile`);
+  delegation lessons append to `shared.lessons` so every skill sees them.
+- **Live delegation state** stays in `.subagent-manager/active.md` — one
+  line per spawned agent:
+  `- <title> | <profile> | <task, one line> | <status: running|done|failed>`
+
+Rules:
+
+- Write the `active.md` entry when you spawn (§3); update the status when
+  the run resolves (§5).
+- **Read `active.md` first on every skill entry.** Entries left `running`
+  mean a prior session died mid-delegation — verify and integrate what
+  finished, respawn what didn't, before starting new work.
+- Read `shared.lessons` before every brief; append a lesson after a failed
+  delegation, and after a win worth keeping. Concrete, reusable rules only —
+  not a transcript. Cut lessons that stop changing behavior.
+- Neither store goes in `/tmp/` — memory must survive reboots. Throwaway
+  intermediates (scratch files, fixtures) still go to `/tmp/`.
 
 ## Anti-patterns
 

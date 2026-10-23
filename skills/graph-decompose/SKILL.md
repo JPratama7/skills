@@ -157,6 +157,12 @@ Do not execute the plan. Do not spawn subagents. Do not run nodes. This skill's 
 - **Self-referential prompt**: "as discussed above", "per the task". Inline the context.
 - **Verbose prompt**: preamble ("you are a..."), restated task, pleasantries, meta-commentary. Strip to imperative instructions + inline context only.
 
+## Memory
+
+`.memory/memory.json` → `graph-decompose`: default granularity and plan dir
+(override for `.graph-decompose/`). Plans stay in `.graph-decompose/`; the DB
+stays in `/tmp/`.
+
 ## Reference files (load on demand)
 
 - Need the full JSON schema with field constraints and validation rules → `references/schema.md`

@@ -1,14 +1,14 @@
 ---
 name: git-commit
 version: 1.4.0
-description: >
-  Stage and commit working-tree changes to version control, safely. Use when
-  the user says "commit this", "commit my changes", "add and commit", "check
-  in these changes", "save this to git", or asks to commit/stage/checkpoint
-  work — including right after you finish a coding task for them. Inspects
-  the diff, stages only what belongs in the commit, writes a commit message
-  that matches the repo's convention, confirms the plan, then commits. Git
-  first; adapts to Mercurial, Jujutsu, and Subversion repos.
+description: Stage and commit working-tree changes to version control, safely.
+  Use when the user says "commit this", "commit my changes", "add and commit",
+  "check in these changes", "save this to git", or asks to
+  commit/stage/checkpoint work — including right after you finish a coding
+  task for them. Inspects the diff, stages only what belongs in the commit,
+  writes a commit message that matches the repo's convention, confirms the
+  plan, then commits. Git first; adapts to Mercurial, Jujutsu, and Subversion
+  repos.
 ---
 
 Commit the user's changes as a clean, single-purpose commit — nothing more,
@@ -120,6 +120,12 @@ beats the default.
 - Nothing to commit? Say so — don't fabricate an empty commit or commit
   files the user didn't ask about just to have something to show.
 - Not a repository? Offer to run `git init` and wait for a yes.
+
+## Memory
+
+`.memory/memory.json` → `git-commit`: `message_style` override when the user
+explicitly overrides Conventional Commits for this repo. Repo history still
+wins as the default.
 
 ## Reference files (load on demand)
 

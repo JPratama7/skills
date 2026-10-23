@@ -124,6 +124,11 @@ Brainstorming ends at the artifact. These carry the user forward — offer them,
 - Skipping the probe because the user "already explained it." The probe is where the real problem gets found.
 - Doing a specialist's job badly instead of routing — guessing at the competitive landscape or hand-waving an adversary's moves are exactly what the companion table is for.
 
+## Memory
+
+`.memory/memory.json` → `brainstorming`: preferred diverge frameworks and the
+user's default artifact format, so future sessions start from their picks.
+
 ## Reference files (load on demand)
 
 - User wants to brainstorm a product/feature and may need PRD structure → `references/prd-template.md`

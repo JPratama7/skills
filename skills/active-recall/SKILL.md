@@ -121,6 +121,13 @@ lower.
 - The quality bar, restated: one testable fact per card, exactly one right
   answer, answerable without the source. Split, rewrite, or drop failures.
 
+## Memory
+
+Persistent config lives in `.memory/memory.json` under `active-recall`:
+last-used deck path and default export formats (see the `cross-skill-memory`
+protocol). Deck data itself stays in `.active-recall/decks/` — never move
+`cards.jsonl` or `state.json` into the memory store.
+
 ## Reference files (load on demand)
 
 - Card quality depth, good/bad examples, coverage strategy, cloze patterns → `references/card-design.md`

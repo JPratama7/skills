@@ -141,6 +141,12 @@ Sections:
    (`strong` = primary + corroborated; `weak` = single or secondary
    only). URLs appear here once, never inline.
 
+## Memory
+
+`.memory/memory.json` → `research`: default mode/depth and report dir, so
+future runs start from the user's usual setup. Checkpoint artifacts stay in
+`.research/<slug>/`.
+
 ## Reference files (load on demand)
 
 - Writing the report → `references/report-template.md`

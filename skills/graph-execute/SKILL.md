@@ -128,6 +128,11 @@ When all terminal nodes (those with no downstream consumers) are `done`:
 - **Bad-output fan-out**: node fails verify but you feed its output to dependents anyway "to keep moving". Stop the wave.
 - **Plan mutation**: editing `plan.json` mid-execution to "fix" a failing node. Stop, rework, re-invoke on the new plan.
 
+## Memory
+
+`.memory/memory.json` → `graph-execute`: none today — plans and outputs are
+explicit paths the user names.
+
 ## Reference files (load on demand)
 
 - About to spawn nodes on a specific harness → `references/execution.md`

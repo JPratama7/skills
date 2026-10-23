@@ -1,6 +1,6 @@
 ---
 name: doc-builder
-version: 1.7.0
+version: 2.0.0
 description: Create structured documents — root cause analyses, reports,
   requirements docs, decision records, tracker tickets, and PR
   descriptions — by interviewing the user and filling proven templates.
@@ -36,6 +36,8 @@ needed to fill it.
 5. **Fill the template** — every section gets real content or an explicit
    `TODO:` with what is missing. No placeholder lorem ipsum, no invented
    metrics, dates, or names. Write the prose to `references/writing-style.md`.
+   Root cause analysis is the exception to hand-filling: write a Python draft
+   that builds an `RCA` and let the script render the document.
 6. **Check the opening before delivery** — verify the intro and all four
    `Attention Conservation Notice` lines (`For:`, `What:`, `Action:`,
    `Skip if:`) appear in the required position for that type. Do not deliver
@@ -52,6 +54,12 @@ needed to fill it.
    tracker/PR form instead of saving a file, unless the user asks to save.
    Working drafts and scan intermediates go in `/tmp/` — only the delivered
    doc persists.
+
+## Memory
+
+`.memory/memory.json` → `doc-builder`: default save directory for docs, if
+the user names one. Delivered docs remain files in the repo, not in the
+store.
 
 ## Reference files (load on demand)
 
@@ -71,6 +79,12 @@ needed to fill it.
 
 ## Rules
 
+- Root cause analysis is script-driven. Write a Python draft that builds an
+  `RCA` (see `references/root-cause-analysis.md`), run
+  `python3 <skill-dir>/scripts/rca.py render draft.py -o <doc>.md`, then
+  `python3 <skill-dir>/scripts/rca.py check <doc>.md` until it exits clean.
+  The script owns which sections appear; the writer owns the prose in each
+  field. Do not hand-write the RCA markdown, and do not skip the check.
 - Every generated document starts with a one- or two-sentence plain intro and
   an `Attention Conservation Notice` containing exactly `For:`, `What:`,
   `Action:`, and `Skip if:` lines. This applies to every type, including bug

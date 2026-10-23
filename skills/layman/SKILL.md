@@ -205,6 +205,12 @@ deliverable or needs rendering.
 If the user asks for an explanation or walkthrough, give it in plain prose
 unless they also ask for a diagram. Keep necessary steps and exact details.
 
+## Memory
+
+`.memory/memory.json` → `layman`: `intensity` (default `full`), persisted
+across sessions — the first preference that outlives the session. An explicit
+`/layman lite|full|ultra` overrides and updates it.
+
 ## Reference files (load on demand)
 
 - Writing a document as a deliverable (README, guide, report, explainer)

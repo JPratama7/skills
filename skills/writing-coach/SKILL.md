@@ -92,6 +92,11 @@ Ask one question: "What happened the last time you sat down to write?" Route by 
 - Code blocks with no explanation of the *why*
 - Conclusions that merely summarize — push for a "so what" or next step
 
+## Memory
+
+`.memory/memory.json` → `writing-coach`: recurring issues named across
+sessions, so "track growth" outlives one session. No per-file state.
+
 ## Reference files (load on demand)
 
 - Idea sharpening stalling after 2 exchanges → `references/idea-prompts.md`

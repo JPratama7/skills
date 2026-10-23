@@ -28,6 +28,12 @@ State `Role: coordinator.` Never grade your own runs inline when an independent 
 
 Use diagnoses and feedback to fix general causes; update verifier checks when evidence exposes a gap. Snapshot the pre-edit skill before each iteration.
 
+## Memory
+
+`.memory/memory.json` → `skill-generator`: target harness and
+generator/evaluator model ids. Eval artifacts stay in the repo's gitignored
+`.local/` scratch — the store holds config only.
+
 ## References (load on demand)
 
 - New skills or substantial capabilities → `references/design.md`

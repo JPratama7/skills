@@ -111,6 +111,11 @@ Close every deploy with: the exact commands run, required env vars and where to 
 - Report the measurable facts — image size, build time, pipeline duration, deploy URL. They regress silently.
 - Verify before handing over — build the image, curl the endpoint. If a tool is unavailable in the environment, say so explicitly and give the user the exact commands to run.
 
+## Memory
+
+`.memory/memory.json` → `devops`: preferred platform and cloud, if the user
+states them — future deploys default there instead of re-interviewing.
+
 ## Reference files (load on demand)
 
 - Writing or improving a Dockerfile, `.dockerignore`, or compose setup → `references/docker.md`

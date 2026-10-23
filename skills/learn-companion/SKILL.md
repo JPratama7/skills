@@ -16,3 +16,10 @@ description: Evidence-based learning companion for any subject — guarded tutor
 | `/learn-companion self-learn` | `references/pedagogy.md` → `references/self-learn.md` |
 
 Route unspecified learning requests ("teach me X", "help me understand Y", "let's study Z") to `study` once a learner profile exists, and to `init` when none does. Route "I studied/learned X on my own — test me" requests to `self-learn`. Learning mode is active when the nearest `.learn-companion/profile.md` says `Learning mode: active` or learning was activated earlier in this conversation. Load `pedagogy.md` whenever learning mode is active; load `onboarding.md` and `state.md` only for onboarding or state creation. Plain factual questions need no mode activation — answer them directly.
+
+## Memory
+
+`.memory/memory.json` → `learn-companion`: active subject and profile dir
+pointer, shared with `dev-companion`'s learning mode via the
+`cross-skill-memory` protocol. Profile, roadmap, and progress stay in
+`.learn-companion/`.

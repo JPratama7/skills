@@ -45,6 +45,12 @@ If you catch yourself writing any of these, stop and fix it:
 - **Hiding assumptions** — state them explicitly ("assumes read access to the vendor API") so a wrong assumption surfaces early instead of failing mid-execution.
 - **Over-planning** — if the whole thing is one sitting's work, a two-line checklist beats a five-page plan. Match the depth to the size.
 
+## Memory
+
+`.memory/memory.json` → `planning`: default plan dir (override for `.plan/`)
+and preferred planning mode. Plans stay in `.plan/` — the store holds the
+defaults.
+
 ## Reference files (load on demand)
 
 - Engineering work: features, refactors, migrations, anything involving a codebase → `references/coding.md`

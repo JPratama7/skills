@@ -93,6 +93,12 @@ A typical handoff fits in 200-500 tokens; a complex multi-stage one can go to ~1
 - **The buried blocker.** Critical issue in bullet 7 of a 10-bullet list. Lead with it in the prose.
 - **The everything-matters file list.** 15 files, no priority — the next agent can't tell where to start.
 
+## Memory
+
+`.memory/memory.json` → `agent-handoff`: optional `handoff_dir` override
+(default `.agent-handoff/`). Handoff files themselves stay in that dir — the
+store holds config, not handoffs.
+
 ## Reference files
 
 - `references/handoff-examples.md` — Annotated examples covering the four handoff directions (subagent→parent, parent→subagent, peer, chain) plus the trivial case.
