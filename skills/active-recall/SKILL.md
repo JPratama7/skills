@@ -1,7 +1,7 @@
 ---
 name: active-recall
-version: 1.0.0
-description: Build spaced-repetition flashcard decks from source material and run in-chat review sessions backed by a real scheduler. Use whenever the user wants flashcards, Anki cards, cloze deletions, or Q&A cards made from notes, docs, articles, or transcripts; says "make cards", "turn this into flashcards", "quiz me", "test me on", "what's due", "spaced repetition", or "active recall"; or wants to memorize or study material. Cards persist to files with review state — not just chat output.
+version: 1.1.0
+description: Build spaced-repetition flashcard decks from source material and run in-chat review sessions backed by a real scheduler. Use whenever the user wants flashcards, Anki cards, cloze deletions, or Q&A cards made from notes, docs, articles, or transcripts; says "make cards", "turn this into flashcards", "quiz me", "test me on", "what's due", "spaced repetition", "active recall", "sticky notes", "key facts", or "make it stick"; or wants to memorize or study material. Cards persist to files with review state — not just chat output.
 ---
 
 # Spaced Repetition
@@ -63,6 +63,28 @@ and wants cards.
    `obsidian`, `mochi`, or `md` for a readable file). If they didn't say,
    produce `md` + `anki` and mention the others exist.
 6. **Report** card count, dupe count, and where the deck + exports live.
+
+## Sticky notes mode
+
+Trigger: "sticky notes", "key facts", "make it stick" — the user wants
+the main points distilled, not a full deck.
+
+1. **Read the source fully**, same as build mode.
+2. **Distill one note per key fact** — the fact a learner must not
+   forget, phrased so it stands alone. Aim for 5-12 notes; a source
+   with more main points than that wants a deck, not notes. Each note:
+   a bolded 3-8 word title, then the fact in one sentence, then an
+   optional `why it matters` line when the fact isn't self-motivating.
+3. **Write to a file** — `exports/sticky.md` if a deck for the topic
+   already exists, else `.active-recall/sticky/<topic-slug>.md`. Same
+   rule as cards: not chat-only output the user can't reuse.
+4. **Offer the upgrade once.** Sticky notes are the pre-stage of cards —
+   offer to turn them into a deck ("want these as cards?"). If yes,
+   draft cards from the notes and enter build mode at step 3 (the
+   two-grade discipline still applies).
+
+Don't run the scheduler for sticky notes — they have no review state.
+If the user wants scheduled review, that's the deck path.
 
 ## Card rules (the quality core)
 
