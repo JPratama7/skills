@@ -1,7 +1,7 @@
 ---
 name: planning
-version: 1.0.0
-description: Turn any goal into a concrete, executable plan. Covers three planning styles — coding/engineering plans, personal/task plans, and agile sprint plans — and picks the right one for the situation. Use whenever the user asks to "make a plan", "plan this out", "break this down into steps", "what are the next steps", "how do I start", "create a roadmap", "scope this project", or describes work that needs organizing before it starts — even if they never say the word "plan". Produces the plan only; execution is a separate step.
+version: 1.1.0
+description: Turn any goal into a concrete, executable plan. Covers three planning styles — coding/engineering plans, personal/task plans, and agile sprint plans — and picks the right one for the situation. Use whenever the user asks to "make a plan", "plan this out", "break this down into steps", "what are the next steps", "how do I start", "create a roadmap", "scope this project", "80/20", "pareto", "highest leverage", "biggest impact", "what's the 20% that matters", or describes work that needs organizing before it starts — even if they never say the word "plan". Produces the plan only; execution is a separate step.
 ---
 
 # Planning
@@ -33,6 +33,22 @@ The difference between a plan that works and one that doesn't is specificity. "S
 - **What's involved** — the exact files, repos, commands, people, or resources
 - **Verify** — how you know it's done, concretely ("tests pass", "page loads with no console errors", "contact replies")
 - **Time** — an honest estimate. Use hours, not vague "days"; if a task takes more than a day, break it down further.
+
+## The 80/20 lens (Pareto prioritization)
+
+Two triggers, one method:
+
+- **Standalone ask** — "what's the 20% that matters", "80/20 this", "where's the leverage": run step 1 below and deliver the vital-few list as the answer. No full plan needed unless asked.
+- **Inside any plan** — when the user invokes it or the task list is long enough that order matters, apply it as a prioritization pass before presenting the plan.
+
+Method:
+
+1. **List candidate efforts** — tasks, topics, or actions, whichever the ask is about. For a topic ("80/20 this subject"), the candidates are sub-areas of the subject; for a plan, they're the tasks.
+2. **Score impact vs effort.** For each: what outcome does it move, and how much does it cost? Impact is judged against the user's stated goal — never invented. Where the user hasn't said what they value, ask one question instead of guessing.
+3. **Cut at the knee.** Identify the vital few — typically ~20% of items producing ~80% of the impact. The ratio is a heuristic, not a quota: if it's 90/10 or 60/30, report the actual split.
+4. **Mark, don't delete.** In a plan, mark vital-few tasks as the critical path and the rest as "defer until the core lands." In a standalone ask, name what was left out and why — a Pareto cut that hides the 80% is just a biased plan.
+
+Anti-pattern: using 80/20 to skip thinking. The lens orders work; it doesn't shrink scope the user asked for. If the user wants everything, plan everything — with the critical path marked.
 
 ## Anti-patterns: what makes a bad plan
 
