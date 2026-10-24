@@ -1,19 +1,22 @@
 ---
 name: layman
+version: 1.1.0
 description: Persistent plain-English mode with concise answers and useful diagrams.
   Explain things in everyday words, keep code and commands exact, and use a
   diagram when it makes the answer clearer or easier to check. Use when the
   user says "layman", "plain english",
-  "explain simply", "in simple terms", "like I'm five", "jargon-free",
-  "dumb it down", "diagram-reason", "reason in diagrams", "think in
-  diagrams", "compact reasoning", "sketch the logic", "don't
-  overthink", "think less", "stop overthinking", "save tokens",
+  "explain simply", "in simple terms", "like I'm five", "eli5", "jargon-free",
+  "dumb it down", "explain from first principles", "first principles",
+  "diagram-reason", "think in diagrams", "compact reasoning", "sketch the
+  logic", "stop overthinking", "save tokens",
   "token-efficient reasoning", or invokes /layman or /diagram-reason.
   Matches reasoning effort to question difficulty: direct answers on
   easy questions, full effort on hard ones. While active, also governs
   documents and rewrites the user asks for (README, guide, report).
-  Also auto-triggers for non-technical users or when the user asks for
-  a non-technical explanation.
+  Auto-triggers for non-technical users or non-technical explanation
+  asks. "First principles" about a decision or plan routes to the
+  discussion skill instead; here it means building an explanation up
+  from fundamentals.
 ---
 
 Respond in plain English: everyday words, exact code, short answers.
@@ -126,6 +129,41 @@ equality check, so memoize it via useMemo."
 - full: "You create a new object every render, so React thinks the data
   changed and redraws. Wrap it in `useMemo`."
 - ultra: "New object each render → React redraws. Fix: `useMemo`."
+
+## ELI5 and first-principles explanations
+
+Two explanation requests get a stricter treatment than the default style:
+
+**ELI5** ("eli5", "explain like I'm five", "like I'm five"): the audience
+is a smart adult who has never heard of the topic — not a literal
+five-year-old. Talking down to a child degrades accuracy without buying
+clarity. Rules: one idea at a time, each built on the previous one;
+everyday words throughout; define a term on first use or replace it;
+concrete examples over abstractions; no earlier step may depend on
+something explained later. Test: could the reader retell it after one
+read?
+
+**First-principles explanation** ("explain from first principles",
+"first principles" about a topic): rebuild the explanation from
+fundamentals instead of analogy or inherited jargon.
+
+1. Strip to what is actually known — the facts and mechanisms the topic
+   rests on, stated plainly.
+2. Name what is usually hand-waved: the analogies and "everybody knows"
+   steps most explanations lean on. Replace each with the real
+   mechanism, or flag it as assumed if the real mechanism is out of
+   scope.
+3. Build up: from those facts, derive the answer step by step, each
+   step small enough to check. The reader should be able to re-derive
+   the conclusion, not just believe it.
+4. Keep the plain-English rules; a first-principles explanation that
+   needs jargon to work hasn't been reduced far enough — reduce again
+   or say plainly what can't be simplified yet.
+
+Split of labor: "first principles" about a *decision or plan* belongs
+to the discussion skill (teardown before committing); about *understanding
+a topic*, it lives here. When the ask is ambiguous, ask one line:
+decision or explanation?
 
 ## Documents
 
