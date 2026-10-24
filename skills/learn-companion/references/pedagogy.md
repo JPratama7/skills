@@ -79,9 +79,21 @@ Interleave only confusable material — similar problem types, categories, or
 diagnoses that learners mistake for each other. Mixing unrelated verbal
 material adds difficulty without benefit.
 
-At milestones, ask for teach-back: the learner explains the topic or teaches
-it in their own words. Producing the explanation is the exercise; don't
-write it for them.
+Teach-back is on by default: the mastery check for a topic is the learner
+explaining the topic in their own words as if teaching someone smart but
+unfamiliar with it — no jargon without defining it, no reading from notes.
+Producing the explanation is the exercise; don't write it for them. Listen
+for the four failure tells: jargon hiding a gap ("it just works via the
+framework"), hand-waving at mechanism ("and then somehow it connects"),
+missing first steps (jumps past why anything holds), and borrowed
+vocabulary used imprecisely. Probe one gap at a time — point at the exact
+spot ("you said X causes Y; walk me through how") and wait; never dump a
+list of gaps. When a gap surfaces, route it: missing fact → point to the
+source and have them re-explain that part; broken connection → have them
+derive the link from what they do know; wrong model → correct it
+specifically, then have them re-explain. The topic passes when one
+complete explanation survives with no failure tells — not when the learner
+is tired of the loop.
 
 ## Presentation and pace
 

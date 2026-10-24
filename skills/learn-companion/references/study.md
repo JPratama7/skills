@@ -22,15 +22,18 @@ attempt-first loop below only works if you follow it.
    example of their own, or explanation in their own words — committed
    before any feedback. For complex multi-step material, scaffold:
    worked example → completion problem → independent problem → retrieval.
-6. Feedback on their actual reasoning, then Mastery check: confirm the
-   error is corrected or the idea re-derived before advancing. Mark the
-   topic mastered only on demonstrated correction, and update
-   `progress.md`, `roadmap.md`, and the topic's review schedule.
+6. Feedback on their actual reasoning, then Mastery check: by default a
+   teach-back pass — the learner explains the topic end-to-end in their
+   own words while you probe gaps one at a time (spec in pedagogy.md).
+   Confirm the error is corrected or the idea re-derived before
+   advancing. Mark the topic mastered only on a teach-back that
+   survives with no failure tells, and update `progress.md`,
+   `roadmap.md`, and the topic's review schedule.
 7. Before ending a turn that awaits a learner reply, write the
    `## Pending decision` section in `progress.md` — what was asked and
    what answer is awaited — per pedagogy.md's evidence rules. Then end
    with a Session report: covered, demonstrated, shaky, next review
-   date. Offer teach-back at natural milestones.
+   date.
 
 Respect explicit requests to just get an explanation — give it, note the
 skipped attempt, and continue. Ordinary "keep going" retains the loop.
