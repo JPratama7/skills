@@ -33,7 +33,7 @@ skill's settings carry across sessions and are visible to every other skill.
   },
   "layman":     { "intensity": "ultra" },
   "research":   { "default_depth": "standard" },
-  "subagent-manager": { "model": "fast", "max_parallel": 3 }
+  "crewmates":  { "defaults": { "model": "fast", "max_parallel": 3 }, "roster": "…" }
 }
 ```
 
@@ -60,7 +60,7 @@ skill — lives in the `cross-skill-memory` skill.
 - `planning` — plan tasks in coding, personal/task, or agile sprint mode; 80/20 Pareto lens for prioritization and standalone "what's the 20% that matters" asks
 - `agent-handoff` — transfer work between agents without losing context
 - `brainstorming` — take a vague idea and narrow it down into a chosen direction (PRD, system design, one-pager)
-- `subagent-manager` — delegate to subagents: briefing, parallel launch, verify before integrate
+- `crewmates` — run a standing crew of named agents: interviews you for setup, recursive leads, roster persisted in memory, shared board + per-member inboxes, temp one-shots for leaf work
 - `doc-builder` — produce docs via interview: RCAs, reports, requirements, decision records, Jira/GitHub tickets, PR descriptions; anti-AI-slop style rules + a deterministic pre-delivery checker; RCAs are rendered from a typed draft and validated by a structural and judgment checker
 - `git-commit` — stage and commit with secret screening, conventional message formatting, and VCS-specific guidance
 - `devops` — deploy and operate apps across Docker, Railway, Fly.io, Cloud Run, ECS, Kubernetes, VPS, and static hosts; CI/CD, secrets, health checks, observability

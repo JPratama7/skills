@@ -11,7 +11,7 @@
     "./skills/planning",
     "./skills/agent-handoff",
     "./skills/brainstorming",
-    "./skills/subagent-manager",
+    "./skills/crewmates",
     "./skills/doc-builder",
     "./skills/git-commit",
     "./skills/devops",
