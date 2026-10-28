@@ -91,7 +91,7 @@ Keep this table in sync when skills change:
 | planning | plan dir |
 | research | default mode/depth, report dir |
 | skill-generator | target harness, generator/evaluator models |
-| subagent-manager | default model, max parallel (lessons live in `shared.lessons`) |
+| crewmates | roster tree, spawn defaults, member status (lessons live in `shared.lessons`) |
 | writing-coach | recurring issues across sessions |
 
 ## Adding memory to a new skill
