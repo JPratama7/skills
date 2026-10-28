@@ -83,7 +83,7 @@ carries a claim or a citation, no filler.
 
 Subagent or not, a branch reports back the same way — telegraphic, ≤10
 finding lines (≤5 on quick depth), at most two sources per line. Use the
-`subagent-manager` brief format if available:
+`crewmates` brief format if available:
 
 ```
 Node: <sub-question>
