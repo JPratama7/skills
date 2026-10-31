@@ -10,4 +10,4 @@ Use this only for a new skill or a revision that adds a substantial capability. 
 6. **Sketch minimal architecture.** State each asset's responsibility, invocation, inputs, outputs, and behavior for unavailable, malformed, or inconclusive inputs. Separate confirmed interfaces from assumptions; defer nonessential work.
 7. **Hand off to drafting.** Recap the agreed problem, examples, scope, and architecture briefly in chat or scratch. Create a handoff file only if it helps resume or coordinate work.
 
-Ask only for missing information. Prefer one focused question at a time; validate major decisions before drafting. For every task, identify trigger context, desired output, objective vs subjective evaluation, and target harness (default to the current harness).
+Grill in rounds, a recommended answer attached to every question; look up discoverable facts instead of asking, and validate major decisions before drafting. For every task, identify trigger context, desired output, objective vs subjective evaluation, and target harness (default to the current harness). The interview is done when an implementer could draft without a single remaining question.
