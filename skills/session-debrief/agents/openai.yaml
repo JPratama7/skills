@@ -1,0 +1,5 @@
+interface:
+  display_name: "Session Debrief"
+  short_description: "Debrief a coding session and propose environment improvements."
+policy:
+  allow_implicit_invocation: false
