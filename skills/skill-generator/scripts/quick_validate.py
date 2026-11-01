@@ -14,6 +14,8 @@ ALLOWED_KEYS = {
     "license",
     "allowed-tools",
     "harness",
+    "triggers",
+    "disable-model-invocation",
 }
 
 SEMVER_RE = re.compile(r"^\d+\.\d+\.\d+(?:[-+.]?[A-Za-z0-9-]+)*$")
