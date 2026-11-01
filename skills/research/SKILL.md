@@ -1,6 +1,6 @@
 ---
 name: research
-version: 1.9.1
+version: 1.10.0
 description: Research a question by reasoning as an evolving graph of sub-questions — ask the user how to execute, decompose the question, explore branches with parallel research agents, merge, score, and prune — then deliver a cited markdown report plus the thought graph that produced it. Use whenever the user wants a topic investigated, facts or docs/API details gathered, a comparison made, contradictions between sources resolved, or reading legwork delegated — even if they just say "look into X", "find out whether", "dig into", "research this", or "how does X actually work".
 ---
 
@@ -18,11 +18,17 @@ carries a claim or a citation, no filler.
 
 ## Loop
 
-1. **Root** — one sentence: what is true when answered. Sharpen a vague ask
-   first.
-2. **Ask execution** — before decomposing, ask the user how to run it. One
-   ask covering all of it, not a drip-feed (use the harness's question tool
-   if it has one):
+A run is a loop fired by a **trigger** — the user's question. Two
+**checkpoints** put a human in it — execution (step 2) and plan (step 4) —
+and they **push right**: maximal work first, then one ask, late, with
+everything prepared. What a checkpoint presents is a **brief** —
+telegraphic, decision-ready — never raw output.
+
+1. **Root** — resolve the trigger into one sentence: what is true when
+   answered. Sharpen a vague ask first.
+2. **Checkpoint: execution** — before decomposing, ask the user how to run
+   it. One ask covering all of it — push right, never drip-feed (use the
+   harness's question tool if it has one):
    - *Mode* — `parallel` (default): one research subagent per branch,
      launched same turn / `sequential`: same contract, one at a time /
      `inline`: no subagents, you read
@@ -43,11 +49,12 @@ carries a claim or a citation, no filler.
    alternatives), not steps, sized to the chosen breadth. "And then" = a
    chain, not a branch — fold it. A focused question may honestly be 1-2
    nodes; don't inflate just because agents are available.
-4. **Plan check** — show the branch list telegraphically (one line each)
-   plus the chosen mode; the user confirms, prunes, or adjusts before
-   anything launches. No way to ask → proceed. This is the cost
-   checkpoint: each branch will cost a fresh agent context, so cut any
-   branch you could resolve with a direct fetch.
+4. **Checkpoint: plan** — present the brief: the branch list
+   telegraphically (one line each) plus the chosen mode; the user
+   confirms, prunes, or adjusts before anything launches. No way to ask →
+   proceed. This is the cost checkpoint: each branch will cost a fresh
+   agent context, so cut any branch you could resolve with a direct
+   fetch.
 5. **Explore** — per the chosen mode. Primary sources only: official docs,
    source code, specs, first-party APIs, papers. A blog citing the docs is
    a pointer to the docs, not a source. Per node record
@@ -100,12 +107,12 @@ discipline, on the agent side.
 
 ## Working files
 
-Checkpoint working artifacts — the evolving graph, branch findings, scores —
+Snapshot working artifacts — the evolving graph, branch findings, scores —
 under `.research/<slug>/` at the repo root so a long run survives context
 loss and can be resumed or audited later. Bulk page dumps, fetched copies,
 and other one-shot scratch go in `/tmp/` — they're regenerated on demand and
 shouldn't pile up on disk. The report below is the deliverable; it goes where
-the repo keeps docs, not in the checkpoint dir.
+the repo keeps docs, not in the run-state dir.
 
 ## Report
 
@@ -120,8 +127,9 @@ worked example in the template:
 
 Sections:
 
-1. **Summary** — 2-4 sentences answering the root question directly. The
-   whole report in miniature; a reader stops here if they must.
+1. **Summary** — the run's brief: 2-4 sentences answering the root
+   question directly. The whole report in miniature; a reader stops here
+   if they must.
 2. **Mind map** — a mermaid `mindmap` of the question decomposition with
    inline verdicts; orientation at a glance. The thought graph in the
    appendix carries the edges.
@@ -144,7 +152,7 @@ Sections:
 ## Memory
 
 `.memory/memory.json` → `research`: default mode/depth and report dir, so
-future runs start from the user's usual setup. Checkpoint artifacts stay in
+future runs start from the user's usual setup. Run state stays in
 `.research/<slug>/`.
 
 ## Reference files (load on demand)
@@ -156,8 +164,8 @@ future runs start from the user's usual setup. Checkpoint artifacts stay in
 ## Anti-patterns
 
 - **Chain-as-graph** — sequencing dressed as branches.
-- **Silent fan-out** — agents launched before the plan check; the user
-  never saw what they're paying for.
+- **Silent fan-out** — agents launched before the plan checkpoint; the
+  user never saw what they're paying for.
 - **Branch bloat** — spawning a child agent for a branch you could resolve
   with a direct fetch; a child costs roughly as much as the rest of the
   run.
@@ -167,8 +175,10 @@ future runs start from the user's usual setup. Checkpoint artifacts stay in
   more than the fetch.
 - **Re-reading** — fetching pages a branch already read; compile from its
   findings and spot-check only what decides the root.
-- **Ask-spam** — mode, breadth, and depth are one ask; three separate
-  questions is a drip-feed.
+- **Ask-spam** — a checkpoint pushed right is one ask; splitting mode,
+  breadth, and depth into separate questions is a drip-feed.
+- **Raw checkpoint** — a checkpoint that dumps branch findings or draft
+  output where a brief belongs.
 - **Silent pruning** — a dropped branch nobody can see is a coverage hole.
 - **Averaging contradictions** — "some say X, some say Y" without resolving
   authority.
