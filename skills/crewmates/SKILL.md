@@ -29,7 +29,7 @@ context accumulates in the agent and in shared files.
   board.md           — shared knowledge; kills re-briefing
   inbox/<name>.md    — mail to that member
   handoff/<name>.md  — the member's catch-up note, agent-handoff format
-  panes.txt          — session map, one per line: <stable-name>\t<session-id>
+  panes.txt          — channel addresses: <stable-name>\t<live session-id>
 ```
 
 Exclude `.crew/` and `.memory/` via `.git/info/exclude`; `board.md` may
@@ -40,6 +40,11 @@ bare `running` hides "idle, waiting on X".
 
 Read `memory.json` → `crewmates` and `shared.lessons`.
 
+- Map the channel before any boot or dispatch (§6): which of
+  `notify`/`tail`/`wait`/`probe`/`signal` does this harness give each
+  member? Missing primitives take their file fallback now — a member
+  you can't wake has its mail relayed by a lead, not left in a file
+  nobody reads.
 - Roster exists → boot each standing member: "load your skills → read
   `board.md`, your inbox, your handoff → post one `ready` line". The
   file read IS the catch-up — never re-paste board content into prompts.
@@ -106,6 +111,8 @@ Skills: <skills to load first — skills don't propagate>
 
 Output contract: <exact return shape, evidence, failure report>
 
+Comms: mail your report to <lead>; notify "report <name>: <one-line outcome>"
+
 Defaults: <every open question gets "Default: X">
 ```
 
@@ -126,8 +133,11 @@ Defaults: <every open question gets "Default: X">
 
 **Dispatch.** Independent members in the same turn; disjoint write
 scopes (two members on one file collide). Log every spawn in `status`.
-Don't poll — the stall-check (§5) finds the stuck ones. A lead that
-dispatched owns its builders: check each before going idle.
+Confirm each dispatch took — `wait` for the working transition where
+the harness has it, `tail` once where it doesn't; a prompt that was
+accepted then dropped is an orphan nobody sees. Then don't poll — the
+stall-check (§5) finds the stuck ones. A lead that dispatched owns its
+builders: check each before going idle.
 
 **Verify.** Output is a claim, not a fact. Check against the contract;
 spot-check load-bearing claims — rerun the test, read the diff, open
@@ -142,7 +152,8 @@ respawn corrected. Reusable findings → board; lessons →
 
 **Needs a decision.** A blocker that is the user's call goes up as
 `needs-decision: <question>; Default: X; working on it`. Keep working
-the default; the root batches these for the user.
+the default; the root batches these for the user — `signal` once with
+the count, never once per item.
 
 **Integrate code** — pick order, baseline diffing, conflict policy,
 head-posting → `references/integration.md`.
@@ -167,26 +178,41 @@ running tasks re-briefed."
   autostashes, so "no stash" bans it too.
 - Root prunes at session start: stale entries out, dupes merged.
 
-**Mail** — `.crew/inbox/<name>.md`. Sending is exactly two steps:
+**Mail** — the inbox file is the store; the channel is only the
+doorbell. Sending is exactly two steps:
 
-1. Append `- from <sender>: <message>` to the reader's inbox file.
-2. Wake the reader — `herdr agent prompt <to> "mail from <me>"` or the
-   harness equivalent. Skip the wake only for the root lead, who polls.
+1. Append `- from <sender>: <message>` to `.crew/inbox/<name>.md` —
+   full body, durable, ordered across senders.
+2. `notify` the reader: `mail <from>: <subject>` — ≤8 words naming what
+   arrived, never the body. Skip the notify only for the root lead,
+   who polls.
 
-Write first, then wake — a wake before the append is a silent no-op:
-the reader finds an empty inbox and goes idle while you wait. After
-waking, verify the reader started (`herdr agent read <to>` or
-equivalent). A reader that wakes to an empty inbox replies "inbox
-empty" to the sender — silence is how two members deadlock over nothing.
+Write first, then notify — a notify before the append is a silent
+no-op: the reader finds an empty inbox and goes idle while you wait.
+After notifying, confirm it landed — `wait`/`probe` for activity where
+the harness has it; a channel that accepts-then-drops is worse than
+none, so fall back to relay-by-lead when a notify can't be confirmed.
+A reader that wakes to an empty inbox replies "inbox empty" to the
+sender — silence is how two members deadlock over nothing.
 
-- Reader clears its inbox after consuming.
+- Reader clears its inbox after consuming — and reads it on every
+  wake, not just boot: a notify means mail arrived.
 - Members mail each other directly — cross-lead traffic doesn't route
-  through the root.
-- Blocked on a decision → mail the question AND wake. A question in a
+  through the root. No member→member channel → the lead relays.
+- Blocked on a decision → mail the question AND notify. A question in a
   report footer is a question nobody reads.
 
-**Stall-check** — run every turn while members are active and whenever
-the user says "all idle". One line per member — `<name>: <signals>`:
+**Wait, don't poll** — where the harness gives `wait`, block on the
+state instead of looping on `tail`: `wait blocked` right after a
+dispatch catches a permission wall in seconds, not at the next
+stall-check. Passive completion notices (subagent results, completion
+badges) are inbound mail too — integrate on arrival. No `wait`
+primitive → the stall-check is the whole loop.
+
+**Stall-check** — the audit layer under `wait`, and the whole loop on
+file-only harnesses. Run every turn while members are active and
+whenever the user says "all idle". One line per member — `<name>:
+<signals>`:
 
 - `unread` — inbox file non-empty (file check);
 - `no-deliverable` — declared path/SHA absent (file check, only when
@@ -194,34 +220,50 @@ the user says "all idle". One line per member — `<name>: <signals>`:
 - `question` — last turn ended on a `?` or "waiting for X" (tail read);
 - `api-error` — last turn ended in an API error (tail read).
 
-Tail reads: `herdr agent read <name>` on panes; the agent's transcript,
-resumed output, or last report file on other harnesses. Script the file
-checks and fold the tail reads in per member. Run it before telling the
+Tail reads: `tail` per the comms map (`references/harness-comms.md`);
+last report file on file-only harnesses. Script the file checks and
+fold the tail reads in per member. Run it before telling the
 user "waiting on the crew" — idle panes are not finished work.
 
 **Dispatch-request** — a member that can't spawn writes to its lead's
 inbox: `- DISPATCH <role>: <task> → report to inbox <requester>`.
 
-## 6. Spawning and portability
+## 6. Channel map and portability
 
-- **Herdr** (`HERDR_ENV=1`): `herdr agent start <name> --kind devin
-  --pane <pane_id>`; re-prompt `herdr agent prompt <name> --wait`. Pane
-  agents can spawn — sub-leads start their own teammates. Herdr names
-  survive restarts: they are the stable identity.
+The crew needs six primitives — resolve yours before the first
+dispatch:
+
+| primitive | job |
+|-----------|-----|
+| `spawn`   | start a member, deliver its brief |
+| `notify`  | deliver a compact message into a member's context |
+| `tail`    | read a member's recent output |
+| `wait`    | block until a member reaches a state |
+| `probe`   | read a member's lifecycle state |
+| `signal`  | reach the user out-of-band |
+
+Detect at entry: `HERDR_ENV=1` → herdr map; a subagent-spawn tool in
+your toolset → that harness's builtin map; neither → file-only.
+Concrete commands per harness → `references/harness-comms.md`. Store
+the resolved map in `status` so a reboot skips detection. A missing
+primitive falls back to files: no `notify` → leads relay mail on next
+contact and members read inbox on every wake; no `wait` → the
+stall-check is the loop; no `tail` → report files only.
+
 - **Session map** — `panes.txt` maps stable name → live session id for
   direct-messaging harnesses. Live ids die on restart. Rebuild order:
   root writes its line first (a stale root id misroutes mail), every
-  member re-appends its own, then prompt each member via stable name to
-  re-read the file. Look up the address in the file on every send —
+  member re-appends its own, then `notify` each member via stable name
+  to re-read the file. Look up the address in the file on every send —
   never from memory. No live session ids on the board.
-- **Plain** (`run_subagent` or equivalent): record the returned agent
-  id in `status`; `resume`/re-prompt for follow-ups. A member that
-  can't spawn drops DISPATCH in your inbox.
+- **Can't spawn** — a member without `spawn` drops DISPATCH in your
+  inbox; on spawn-capable harnesses sub-leads run their own teammates.
+  Log every returned agent id in `status`.
 - **Dead session** → respawn; board + inbox is the catch-up. The board
   is the persistence; a live agent is a fast path.
-- **Pane state** — trust `agent_status` and inbox files, never the
-  input box: greyed-out prompt suggestions look like unsent orders.
-- **`blocked`** — a permission prompt a wake can't pass. Never answer
+- **Pane state** — trust `probe` and inbox files, never the input box:
+  greyed-out prompt suggestions look like unsent orders.
+- **`blocked`** — a permission prompt a notify can't pass. Never answer
   another session's prompt (permission laundering); give the user the
   pane + right answer, re-brief once unblocked.
 - **Hung command** — kill the parent before the child; killing the
@@ -255,8 +297,17 @@ Default leaves: `scout` (read-only explore), `builder` (writes),
   sourced, or cut.
 - **Re-briefing the board** — pasting into a brief what the member
   reads for itself.
-- **Half-sent mail** — append without the wake, or wake before the
+- **Half-sent mail** — append without the notify, or notify before the
   append. Both sides stall silently (§5).
+- **Body-in-channel** — the mail body in the notify. It bypasses the
+  durable store, dies with the session, and breaks multi-sender order.
+- **Bare wake** — `mail from me` with no subject. The reader opens the
+  file just to triage; say what arrived in ≤8 words.
+- **Poll-loop on a wait-capable harness** — tail-sleep-repeat when
+  `wait` blocks for free. Burns the lead's turn — and on some channels
+  each poll lands as input and burns the member's too.
+- **Unmapped channel** — assuming a `notify` the harness lacks. The
+  mail sits, the stall-check reads clean, both sides wait.
 - **Verdict by count** — "1 failure, the known one" is not a check.
   Compare the offence list; a known red hides new ones.
 - **Held green head** — sitting on a verified head while a long gate
@@ -277,6 +328,7 @@ protocol.
 
 ## Reference files (load on demand)
 
+- Per-harness comms maps (spawn/notify/tail/wait/probe/signal commands) → `references/harness-comms.md`
 - Worked member briefs (explore / build / review) → `references/delegation-prompts.md`
 - Integrating member code (pick order, conflicts, head-posting, role changes) → `references/integration.md`
 - Example roster trees for a project shape → `references/roster-examples.md`
