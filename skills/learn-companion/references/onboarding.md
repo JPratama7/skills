@@ -1,5 +1,9 @@
 # Learning onboarding
 
+This file covers learner onboarding only. Teacher-side requests skip it —
+course context is collected by the relevant command (`plan`, `deliver`)
+into `course_passport.yaml`, not here.
+
 Guide one step at a time. Reuse answers already given; don't dump a
 questionnaire. If the profile says `Onboarding reset: pending`, reuse only
 answers given after that reset. Keep this marker while onboarding is

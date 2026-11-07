@@ -86,7 +86,7 @@ Keep this table in sync when skills change:
 | graph-execute | none today |
 | indexer | output override (repo config stays in `.ai-comments.json`) |
 | layman | intensity (persists across sessions) |
-| learn-companion | active subject, profile dir |
+| learn-companion | active subject, profile dir, active course, passport path |
 | pentest-toolkit | engagement dir, current engagement |
 | planning | plan dir |
 | research | default mode/depth, report dir |

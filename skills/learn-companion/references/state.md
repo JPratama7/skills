@@ -93,3 +93,53 @@ Mark proposed vs confirmed. None when the subject doesn't suit one.]
 [Unverified prerequisites, unclear scope, scheduling constraints, open
 questions about the subject itself.]
 ```
+
+On creation, write `active_subject` + `profile_dir` to
+`.memory/memory.json` → `learn-companion` so a fresh session finds the
+state without searching; update the pointer if the directory moves.
+
+## course_passport.yaml (teacher-side state)
+
+The Course Passport is the single source of truth for a course — its
+design, schedule, gate results, artifact ledger, and iteration history.
+Created during `plan` (course design) or `deliver` (pipeline intake);
+default location `.learn-companion/course_passport.yaml`, beside
+`profile.md` — or where the professor chooses.
+Template: `assets/course-designer/templates/course_passport_starter.yaml`;
+structure + cross-reference invariants checked by
+`assets/scripts/check_passport.py` (schema: `assets/shared/`).
+
+Key fields: `course` facts and `term_calendar` (institutional facts — ask
+once, store, never invent); `learner_profile` (cohort aggregates only);
+`learning_outcomes` (`id`, `statement`, `bloom_level`, `assessed_by`,
+`taught_in` — the alignment spine); `assessment_plan` (type, weight,
+week, `outcomes_assessed`, `ai_resilience`); `schedule` (per-week topic,
+outcomes, `artifact_refs`); `policies` (incl. the required
+`ai_use_policy`); `workload_audit`; `gates` (alignment/quality findings
+and status); `artifacts[]` (each `confirmed_by_professor` set only at a
+real confirmation); `iteration_history` (cross-term improvement record).
+
+Iron rules:
+
+1. **Append, don't overwrite** — each stage writes its own fields; nothing
+   deletes another stage's entries. Corrections come from the professor
+   at a checkpoint, not silently.
+2. **No invented context** — an empty field a workflow needs gets asked
+   about, not guessed. Unknown is a legitimate value; a guess recorded as
+   fact is not.
+3. **Outcomes are the spine** — every assessment lists
+   `outcomes_assessed`; every week lists `outcomes`.
+4. **Checkpoint provenance** — `confirmed_by_professor` is set only when
+   the professor actually confirmed.
+5. **Graceful absence** — every teacher-side workflow runs standalone
+   without a passport, asks for what it needs, and offers passport
+   creation at exit.
+6. **No student-identifying data** — names, grades, and individual-level
+   facts never enter the passport or any state file; aggregates and
+   counts only.
+7. **Schema keys stay present** — unknown values get `[NEEDS PROFESSOR
+   INPUT]` or `[VERIFY]` inside the field; never omit the key.
+
+On creation, write `active_course` to `.memory/memory.json` →
+`learn-companion`; add `passport_path` only if the professor places the
+passport outside `.learn-companion/`.
