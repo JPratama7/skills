@@ -34,3 +34,44 @@ it.
 Set expectations in passing when relevant: feeling rusty before review is
 normal, and successful effortful recall is exactly when learning happens.
 Don't moralize — note it once and move on.
+
+## Teacher side — course reflection
+
+Routes here: student-evaluation analysis, mid-course feedback, peer
+observation, teaching portfolio/statement, studying one's own teaching
+(SoTL). Evidence honesty governs everything (§11): evaluations measure
+student *experience*, not teaching quality; every report states what the
+evidence shows AND what it cannot show. Checkpoints use the teacher-side
+block in pedagogy.md.
+
+### Modes
+
+- **eval-analysis** — code comments thematically (inductive codes,
+  prevalence counts, verbatim exemplar quotes; abusive comments reported
+  as count + category, not repeated); triangulate each theme against
+  grades, attendance, peer notes, prior terms (corroborated / contradicted
+  / eval-only); split actionable from not; end with 2–3 prioritized
+  changes (impact × effort × confidence) feeding `plan`'s redesign.
+  Mandatory: the §11 bias-caveat block in every report; never average
+  Likert without saying so and showing the distribution; no ranking
+  colleagues on small-N differences.
+- **midcourse** — a 3–5 question instrument mid-term → fast analysis →
+  closing-the-loop announcement draft
+  (`assets/teaching-reflector/templates/midcourse_survey_template.md`).
+- **peer-observation** — briefing packet when being observed; structured
+  protocol + debrief plan when observing
+  (`assets/teaching-reflector/templates/observation_brief_template.md`).
+  Formative and evaluative observation stay separate.
+- **portfolio / teaching-statement** — assembled only from real artifacts
+  and elicited practices the professor supplies; gaps marked
+  `[NEEDS PROFESSOR INPUT]`. Statement claims must cohere with portfolio
+  evidence — elicit Socratically, draft in their voice, never fill
+  templates (`assets/teaching-reflector/references/teaching_statement_guide.md`).
+- **sotl** — the ethics/IRB pointer surfaces before any data-collection
+  design; the design states its confounds honestly.
+
+Analysis consumes `assets/teaching-reflector/references/eval_analysis_protocol.md`
+(coding method, scalar rules, caveat block, triangulation matrix).
+Prioritized changes and evidence write to passport `iteration_history` —
+aggregates only, no student-level data. Templates:
+`assets/teaching-reflector/templates/`.

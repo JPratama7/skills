@@ -16,6 +16,11 @@ call.
 
 ## Locate state
 
+First read `.memory/memory.json` → `learn-companion` at the project root
+for stored pointers (`profile_dir`, `passport_path`). A pointer whose
+target exists short-circuits the search below; a stale pointer falls back
+to the search and gets corrected on write.
+
 Starting at the current working directory, look upward for
 `.learn-companion/`, stopping at the nearest `.git` directory or file
 (including a worktree root). Use the nearest one within that boundary.
@@ -43,9 +48,20 @@ onboarding. Use [state.md](state.md) when creating state. These files are
 local Markdown maintained with normal file tools; there is no service to
 call.
 
-After setup, continue the learner's study task. If none was provided, ask
-what they want to learn or review. Invoking `/learn-companion init` again
-should not reset anything.
+## Teacher-side state
+
+Teacher requests ("design a course", "prepare my lesson", "check these
+submissions") skip learner onboarding entirely. Look for the passport at
+`.learn-companion/course_passport.yaml` (default) or the `passport_path`
+memory pointer if set; if present, load it as the course's source of
+truth instead of re-asking context — the design, schedule, gates, and
+artifact ledger are all in it. If none exists, run the requested command
+standalone and offer to create a passport at the first checkpoint.
+See state.md for the field layout and iron rules.
+
+After setup, continue the learner's study task or the teacher's request.
+If none was provided, ask what they want to learn, review, or build.
+Invoking `/learn-companion init` again should not reset anything.
 
 ## Harness notes
 

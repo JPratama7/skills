@@ -36,3 +36,12 @@ measure before trusting, and to aim the quiz at what the measurement finds.
 If they haven't studied yet and are asking where to start, point them at a
 scope and a resource type rather than quizzing an untaught topic — the
 diagnostic only works on material they've actually covered.
+
+## Teacher side — diagnostics
+
+The same craft runs class-wide. A professor wanting a readiness check or
+pre-lesson questionnaire gets the cohort version: ungraded instruments
+where every item names the decision it informs, misconception probes, and
+aggregate-only results. That workflow lives in `plan.md`'s cohort
+diagnostics section — same rule applies there: no prediction, no
+individual-level reads, instrument-strength caveats mandatory.
