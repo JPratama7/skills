@@ -21,7 +21,7 @@ context accumulates in the agent and in shared files.
 ```
 .memory/memory.json → "crewmates" namespace:
   roster    — member tree: {name, role, spawn, teammates: [...]}
-  defaults  — {model, max_parallel, depth_cap: 3, fanout_cap: 5,
+  defaults  — {model, kind, max_parallel, depth_cap: 3, fanout_cap: 5,
                roles: {writes, executes, commits, worktrees}}
   status    — per member: running | waiting:<what> | done | failed
 
@@ -72,7 +72,8 @@ The crew outlives the task, so its shape is the user's call. One batch:
   the board — every brief points to it. Write-only builders with
   executing leads are valid but name the cost: every check is a lead
   round-trip → ≈2 builders per lead.
-- **Defaults** — model, parallelism, verification depth.
+- **Defaults** — model, agent `kind` (claude, devin, …), parallelism,
+  verification depth.
 
 Then propose the tree and get approval. Coverage check: every scope
 piece maps to a seat or to you. Skip the interview for obvious
@@ -105,13 +106,17 @@ Constraints:
 
 Scope: <investigate-only vs. make-changes; files/dirs it owns>
 
+Tests: <exact test scope — files, dirs, or a -k/-m filter; "full suite"
+       only when the user asked. Run through scripts/crew-run; name a
+       --class for a heavy objective suite>
+
 Roles: <the member's row of the board ROLES line>
 
 Skills: <skills to load first — skills don't propagate>
 
 Output contract: <exact return shape, evidence, failure report>
 
-Comms: mail your report to <lead>; notify "report <name>: <one-line outcome>"
+Comms: mail your report to <lead>; notify "<name> → <lead>: report <one-line outcome>"
 
 Defaults: <every open question gets "Default: X">
 ```
@@ -123,7 +128,8 @@ Defaults: <every open question gets "Default: X">
   pass/fail per item), telegraphic report. `checks` claims name the
   command that ran — `checks=pass` with no command is a failed report.
 - Executing members get Critical: `timeout` long commands, no chained
-  heredocs — a hung chain holds the pane for hours.
+  heredocs — a hung chain holds the pane for hours. Every test run goes
+  through `scripts/crew-run` (§6 resource budget).
 - Write-only builders get the loop spelled out: builder writes the
   failing test + hands over the exact run command → lead runs it red →
   builder writes code → lead runs it green. Every handover lists files
@@ -158,6 +164,13 @@ the count, never once per item.
 **Integrate code** — pick order, baseline diffing, conflict policy,
 head-posting → `references/integration.md`.
 
+**Retire a member.** The stop point is the command running now — the
+member starts nothing new; "finish your run" means that run, not the
+series. Before its seat closes it lists the steps it didn't run, for its
+lead. The pane closes only when no test process still runs under it —
+check with `scripts/stall-check`; a retired member holding a live run is
+a zombie burning the machine.
+
 **Roles change mid-flight.** Re-brief every running task — a role rule
 only binds tasks briefed after the change. Root checks each member's
 status first: a `blocked` member can't hear a wake — give the user the
@@ -182,10 +195,13 @@ running tasks re-briefed."
 doorbell. Sending is exactly two steps:
 
 1. Append `- from <sender>: <message>` to `.crew/inbox/<name>.md` —
-   full body, durable, ordered across senders.
-2. `notify` the reader: `mail <from>: <subject>` — ≤8 words naming what
-   arrived, never the body. Skip the notify only for the root lead,
-   who polls.
+   full body, durable, ordered across senders. Use `scripts/inbox.py`
+   for send/consume/list — hand-rolled clears miss lines.
+2. `notify` the reader: `<from> → <to>: <subject>` — direction plus
+   ≤8 words naming what arrived, never the body. The root's wake-up
+   goes through the harness's message tool (SendMessage where the crew
+   runs claude), never typed into a pane a person uses — typed input
+   lands mid-keystroke and reads as a user message.
 
 Write first, then notify — a notify before the append is a silent
 no-op: the reader finds an empty inbox and goes idle while you wait.
@@ -217,13 +233,17 @@ whenever the user says "all idle". One line per member — `<name>:
 - `unread` — inbox file non-empty (file check);
 - `no-deliverable` — declared path/SHA absent (file check, only when
   the brief declared one);
+- `bg-running` — a test or long command still running under the
+  member's process, matched by the runner's name (pytest, vitest…),
+  never by `uv` alone (process check — "idle" panes hide live runs);
 - `question` — last turn ended on a `?` or "waiting for X" (tail read);
 - `api-error` — last turn ended in an API error (tail read).
 
-Tail reads: `tail` per the comms map (`references/harness-comms.md`);
-last report file on file-only harnesses. Script the file checks and
-fold the tail reads in per member. Run it before telling the
-user "waiting on the crew" — idle panes are not finished work.
+The file and process checks run as `scripts/stall-check`; fold the
+tail reads in per member — `tail` per the comms map
+(`references/harness-comms.md`), last report file on file-only
+harnesses. Run it before telling the user "waiting on the crew" —
+idle panes are not finished work.
 
 **Dispatch-request** — a member that can't spawn writes to its lead's
 inbox: `- DISPATCH <role>: <task> → report to inbox <requester>`.
@@ -242,20 +262,43 @@ dispatch:
 | `probe`   | read a member's lifecycle state |
 | `signal`  | reach the user out-of-band |
 
-Detect at entry: `HERDR_ENV=1` → herdr map; a subagent-spawn tool in
-your toolset → that harness's builtin map; neither → file-only.
-Concrete commands per harness → `references/harness-comms.md`. Store
-the resolved map in `status` so a reboot skips detection. A missing
-primitive falls back to files: no `notify` → leads relay mail on next
-contact and members read inbox on every wake; no `wait` → the
-stall-check is the loop; no `tail` → report files only.
+Resolve at entry — capability first, env var second:
 
+1. **Native inventory** — which of the six do your own tools cover? A
+   subagent-spawn tool gives spawn/tail/probe/passive-wait; a
+   SendMessage-style tool gives notify into any session it can name —
+   including members on another substrate (herdr panes running claude).
+2. **Gap check** — spawn or notify missing → probe herdr:
+   `HERDR_ENV=1` AND a live `herdr` answer (the env var survives dead
+   servers). Live → herdr panes fill the missing primitives.
+3. **Neither** → file fallbacks per primitive: no `notify` → leads
+   relay mail on next contact and members read inbox on every wake;
+   no `wait` → the stall-check is the loop; no `tail` → report files.
+
+A member's channel follows its substrate: herdr-spawned → herdr
+primitives, builtin-spawned → builtin primitives. Concrete commands
+per harness → `references/harness-comms.md`. Store the resolved map in
+`status` so a reboot skips detection. If spawn or notify resolved to
+a file fallback, put the degraded map in front of the user in the §2
+interview — channel quality shapes the whole crew; relay-by-lead is
+real coordination cost, and the user may fix the channel instead.
+
+- **Resource budget** — every executor runs tests through
+  `scripts/crew-run`: it caps concurrent runs (`CREW_MAX_RUNS`),
+  serializes a named heavy class (`--class`), refuses to start under a
+  free-RAM floor, and redirects temp files to disk. A check in a script
+  beats a rule in a brief — a crew that races unguarded runs has
+  already lost the machine to swap and tmpfs.
 - **Session map** — `panes.txt` maps stable name → live session id for
   direct-messaging harnesses. Live ids die on restart. Rebuild order:
   root writes its line first (a stale root id misroutes mail), every
   member re-appends its own, then `notify` each member via stable name
   to re-read the file. Look up the address in the file on every send —
-  never from memory. No live session ids on the board.
+  never from memory. No live session ids on the board. When wake-ups
+  go through the harness's message tool (SendMessage), it addresses
+  members by session name: root's line first, builder names filled in
+  from their worktree-named sessions, every other member registering
+  its own at boot.
 - **Can't spawn** — a member without `spawn` drops DISPATCH in your
   inbox; on spawn-capable harnesses sub-leads run their own teammates.
   Log every returned agent id in `status`.
@@ -301,6 +344,9 @@ Default leaves: `scout` (read-only explore), `builder` (writes),
   append. Both sides stall silently (§5).
 - **Body-in-channel** — the mail body in the notify. It bypasses the
   durable store, dies with the session, and breaks multi-sender order.
+- **Typed wake-up** — `send-keys`/`send-text` into a pane a person
+  uses. It lands mid-keystroke and reads as a user message; the root's
+  wake-up goes through the message tool.
 - **Bare wake** — `mail from me` with no subject. The reader opens the
   file just to triage; say what arrived in ≤8 words.
 - **Poll-loop on a wait-capable harness** — tail-sleep-repeat when
@@ -332,3 +378,10 @@ protocol.
 - Worked member briefs (explore / build / review) → `references/delegation-prompts.md`
 - Integrating member code (pick order, conflicts, head-posting, role changes) → `references/integration.md`
 - Example roster trees for a project shape → `references/roster-examples.md`
+
+## Bundled scripts
+
+- `scripts/crew-run` — test-run gate: concurrency cap, `--class` serialization, RAM floor, disk TMPDIR (§6)
+- `scripts/stall-check` — unread/no-deliverable/bg-running signals per member (§5)
+- `scripts/inbox.py` — inbox send / `consume --match` / list (§5)
+- `scripts/pick.sh` — scripted cherry-pick with lockfile + pyproject conflict resolution (`references/integration.md`)

@@ -1,0 +1,82 @@
+#!/usr/bin/env bash
+# crew-run — gate and serialize crew test runs so parallel work can't exhaust
+# the machine.
+#
+#   crew-run [--class NAME] -- CMD [ARGS...]
+#
+# - Refuses to start when MemAvailable < CREW_MIN_FREE_MB (default 3072).
+#   MemAvailable, not MemFree: free RAM looks tiny under cache pressure while
+#   plenty is reclaimable, and a gate keyed on MemFree refuses constantly.
+# - At most CREW_MAX_RUNS (default 3) runs at once; extras queue on slot
+#   locks. flock locks die with their holder — no stale slots after a kill.
+# - --class NAME serializes runs of one named heavy class (e.g. an
+#   objective's full suite): one at a time, still counting against
+#   CREW_MAX_RUNS. The brief names the class; the script enforces it.
+# - TMPDIR is redirected to CREW_TMPDIR (default .crew/tmp) — disk, never the
+#   RAM-backed /tmp. A tmpfs worktree is RAM a run holds hostage.
+#
+# Exit: the command's own code; 2 usage; 3 refused by the RAM gate.
+
+set -uo pipefail
+
+MAX_RUNS=${CREW_MAX_RUNS:-3}
+MIN_FREE_MB=${CREW_MIN_FREE_MB:-3072}
+RUNDIR=${CREW_RUNDIR:-.crew/run}
+TMPDIR_ROOT=${CREW_TMPDIR:-.crew/tmp}
+CLASS=""
+
+usage() { echo "usage: crew-run [--class NAME] -- CMD [ARGS...]" >&2; exit 2; }
+
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --class)   CLASS=${2:?"--class needs a name"}; shift 2 ;;
+    --class=*) CLASS=${1#--class=}; shift ;;
+    --)        shift; break ;;
+    -*)        usage ;;
+    *)         break ;;
+  esac
+done
+[ $# -eq 0 ] && usage
+
+if [ -r /proc/meminfo ]; then
+  avail_kb=$(awk '/^MemAvailable:/ {print $2}' /proc/meminfo)
+  if [ -n "$avail_kb" ] && [ "$avail_kb" -lt "$((MIN_FREE_MB * 1024))" ]; then
+    echo "crew-run: refused — MemAvailable $((avail_kb / 1024))MB under the ${MIN_FREE_MB}MB floor" >&2
+    exit 3
+  fi
+fi
+
+have_flock=1
+command -v flock >/dev/null 2>&1 || have_flock=0
+if [ "$have_flock" -eq 0 ]; then
+  echo "crew-run: WARNING no flock — running WITHOUT the concurrency cap" >&2
+fi
+
+if [ "$have_flock" -eq 1 ]; then
+  mkdir -p "$RUNDIR"
+  if [ -n "$CLASS" ]; then
+    exec {class_fd}>"$RUNDIR/class-$CLASS.lock"
+    flock "$class_fd" || { echo "crew-run: class lock failed" >&2; exit 1; }
+  fi
+  slot_fd=""
+  for ((i = 1; i <= MAX_RUNS; i++)); do
+    exec {fd}>"$RUNDIR/slot-$i" || continue
+    if flock -n "$fd"; then slot_fd=$fd; break; fi
+    exec {fd}>&-
+  done
+  if [ -z "$slot_fd" ]; then
+    echo "crew-run: all $MAX_RUNS slots busy — queuing" >&2
+    exec {slot_fd}>"$RUNDIR/slot-1"
+    flock "$slot_fd" || { echo "crew-run: slot lock failed" >&2; exit 1; }
+  fi
+fi
+
+mkdir -p "$TMPDIR_ROOT"
+TMPDIR=$(cd "$TMPDIR_ROOT" && pwd)
+export TMPDIR
+
+echo "crew-run: start $(date +%T) class=${CLASS:-none} cmd: $*" >&2
+"$@"
+rc=$?
+echo "crew-run: exit $rc $(date +%T) cmd: $*" >&2
+exit "$rc"

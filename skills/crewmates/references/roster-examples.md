@@ -44,6 +44,27 @@ the lead. Leads earn their seat by coordinating ≥ 2 members.
 Temps hang off this tree without entering it: a one-shot to rename a prop
 across 40 files is a `run_subagent` call, not a seat.
 
+## Test team (heavy suite)
+
+For a project whose test runs are heavy enough to need a budget: a test
+lead owns `crew-run` and answers VERIFY requests from the integrator
+(`references/integration.md`), with two testers executing scoped runs.
+
+```json
+{"name": "main", "role": "root lead", "spawn": "standing", "teammates": [
+  {"name": "builder",   "role": "writes under src/ and tests/", "spawn": "standing"},
+  {"name": "test-lead", "role": "owns crew-run, answers VERIFY requests", "spawn": "standing", "teammates": [
+    {"name": "tester-1", "role": "executes scoped runs", "spawn": "standing"},
+    {"name": "tester-2", "role": "executes scoped runs", "spawn": "standing"}
+  ]},
+  {"name": "reviewer",  "role": "verifies diffs before merge", "spawn": "standing"}
+]}
+```
+
+Two testers ≈ `crew-run`'s default cap of 3 runs — the lead's own
+verification run gets the third slot. A bigger test team just queues
+longer; don't grow it past what the machine budget allows.
+
 ## Research / writing project (depth 1, mixed spawn)
 
 ```json

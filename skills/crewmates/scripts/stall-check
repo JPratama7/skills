@@ -1,0 +1,126 @@
+#!/usr/bin/env python3
+"""stall-check — per-member stall signals for the lead's audit loop.
+
+  stall-check [MEMBER ...] [--dir .crew] [--runner REGEX]
+              [--deliverable NAME=PATH ...] [--pid NAME=PID ...]
+
+Emits one line per member: `NAME: sig1, sig2` or `NAME: clean`.
+
+Signals:
+  unread          inbox file non-empty (file check)
+  no-deliverable  declared path absent (only when --deliverable gives one)
+  bg-running      a descendant of the member's process matches --runner.
+                  Member root = the herdr pane's foreground process (from
+                  .crew/panes.txt `name<TAB>pane-id`), else --pid NAME=PID.
+
+The runner regex matches the command line, so `pytest` catches `uv run
+pytest`; matching `uv` alone flags unrelated uv commands — the bug this
+signal replaces. Tail-based signals (question, api-error) still come from
+`tail` per the comms map; idle panes are not finished work.
+"""
+
+import argparse
+import json
+import os
+import re
+import subprocess
+import sys
+
+DEFAULT_RUNNER = r"pytest|vitest|jest|cargo test|go test"
+
+
+def pane_root_pid(pane_id: str) -> int | None:
+    try:
+        out = subprocess.run(
+            ["herdr", "pane", "process-info", "--pane", pane_id],
+            capture_output=True, text=True, timeout=15,
+        )
+        info = json.loads(out.stdout)["result"]["process_info"]
+        fg = info.get("foreground_processes") or []
+        return fg[0]["pid"] if fg else info.get("shell_pid")
+    except Exception:
+        return None
+
+
+def load_members(args) -> dict[str, int | None]:
+    roots: dict[str, int | None] = {}
+    pid_map = dict(p.split("=", 1) for p in args.pid)
+    panes: dict[str, str] = {}
+    panes_file = os.path.join(args.dir, "panes.txt")
+    if os.path.exists(panes_file):
+        for line in open(panes_file):
+            parts = line.rstrip("\n").split("\t")
+            if len(parts) >= 2:
+                panes[parts[0]] = parts[1]
+    for name in args.members:
+        if name in pid_map:
+            roots[name] = int(pid_map[name])
+        elif name in panes:
+            ident = panes[name]
+            roots[name] = int(ident) if ident.isdigit() else pane_root_pid(ident)
+        else:
+            roots[name] = None
+    return roots
+
+
+def descendants_matching(root: int, pattern: re.Pattern) -> list[str]:
+    out = subprocess.run(
+        ["ps", "-eo", "pid,ppid,args"], capture_output=True, text=True
+    ).stdout
+    children: dict[int, list[tuple[int, str]]] = {}
+    for line in out.splitlines()[1:]:
+        parts = line.split(None, 2)
+        if len(parts) == 3:
+            children.setdefault(int(parts[1]), []).append((int(parts[0]), parts[2]))
+    hits, stack = [], list(children.get(root, []))
+    while stack:
+        pid, args = stack.pop()
+        if pattern.search(args):
+            hits.append(f"{pid} {args[:80]}")
+        stack.extend(children.get(pid, []))
+    return hits
+
+
+def main() -> int:
+    p = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    p.add_argument("members", nargs="*")
+    p.add_argument("--dir", default=".crew")
+    p.add_argument("--runner", default=DEFAULT_RUNNER)
+    p.add_argument("--deliverable", action="append", default=[])
+    p.add_argument("--pid", action="append", default=[])
+    args = p.parse_args()
+
+    if not args.members:
+        inbox_dir = os.path.join(args.dir, "inbox")
+        if os.path.isdir(inbox_dir):
+            args.members = sorted(f[:-3] for f in os.listdir(inbox_dir) if f.endswith(".md"))
+        if not args.members:
+            sys.exit("stall-check: no members given and no inbox dir to derive them from")
+
+    deliverables = dict(d.split("=", 1) for d in args.deliverable)
+    roots = load_members(args)
+    pattern = re.compile(args.runner)
+    worst = 0
+
+    for name in args.members:
+        sigs = []
+        inbox = os.path.join(args.dir, "inbox", f"{name}.md")
+        if os.path.exists(inbox) and os.path.getsize(inbox) > 0:
+            sigs.append("unread")
+        d = deliverables.get(name)
+        if d and not os.path.exists(d):
+            sigs.append("no-deliverable")
+        root = roots.get(name)
+        if root is None:
+            sigs.append("no-process-handle")
+        else:
+            hits = descendants_matching(root, pattern)
+            if hits:
+                sigs.append("bg-running[" + "; ".join(hits[:3]) + "]")
+                worst = 1
+        print(f"{name}: {', '.join(sigs) if sigs else 'clean'}")
+    return worst
+
+
+if __name__ == "__main__":
+    sys.exit(main())

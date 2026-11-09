@@ -6,19 +6,29 @@ take the file fallback. The protocol never changes: append before
 notify, subject not body, inbox-first on every wake. Only the
 doorbell differs.
 
+Resolution order is native tools first, herdr second: a harness's own
+spawn/message tools beat pane commands where they exist. `HERDR_ENV=1`
+only *suggests* herdr — verify it answers (`command -v herdr`, then a
+cheap `herdr agent list`); the env var survives dead servers, and a
+dead herdr means the file fallbacks, not dead commands.
+
 ## Herdr panes (`HERDR_ENV=1`)
 
 | primitive | command |
 |-----------|---------|
-| `spawn`   | `herdr pane split --current --direction right --cwd "$PWD" --no-focus` → `.result.pane.pane_id`, then `herdr agent start <name> --kind devin --pane <id> -- --model <defaults.model>` |
-| `notify`  | `herdr agent prompt <name> "mail <from>: <subject>"` |
+| `spawn`   | `herdr pane split --current --direction right --cwd "$PWD" --no-focus` → `.result.pane.pane_id`, then `herdr agent start <name> --kind <defaults.kind> --pane <id> -- --model <defaults.model>` |
+| `notify`  | claude-kind: `SendMessage` to the member's session name (from `panes.txt`); other kinds / fallback: `herdr agent prompt <name> "<from> → <to>: <subject>"`. Never `send-keys`/`send-text` into a pane a person uses |
 | `tail`    | `herdr agent read <name> --source recent-unwrapped --lines 120` |
-| `wait`    | `herdr agent wait <name> --until <idle\|working\|blocked\|done> --timeout <ms>` |
+| `wait`    | `herdr agent wait <name> --until idle --until done --timeout <ms>` — repeat `--until` per state; a member already `done` misses an idle-only wait. Check the output for an `error` key: failures return as JSON, not exit codes |
 | `probe`   | `herdr agent get <name>` / `herdr agent list` |
 | `signal`  | `herdr notification show "<title>" --body "<text>"` |
 
-- Herdr names survive restarts — they ARE the stable identity; this
-  harness doesn't need `panes.txt`.
+- Herdr names survive restarts — they ARE the stable identity for
+  `agent prompt`/`agent wait`. But `SendMessage` addresses claude
+  sessions by session name, so a SendMessage crew still keeps
+  `panes.txt` — mapping each member to its session (root first,
+  builders from worktree-named sessions, the rest register at boot;
+  SKILL.md §6).
 - `agent prompt --wait` doubles as dispatch-confirm: it fails
   `agent_prompt_stalled` when no activity follows submission, and
   `agent_blocked` when a permission dialog holds the pane.
@@ -27,6 +37,13 @@ doorbell differs.
   another session's prompt.
 - Pane agents can spawn — sub-leads start their own teammates. Keep
   agent panes ≤4 per tab; a fifth opens a second tab.
+- herdr can exit 0 on bad arguments and prints usage instead of
+  failing — check the JSON result (`"changed":true`, an `error` key),
+  never the exit code.
+- Regrouping panes: `herdr pane move <id> --tab <tab_id> --target-pane
+  <id> [--split right|down]` — `--target-pane` requires `--tab`. A
+  lead-plus-builders layout: lead pane left, builders moved right then
+  split down.
 
 ## Devin builtin (`run_subagent`)
 

@@ -61,6 +61,9 @@ next member skips the search.
 > **Scope:** you may create/edit files under `src/routes/`, `src/services/`,
 > and `tests/`. Do not touch `src/middleware/session.ts`.
 >
+> **Tests:** `crew-run -- pytest tests/routes/test_sessions.py` — scoped to
+> the new test file; do not run the full suite.
+>
 > **Output contract:** List files changed, paste the test output showing
 > pass/fail counts, and flag anything you assumed that isn't in this brief.
 >
@@ -115,3 +118,6 @@ scannable.
 - **Output contracts are checkable.** Each one could be graded mechanically:
   did it return the right shape, within the size cap, with the evidence
   requested?
+- **Test scope is named exactly.** A brief that says "run tests" gets a
+  full-suite run — hours on a heavy project. Name files, dirs, or a
+  `-k`/`-m` filter; "full suite" only when the user asked.

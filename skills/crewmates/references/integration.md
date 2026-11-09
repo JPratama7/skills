@@ -3,15 +3,19 @@
 Loaded on demand — read when you are the member who integrates (the
 `commits` role in the board's `ROLES` line).
 
-One integration branch, one scripted pick loop. Write `.crew/pick.sh`
-once — it applies a member's commits onto the integration branch — so
-order and checks stay identical per pick.
+One integration branch, one scripted pick loop. Use the skill's
+`scripts/pick.sh` — it applies a member's commits onto the integration
+branch, resolving lockfile and pyproject conflicts mechanically and
+stopping on anything else — so order and checks stay identical per
+pick.
 
 ## Order
 
 1. **Baseline first.** Run the suite once on the base commit, in a
-   separate worktree — never check out an old commit in the main tree.
-   Record the failure list: that is the pre-existing set.
+   separate worktree on disk — never in /tmp (a tmpfs worktree and its
+   venv are RAM a run holds hostage), and never check out an old
+   commit in the main tree. Record the failure list: that is the
+   pre-existing set.
 2. **Pick per member, in dependency order.** One member's batch at a
    time. Run the suite after every batch — never once at the end.
 3. **Diff against baseline, not zero.** A batch is clean when its
@@ -34,6 +38,11 @@ Shared registry files conflict by design:
 The moment a batch verifies, mail the new head SHA to every lead so
 they branch from it. Long merge gates land later as their own commit
 on top — never hold a verified head while leads wait.
+
+When a test team exists (`references/roster-examples.md`), the
+integrator doesn't run the suite itself: mail `VERIFY <trial-sha>` to
+the test lead, get back a `VERIFIED <trial-sha>` line, then confirm
+`git diff --stat <trial> HEAD` is empty before posting the head.
 
 ## Carry fixes down
 
