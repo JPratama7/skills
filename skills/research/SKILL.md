@@ -1,6 +1,6 @@
 ---
 name: research
-version: 1.10.0
+version: 1.11.0
 description: Research a question by reasoning as an evolving graph of sub-questions — ask the user how to execute, decompose the question, explore branches with parallel research agents, merge, score, and prune — then deliver a cited markdown report plus the thought graph that produced it. Use whenever the user wants a topic investigated, facts or docs/API details gathered, a comparison made, contradictions between sources resolved, or reading legwork delegated — even if they just say "look into X", "find out whether", "dig into", "research this", or "how does X actually work".
 ---
 
@@ -35,6 +35,12 @@ telegraphic, decision-ready — never raw output.
    - *Breadth* — how many branches to fan out (suggest 3-5)
    - *Depth* — `quick` (1-2 primary sources per branch) / `standard` /
      `deep` (follow secondary threads)
+   - *Workers* — what runs a spawned branch: cheapest capable worker
+     first — a free model on a headless agent beats billing five full
+     sessions. Flag the cost/privacy trade-off inside the ask (a free
+     model may sit outside a zero-retention boundary the user cares
+     about). Whatever is picked gets its push channel learned once and
+     cached in memory — how → `references/agent-profiles.md`.
    - *Background* — what the user already knows and the context that
      should frame the report: why the question matters, prior work,
      constraints, things they refuse to rely on. Feeds the report's
@@ -68,7 +74,15 @@ telegraphic, decision-ready — never raw output.
    branches carry the `research-branch` profile — spec and instantiation
    in `references/agent-profiles.md`. Cap spawned agents at 5 in flight;
    past that, queue the branch and spawn it when a slot frees — more in
-   flight buys latency, not coverage. Once a branch reports, do not
+   flight buys latency, not coverage.
+
+   Branches report by **push**, not poll: the worker drops its findings
+   at its file and rings you itself — you integrate each report as it
+   lands instead of looping on reads. A poll spends your turn to learn
+   nothing the push won't deliver. Liveness stays yours: a branch silent
+   past its expected window earns one probe, not a watch. An unproven
+   channel earns a canary branch before the real fan-out. Once a branch
+   reports, do not
    re-read its sources: compile from its findings and spot-check only the
    claims that decide the root answer — inline for one or two, a single
    `claim-verifier` agent when the load-bearing set is larger.
@@ -98,6 +112,13 @@ Findings: claim — primary source URL — confidence
 New questions: <child-node candidates, or none>
 Contradictions: <conflicts, or none>
 ```
+
+Delivery is two parts, in order: the findings block lands at the
+branch's file — `.research/<slug>/branch-<n>.md` — then the worker
+pushes a one-line ping to the coordinator (`<branch> → <lead>: findings
+at <path>`). The file is the store; the ping is only a doorbell and
+never carries the body. A harness with no push channel falls back to
+one blocking `wait`, not a read loop.
 
 `New questions` feeds step 6 — evaluate each before aggregating. You keep
 the graph and run grow/score/synthesize; branches never see each other's
@@ -151,15 +172,15 @@ Sections:
 
 ## Memory
 
-`.memory/memory.json` → `research`: default mode/depth and report dir, so
-future runs start from the user's usual setup. Run state stays in
-`.research/<slug>/`.
+`.memory/memory.json` → `research`: default mode/depth, report dir, and
+the resolved `worker` (substrate, model, push target), so a repeat run
+skips re-detection. Run state stays in `.research/<slug>/`.
 
 ## Reference files (load on demand)
 
 - Writing the report → `references/report-template.md`
 - De-slopping report prose before saving → `references/prose-hygiene.md`
-- Spawning a branch agent or batch-verifying claims → `references/agent-profiles.md`
+- Spawning a branch agent, choosing its substrate, or batch-verifying claims → `references/agent-profiles.md`
 
 ## Anti-patterns
 
@@ -177,6 +198,11 @@ future runs start from the user's usual setup. Run state stays in
   findings and spot-check only what decides the root.
 - **Ask-spam** — a checkpoint pushed right is one ask; splitting mode,
   breadth, and depth into separate questions is a drip-feed.
+- **Poll-loop** — re-reading a spawned branch on a timer to see whether
+  it finished; the push is the worker's job, your turn is for
+  integrating.
+- **Body-in-channel** — the ping carrying findings; the file is the
+  store, the ping names the path.
 - **Raw checkpoint** — a checkpoint that dumps branch findings or draft
   output where a brief belongs.
 - **Silent pruning** — a dropped branch nobody can see is a coverage hole.
