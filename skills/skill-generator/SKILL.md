@@ -6,41 +6,39 @@ description: Create, evaluate, improve, and package SKILL.md-based agent skills.
 
 # Skill Generator
 
-Build and ship skills. Keep repeatable work deterministic in stdlib scripts; reserve model judgment for subjective decisions.
+Build and ship skills. Repeatable work goes in deterministic stdlib scripts; model judgment is reserved for subjective decisions.
 
 ## Workflow
 
-1. Grill the user into an implementer-ready spec (see Capturing intent): requested outcome, output, target harness (default: current), and objective vs. subjective criteria.
-2. For a new skill or substantial capability, use `references/design.md`; otherwise make the requested change directly.
-3. Draft `SKILL.md` in concise, imperative, why-focused language. Keep it under ~500 lines; move depth to indexed, on-demand references.
-4. Define 2–3 evals using the documented schema. Separate mechanical `assertions` from qualitative `review_criteria`; keep `expected_output` evaluator-only.
-5. Before launching runs, discover how the target harness exports LLM statistics (tokens, duration, model id) — run notifications, transcript/export files, telemetry config, CLI stats commands; verify on a real run and cache the mechanism beside the eval artifacts (see `references/evals.md`). Then compare candidate with baseline (new skill: no skill; revision: pre-edit snapshot) using fresh isolated agents, identical prompts, and writes limited to each run's `outputs/`. Never expose answer keys. Use the requested model exactly; if unavailable, stop rather than substitute. Record model, token, and timing data.
-6. Run deterministic checks first and preserve their scores. Use a fresh verifier for independent audits; never let it overwrite canonical results. Aggregate and review, then fix general causes and repeat until satisfied, feedback is empty, or gains stall.
-7. Validate/package when requested or appropriate; update an existing repository index.
+1. Grill the user into an implementer-ready spec (Capturing intent below).
+2. New skill or substantial capability → `references/design.md`; otherwise make the change directly.
+3. Draft `SKILL.md`: concise, imperative, why-focused; under ~500 lines — depth goes in indexed on-demand references.
+4. Define 2–3 evals per `references/evals.md`: mechanical `assertions` separate from qualitative `review_criteria`; `expected_output` stays evaluator-only.
+5. Discover how the harness exports LLM stats (tokens, duration, model id): notifications, transcripts/exports, telemetry config, CLI stats. Verify on a real run; cache the mechanism beside the eval artifacts. Compare candidate vs. baseline (new skill: none; revision: pre-edit snapshot) with fresh isolated agents, identical prompts, writes confined to each run's `outputs/`. Never expose answer keys. Use the requested model exactly — if unavailable, stop rather than substitute. Record model, token, timing data.
+6. Run deterministic checks first and preserve their scores; a fresh verifier does independent audits and must not overwrite canonical results. Aggregate, review, fix general causes, repeat until satisfied, feedback empty, or gains stall.
+7. Validate/package when requested; update an existing repository index.
 
 ## Capturing intent
 
-Grill the spec out of the user; don't wait for it to arrive. A spec is done when an implementer could draft the skill without asking a single question — outcome, deliverable, trigger context, harness, objective vs. subjective criteria, scope, and anti-features all settled.
+Spec done = implementer could draft without asking: outcome, deliverable, trigger context, harness, objective vs. subjective criteria, scope, anti-features.
 
-- Ask in rounds, a round at a time, with a recommended answer attached to every question. The user confirms or corrects instead of composing answers from scratch — and each recommendation forces your model of their intent into the open where it can be falsified.
-- Look up facts before asking — inspect the repo, harness, and existing skills yourself. Reserve questions for decisions only the user can make.
-- Keep the spec stateful: maintain it in the `.local/` scratch as answers resolve, so a paused session resumes where it stopped.
+- Ask in rounds with a recommended answer on every question — the user confirms or corrects, and each recommendation exposes your model of their intent to falsification.
+- Look up facts yourself first (repo, harness, existing skills); reserve questions for decisions only the user can make.
+- Keep the spec in `.local/` scratch so a paused session resumes.
 
 ## Objective checks
 
-Before runs, use the documented schema (include empty fields) and define one supported assertion per objective requirement. Assert each required output exists. Use flat `{id,type,file}` checks only. For exact headers, rows, and values, use anchored regex or parsed equality; substrings admit near-misses. Validate JSON and run `scripts/check_outputs.py`. Keep qualitative criteria out of scores and `expected_output` out of prompts. Full schema and types: `references/evals.md`.
+Documented schema (include empty fields); one supported assertion per objective requirement; assert every required output exists. Flat `{id,type,file}` only; exact headers/rows/values via anchored regex or parsed equality — substrings admit near-misses. Validate JSON, run `scripts/check_outputs.py`. Qualitative criteria stay out of scores; `expected_output` stays out of prompts. Types: `references/evals.md`.
 
 ## Grading
 
-State `Role: coordinator.` Never grade your own runs inline when an independent verifier is available. For objective evals, deterministic checks own `grading.json`; fresh verifiers write separate audits, diagnoses, and per-config checks. For subjective-only evals, delegate grading or request human review, labeling judgments clearly. Aggregate with `scripts/aggregate_benchmark.py`; build a review with `scripts/make_review.py`, or show a table if no browser is available.
+State `Role: coordinator.` Never grade your own runs inline when an independent verifier is available. Objective evals: deterministic checks own `grading.json`; fresh verifiers write separate audits, diagnoses, per-config checks. Subjective-only: delegate grading or request human review, labeling judgments clearly. Aggregate via `scripts/aggregate_benchmark.py`; review via `scripts/make_review.py` (or a table if no browser).
 
 Use diagnoses and feedback to fix general causes; update verifier checks when evidence exposes a gap. Snapshot the pre-edit skill before each iteration.
 
 ## Memory
 
-`.memory/memory.json` → `skill-generator`: target harness and
-generator/evaluator model ids. Eval artifacts stay in the repo's gitignored
-`.local/` scratch — the store holds config only.
+`.memory/memory.json` → `skill-generator`: target harness and generator/evaluator model ids. Eval artifacts stay in gitignored `.local/` — config only.
 
 ## References (load on demand)
 

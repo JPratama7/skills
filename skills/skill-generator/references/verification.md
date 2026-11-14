@@ -1,60 +1,26 @@
-# Independent Verification
+# Verification
 
-Adapted from CoEvoSkills (Zhang et al., COLM 2026): grading is done by a fresh
-agent that never sees the skill, the expected output, or the conversation that
-produced the run. Independence is the point — a grader that wrote the skill
-tends to pass its own blind spots.
+Grading by a fresh agent that never saw the skill, expected output, or the producing conversation (CoEvoSkills, Zhang et al., COLM 2026) — a grader that wrote the skill passes its own blind spots.
 
-## When to verify
+One verifier per run, after `outputs/` exists. Subjective evals with no executable checks: grader/comparator roles in `agent-roles.md` or human review.
 
-Spawn one verifier per run after `outputs/` exists. For subjective evals where
-executable checks don't apply, use the grader/comparator roles in
-`agent-roles.md` or human review instead.
+## Boundary
 
-## Information boundary
+Give **only**: eval prompt (verbatim), input paths (`files`), the run's `outputs/` dir, assertion list (minimum contract).
 
-Give the verifier **only**:
+Never give — nor allow reading: skill directory, `expected_output` (protected-answer analog), run transcript, this conversation, prior verdicts. Judges output, not implementation; skill's self-claims ("the script validates X") are confirmation bias, not verification.
 
-- The eval prompt, verbatim
-- Input file paths (the eval's `files`)
-- The run's `outputs/` dir
-- The assertion list (the minimum contract — it may check more)
+## Workflow
 
-Never give it, and forbid it from reading if it finds them:
+Encode in the subagent prompt (template below).
 
-- The skill directory or anything in it
-- `expected_output` — that is the protected-answer analog
-- The run transcript, this conversation, prior grading verdicts
-
-It judges the output, not the implementation. Evidence derived from the skill's
-own claims ("the script validates X") is confirmation bias, not verification.
-
-## Verifier workflow
-
-Encode this in the subagent prompt (template below).
-
-1. **Requirements** — before opening outputs, write a numbered R1..Rn list of
-   every verifiable requirement in the prompt and assertion list. Be
-   exhaustive: if the prompt says it, it gets a number.
-2. **Inputs** — inspect input files. Derive checkable properties
-   independently: entity names/IDs, counts, value ranges, formats,
-   invariants. These are the sources of truth for expected values.
-3. **Outputs** — read the produced artifacts.
-4. **Audit checks** — first run the eval's deterministic assertion suite
-   unchanged and preserve its results as the canonical machine score. Then
-   derive additional checks independently and write them to
-   `<scratch>/<skill>-verifier/eval-<id>/<config>/checks.py` (one directory
-   per run configuration — never share a checks file across arms). Where
-   assertions are executable, reuse the deterministic checker rather than
-   reimplementing it; add new checks only for uncovered requirements. Layer
-   checks: existence → parse → schema → stated constraints → recompute from
-   inputs → completeness → anti-fabrication. Map each requirement to a check.
-5. **Run** — execute the checks read-only. Never alter outputs. Report
-   deterministic suite results separately from verifier-added audit findings.
-6. **Reflect** — re-read the prompt. Identify uncovered requirements and
-   assertions that accept clearly wrong outputs. Recommend contract changes
-   for future eval runs; do not change the current machine score retroactively.
-7. **Diagnose** — for each failed check, a 3–5 line block:
+1. **Requirements** — before opening outputs, numbered R1..Rn of every verifiable requirement in prompt + assertions. Prompt says it → gets a number.
+2. **Inputs** — inspect files; independently derive checkable properties: entity names/IDs, counts, ranges, formats, invariants. Sources of truth for expected values.
+3. **Outputs** — read the artifacts.
+4. **Audit checks** — run the deterministic assertion suite unchanged first; keep its results as the canonical machine score. Derive extra checks to `<scratch>/<skill>-verifier/eval-<id>/<config>/checks.py` (one dir per config — never share a checks file across arms). Executable assertions → reuse the deterministic checker; add checks only for uncovered requirements. Layer: existence → parse → schema → stated constraints → recompute from inputs → completeness → anti-fabrication. Map every requirement to a check.
+5. **Run** — read-only; never alter outputs. Report deterministic results separately from verifier-added audit findings.
+6. **Reflect** — re-read prompt; find uncovered requirements and assertions that accept clearly wrong outputs. Recommend contract changes for future runs; never change this run's machine score retroactively.
+7. **Diagnose** — per failed check, 3–5 line block:
 
    ```markdown
    ## <check name>
@@ -64,46 +30,23 @@ Encode this in the subagent prompt (template below).
    - **Fix suggestion**: one concrete action
    ```
 
-   Write these to `<run_dir>/diagnosis.md`. This file is the feedback channel
-   the improve step consumes — specific beats vague.
+   Write to `<run_dir>/diagnosis.md` — improve-step feedback channel. Specific beats vague.
 
-Fail closed: if a check can't be performed read-only, fail it with the reason
-stated. Never modify outputs to make verification easier.
+Fail closed: unperformable read-only → fail with reason stated. Never modify outputs to ease verification.
 
 ## Outputs
 
-- `<run_dir>/verifier_audit.json` for objective evals — findings the verifier
-  derived beyond the deterministic suite, clearly labeled as audit checks.
-  Do not overwrite or revise deterministic `<run_dir>/grading.json`.
-- `<run_dir>/grading.json` for subjective-only evals — standard schema
-  (`expectations[]` with `text`/`passed`/`evidence` + `summary`), with each
-  judgment criterion identified as subjective.
-- `<run_dir>/diagnosis.md` — only when something failed.
-- `eval_feedback` in the audit or subjective grading — critique weak or missing
-  assertions for a future iteration; do not back-edit this run's score.
+- `<run_dir>/verifier_audit.json` (objective) — verifier-derived findings beyond the deterministic suite, labeled audit checks. Never overwrite/revise deterministic `<run_dir>/grading.json`.
+- `<run_dir>/grading.json` (subjective-only) — schema `expectations[]` (`text`/`passed`/`evidence`) + `summary`; judgment criteria identified as subjective.
+- `<run_dir>/diagnosis.md` — only on failure.
+- `eval_feedback` in audit/subjective grading — weak/missing assertions for next iteration; do not back-edit this run's score.
 
 ## Co-evolving checks
 
-Persist verifier checks across iterations at `<scratch>/<skill>-verifier/`:
+Persist at `<scratch>/<skill>-verifier/`: `eval-<id>/<config>/checks.py` (per config, refined per iteration), `notes.md` (blind spots). Arms (with_skill / old_skill) keep separate checks — a shared path races; the second verifier inherits wrong-arm-calibrated checks.
 
-```
-.<skill>-verifier/
-├── eval-<id>/<config>/checks.py  # per run configuration, refined each iteration
-└── notes.md               # known blind spots of the checks
-```
-
-The two arms of one eval (e.g. with_skill / old_skill) keep separate
-checks: a shared path races, and the second verifier inherits checks
-calibrated for the wrong arm's expected behavior.
-
-- Iteration 1: verifier writes checks from scratch.
-- Iteration N+1: it loads the persisted checks and revises where the task
-  changed or a prior verdict was wrong — never regenerates blindly.
-- When user feedback or a canonical check contradicts a verifier verdict (a
-  "pass" that's actually wrong, or vice versa), treat it as a verifier bug:
-  update the checks so they would have caught it. The checks co-evolve with
-  the skill — this is what stops the loop from quietly accepting
-  reward-hacked outputs.
+- Iteration 1: from scratch. Iteration N+1: load persisted checks, revise where task/verdicts changed — never blindly regenerate.
+- User feedback or canonical check contradicting a verdict ("pass" actually wrong, or vice versa) = verifier bug: update checks to catch it. Checks co-evolve with the skill — stops the loop from accepting reward-hacked outputs.
 
 ## Subagent prompt template
 

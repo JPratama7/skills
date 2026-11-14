@@ -1,13 +1,13 @@
 # New-skill design workflow
 
-Use this only for a new skill or a revision that adds a substantial capability. For ordinary improvements, capture the requested outcome and run the eval loop.
+New skill / substantial-capability revision only; else capture outcome, run eval loop.
 
-1. **Ground the problem.** Identify the pain point and ask for 2–3 concrete examples of inputs, deliverables, or manual work. If none exist, ask one focused question for a representative anonymized or synthetic example. Do not design or draft before there is an example to analyze.
-2. **Check relevant coverage.** Inspect names and descriptions of likely skills/tools in the current repository or harness. For each plausible asset, decide tentatively whether to reuse, extend, invoke, or keep separate. Do not inspect unrelated implementations or imply an asset was inspected when only its description is known.
-3. **Confirm the gap.** Summarize pain, coverage, and missing capability; ask whether that gap is correct. Stop for confirmation before proposing architecture.
-4. **Analyze examples.** Extract repeated steps, decisions, and failure points. Make mechanical work deterministic with scripts or validators where practical; reserve skill instructions for judgment and ambiguity.
-5. **Compare approaches.** Offer 2–3 options, recommend one, and state deterministic coverage, model judgment, trade-offs, and reused/separate assets. After selection, define table stakes, differentiators, and anti-features.
-6. **Sketch minimal architecture.** State each asset's responsibility, invocation, inputs, outputs, and behavior for unavailable, malformed, or inconclusive inputs. Separate confirmed interfaces from assumptions; defer nonessential work.
-7. **Hand off to drafting.** Recap the agreed problem, examples, scope, and architecture briefly in chat or scratch. Create a handoff file only if it helps resume or coordinate work.
+1. **Ground.** Find pain; ask 2–3 examples of inputs, deliverables, manual work. None → one focused question for a representative anonymized/synthetic example. No design before an example exists.
+2. **Check coverage.** List candidates by name/description; per asset, tentatively reuse / extend / invoke / keep separate. Don't inspect unrelated implementations; don't imply inspection when only description is known.
+3. **Confirm gap.** Recap pain, coverage, missing capability; ask if right. Stop before architecture.
+4. **Analyze.** Extract steps, decisions, failure points. Mechanical work → deterministic scripts/validators; skill text for judgment/ambiguity.
+5. **Compare.** 2–3 options; recommend one with deterministic coverage, model judgment, trade-offs, reused vs separate assets. Then table stakes, differentiators, anti-features.
+6. **Sketch architecture.** Minimal. Per asset: responsibility, invocation, inputs, outputs, behavior on unavailable/malformed/inconclusive input. Separate confirmed interfaces from assumptions; defer nonessential work.
+7. **Hand off.** Recap problem, examples, scope, architecture in chat/scratch; handoff file only if it aids resume/coordination.
 
-Grill in rounds, a recommended answer attached to every question; look up discoverable facts instead of asking, and validate major decisions before drafting. For every task, identify trigger context, desired output, objective vs subjective evaluation, and target harness (default to the current harness). The interview is done when an implementer could draft without a single remaining question.
+Grill in rounds; recommended answer per question; look up discoverable facts instead of asking; validate major decisions before drafting. Per task: trigger context, desired output, objective vs subjective evaluation, target harness (default: current). Interview is done when an implementer could draft with zero remaining questions.
