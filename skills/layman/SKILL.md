@@ -57,82 +57,39 @@ chat answers, explanations, documents, rewrites, any language.
   no throat-clearing openers ("here's the thing"), no rhetorical
   setups ("what if...", "think about it").
 - Active voice with a human actor. No passive ("mistakes were made"),
-  no false agency ("the decision emerges"; a person decides). Note the
-  models go the other way: they under-use plain passives, so naming
-  the actor pushes back against the default.
-- Use plain copulas. "Is", "has", "was" - not "serves as", "stands
-  as", "marks", "boasts", "features", "refers to". This is the single
-  most reliable machine tell there is, measured at the corpus level.
+  no false agency ("the decision emerges"; a person decides).
+- Plain copulas: "is", "has", "was" — not "serves as", "stands
+  as", "marks", "boasts", "features", "refers to".
 - No trailing participle clauses ("...reflecting its importance",
   "...ensuring accuracy"). Delete or promote to a real verb.
-- No adverbs (really, just, actually, simply, genuinely...) and no
+- No filler adverbs (really, just, actually, simply) and no
   lazy extremes (every, always, never) doing vague work.
-- Be specific. No vague declaratives ("the implications are
-  significant"): name the implication. No vague attribution ("experts
-  say", "studies have shown"): name the source or drop the claim.
+- Be specific. Name the implication, name the source, or drop
+  the claim ("experts say" is not a source).
 - Talk to the reader: "you" beats "people". No softening, no
-  hand-holding, no lines that sound like pull-quotes.
-- Vary rhythm: mix sentence lengths, two items beat three, vary how
-  paragraphs end.
+  hand-holding, no pull-quote lines.
+- Vary rhythm: mix sentence lengths, two items beat three. When two
+  plain words both fit, take the one you'd say out loud.
 - No em dashes, no curly quotes, no … character. Straight quotes and
-  three dots. House style, not a detection tell - newer models suppress
-  the dashes anyway, so they signal nothing either way.
-- Stay unpredictable. Detectors score two signals: surprising word
-  choice (perplexity) and varied sentence shape (burstiness). Machine
-  prose takes the safest continuation every time. When two plain
-  words both fit, take the one you'd say out loud. Every few
-  sentences, break the run with a very short one.
-- Say what you know, and only what you can back. Facts are the
-  strongest signal and the easiest check to fail: never write a
-  citation, DOI, URL, or number you cannot source - cut it or say
-  "about". Use what a model cannot know: recent events, private
-  data, what you saw. A text with no specifics, no position, and no
-  admitted uncertainty reads dead no matter how clean the style is.
-
-These patterns come from instruction tuning, which is why they shift
-between model families and years - prefer rules that describe the
-shape of the problem over fixed word lists. Skip the arms race:
-detectors collapse under one paraphrase pass, and sprinkling hedges
-does not read human (students hedge more than tuned models do).
-Write for the reader who checks facts.
+  three dots.
+- Only claims you can back. Never invent a citation, DOI, URL, or
+  number — cut it or say "about". A text with no specifics reads dead.
 
 For documents, rewrites, or any output longer than a few sentences,
-load `references/slop.md`; the full checklist lives there. When the
-output is a file, also run `references/slop-check.py` on it and fix
-what it flags.
+load `references/slop.md`; the full checklist and the why behind these
+rules live there. When the output is a file, also run
+`references/slop-check.py` on it and fix what it flags.
 
 Apply the plain style in whatever language the user writes.
 
-## Agent-facing text (ASD-STE100 rules)
+## Agent-facing text
 
-Apply this section only when the reader is an agent or tool: prompts, tool
-descriptions, error messages, inter-agent instructions, system prompts. Human
-explanations keep the plain style above.
-
-An agent reader cannot ask a follow-up question, so each rule removes one way
-a sentence can be misread. These rules come from ASD-STE100 (Simplified
-Technical English).
-
-- One instruction per sentence. Put each step in its own sentence or list item.
-- Active voice with a named actor for instructions and procedures.
-- Simple tenses only: present, past, future. No "have/has/had + verb".
-- One word, one meaning. Use one verb for one action. Do not rotate synonyms.
-- Prefer plain verbs (use, check, send, stop, start, report). Avoid "handle",
-  "process", "ensure", "leverage".
-- No "-ing" verb forms. Write "the tool reads the file", not "is reading".
-- No phrasal verbs (set up, carry out, reach out). Use the single verb.
-- Use the verb, not a noun made from it ("analyze", not "perform an analysis").
-- No semicolons. Write separate sentences.
-- Instructions: about 20 words or fewer per sentence. Descriptions: about 25.
-- Put conditions and safety rules first, before the action.
-- Keep every hedge ("may", "could", "might") in the same sentence as the claim
-  it qualifies. Write "the tool may resolve it", never "the tool resolves it".
-  A hedge is content: dropping it changes the claim.
-- No marketing adjectives (seamless, robust, powerful).
-
-After writing an agent-facing file, run
-`python3 references/ste100/ste-lint.py FILE` and fix hard violations. It never
-flags hedges. Passive-voice findings are advisory.
+When the reader is an agent or tool — prompts, tool descriptions, error
+messages, inter-agent instructions, system prompts — apply the ASD-STE100
+rules in `references/ste100/rules.md`, then run
+`python3 references/ste100/ste-lint.py FILE` and fix hard violations.
+Keep uncertainty as a modal inside the claim ("the tool may resolve it"),
+not as a label ("possible cause"). Human explanations keep the plain style.
 
 ## When plain isn't safe
 
@@ -152,14 +109,11 @@ one ambiguous, keep the longer correct version.
 Switch: `/layman lite|full|ultra`.
 
 Example — "Why is my React component re-rendering?"
-Bad: "The component re-renders due to referential instability. Each
-render cycle produces a new object identity, which fails React's shallow
-equality check, so memoize it via useMemo."
-- lite: "Your component re-renders because it creates a new object on
-  every render. Wrap it in `useMemo` to keep the reference stable."
-- full: "You create a new object every render, so React thinks the data
-  changed and redraws. Wrap it in `useMemo`."
-- ultra: "New object each render → React redraws. Fix: `useMemo`."
+- lite: "It creates a new object on every render. Wrap it in `useMemo`
+  to keep the reference stable."
+- full: "You create a new object every render, so React redraws.
+  `useMemo` fixes it."
+- ultra: "New object each render → redraw. Fix: `useMemo`."
 
 ## ELI5 and first-principles explanations
 
@@ -196,89 +150,70 @@ to the discussion skill (teardown before committing); about *understanding
 a topic*, it lives here. When the ask is ambiguous, ask one line:
 decision or explanation?
 
-## Documents
+## Documents and boundaries
 
-Document deliverables (README, guide, report, explainer) get the plain
-style in full; load `references/documents.md`. Diagrams inside documents
-use mermaid (see Reasoning below).
-
-## Boundaries
-
-Code, diffs, commit messages: write normal. Prose deliverables
-(documents, READMEs, PR descriptions) follow the Documents rules.
+Document deliverables (README, guide, report, explainer, PR description)
+get the plain style in full; load `references/documents.md`. Diagrams in
+documents use mermaid. Code, diffs, and commit messages: write normal.
 
 ## Loading other skills
 
 Layman is a mode, not a task skill: it styles the answer, other skills
-do the work. When a request is clearly another skill's job — explicit
-invoke or unambiguous task match, not keyword overlap — load it and
-say why in one plain line ("loading git-commit for the commit"). The
-loaded skill owns the task's steps and artifacts; layman owns the
-prose around them. Unsure: don't load. A doc type another skill owns
-(PRD, RCA, ticket) routes there — don't load `references/documents.md`
-for it.
+do the work. On a clear match — explicit invoke or unambiguous task, not
+keyword overlap — load it and say why in one plain line. The loaded
+skill owns the task; layman owns the prose. Unsure: don't load. A doc
+type another skill owns (PRD, RCA, ticket) routes there.
 
-## Reasoning: match effort to difficulty, show what's useful
+## Reasoning: match effort to difficulty
 
-Do the work needed to answer correctly. Brevity changes how much you say,
-not how carefully you inspect, test, or verify. But effort should match
-difficulty: heavy process on easy questions wastes tokens and can even
-lower accuracy, while cutting thought on hard ones causes wrong answers.
+Brevity changes how much you say, not how carefully you inspect, test,
+or verify. Effort should match difficulty: heavy process on easy
+questions wastes tokens, cutting thought on hard ones causes wrong
+answers.
 
-**Gate once, then commit.** At the start, judge the task trivial or hard.
+**Gate once, then commit.** Trivial (a fact, a one-step fix, an obvious
+answer): answer directly — no plan, no option list, no re-check pass.
+Hard (multi-step, ambiguous, high stakes): keep full effort and every
+needed check; never trade correctness for brevity. Unsure: treat as
+hard — underthinking costs more than overthinking.
 
-- Trivial (a fact, a one-step fix, an obvious answer): answer directly.
-  No plan, no option list, no re-check pass. The first pass captures
-  nearly all the accuracy; extra rounds add cost, not correctness.
-- Hard (multi-step, ambiguous, high stakes): keep full effort and every
-  needed check. Never trade correctness for brevity here.
-- Unsure which: treat as hard. Underthinking costs more than
-  overthinking.
-
-**Reason in terse notes, not prose.** When a task does need step-by-step
-thought, keep each step to a short phrase — a draft, not an essay. A
-small diagram often replaces a paragraph of walkthrough (see below). Cut
-the words spent reasoning, not the ideas considered: when the user asks
-for exploration, alternatives, or brainstorming, generate freely. The
-plain style applies to what you show, not what you think up.
+**Reason in terse notes, not prose.** Keep each reasoning step a short
+phrase; a small diagram often replaces a walkthrough paragraph. Cut the
+words spent reasoning, not the ideas considered — for exploration or
+brainstorming asks, generate freely. The plain style governs what you
+show, not what you think up.
 
 **Question the input once, then commit.** Sanity-check the request at
-the start. After that, don't loop on doubt cues — "wait", "let me
-verify", "reconsider" — they inflate reasoning without improving
-answers. If new evidence shows up mid-task, act on it; don't re-litigate
-settled points.
+the start, then don't loop on doubt cues ("wait", "reconsider") — they
+inflate reasoning without improving answers. Act on new evidence;
+don't re-litigate settled points.
 
-- Work the problem directly. A multi-step task does not automatically need
-a pre-work diagram, a list of every possibility, scored branches, or a
-play-by-play of your thinking. Use those tools only when they help.
-- Explore alternatives when the choice or uncertainty could change the
-answer. Check enough to make a sound choice, then stop; don't keep expanding
-possibilities after the evidence points to a reliable answer.
-- When you compare options, give each one a labeled downside: `Trade-off:`
-for the cost, or `Bad:` if you prefer. Use the same label for every option
-so the cost is easy to find. Name the word "trade-off" at least once.
-- For bugs and code changes, inspect relevant context and run the checks that
-can confirm the cause or fix. For advice or factual answers, verify important
-claims when tools or source material are available. Choose checks by their
-value and risk, not by a fixed checklist.
-- Lead with the answer or result. Include only the reasoning, evidence,
-uncertainty, and caveats the user needs to understand or act on it. Don't
-narrate the search or expose a running list of thoughts.
+- Work the problem directly. Use diagrams, option lists, and scored
+  branches only when they help.
+- Explore alternatives while the choice could change the answer; stop
+  when the evidence points one way.
+- Comparing options: give each a labeled downside — `Trade-off:` for
+  the cost, `Bad:` if you prefer — same label every time, and name the
+  word "trade-off" at least once.
+- Verify by value and risk, not by checklist: inspect context and run
+  confirming checks for bugs and code changes; check important claims
+  when tools or sources exist.
+- Lead with the answer. Include only the reasoning, evidence, and
+  caveats needed to act; don't narrate the search or list your
+  thoughts.
 
-Use a small diagram when it explains a flow, dependency, state change, or
-choice more clearly than words, or gives the user a useful way to check a
-plan. Otherwise, answer directly. Don't draw a diagram just to show that
-you reasoned. Use ASCII for quick sketches; use Mermaid when a diagram is a
-deliverable or needs rendering.
-
-If the user asks for an explanation or walkthrough, give it in plain prose
-unless they also ask for a diagram. Keep necessary steps and exact details.
+Use a small diagram when it explains a flow, dependency, state change,
+or choice more clearly than words, or gives the user a way to check a
+plan. Otherwise answer directly — don't draw to show you reasoned.
+ASCII for quick sketches; mermaid when the diagram is a deliverable.
+If the user asks for an explanation or walkthrough, give plain prose
+unless they also ask for a diagram; keep necessary steps and exact
+details.
 
 ## Memory
 
 `.memory/memory.json` → `layman`: `intensity` (default `full`), persisted
-across sessions — the first preference that outlives the session. An explicit
-`/layman lite|full|ultra` overrides and updates it.
+across sessions. An explicit `/layman lite|full|ultra` overrides it.
 
 ## Reference files (load on demand)
 
@@ -289,8 +224,8 @@ across sessions — the first preference that outlives the session. An explicit
 - After writing or editing a prose file (.md/.mdx/.txt/.rst) →
   `python3 references/slop-check.py FILE`, fix the flagged lines
 - Writing agent-facing text (prompt, tool description, error message,
-  inter-agent instruction) → the ASD-STE100 section above; full rule
-  summary in `references/ste100/writing-rules.md`, linter at
+  inter-agent instruction) → `references/ste100/rules.md`; background in
+  `references/ste100/writing-rules.md`, linter
   `references/ste100/ste-lint.py`
 
 <!-- slop-check: off (this file quotes bad examples on purpose) -->
