@@ -20,8 +20,9 @@ they compound, not to assign a grade. Scheduled long-term spacing lives in
    evaluate a question they haven't attempted.
 4. Feedback after each answer: correct errors specifically, not
    generically. An assisted or wrong answer updates the topic's Needs
-   reinforcement and shortens its next-due gap; a clean independent
-   answer is evidence toward mastery.
+   reinforcement — tagged with its error type (pedagogy.md) — and
+   shortens its next-due gap; a clean independent answer is evidence
+   toward mastery.
 5. Follow up on wrong answers within the same session — a re-derived
    answer or a corrected explanation converts the miss into learning.
    Don't advance past an uncorrected error.
@@ -36,12 +37,17 @@ Keep the tone factual: no praise, no hype. A quiz that always goes well is
 probably too easy — if everything is clean retrieval, push one step
 harder or toward transfer.
 
+When a quiz or practice set is written to a file for later use, answers
+and rubrics go in a separate `*.answers.md` file beside it — never in the
+learner-facing file. An answer in the same file is a spoiler, not a
+study aid.
+
 ## Teacher side — assessment instruments
 
 Routes here: exams, quizzes, question banks, rubrics, project briefs, group
 assessments, accommodation variants, integrity audits, answer keys, item
 and grade analysis — plus checking student submissions against a spec.
-Checkpoints use the teacher-side block in pedagogy.md.
+Checkpoints use the teacher-side block in pedagogy-teaching.md.
 
 **Blueprint first, always (§10).** No item is written before the professor
 confirms the content × Bloom blueprint built from the outcomes — a hurry

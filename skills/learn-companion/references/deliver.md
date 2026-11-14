@@ -2,7 +2,7 @@
 
 The running term: whole-course pipeline orchestration, the weekly delivery
 loop, student-facing communications and packaging, and TA team operations.
-Checkpoints use the teacher-side block in pedagogy.md; state lives in
+Checkpoints use the teacher-side block in pedagogy-teaching.md; state lives in
 `course_passport.yaml` (state.md) — a fresh session resumes from the
 passport plus the stored term calendar, never from chat history.
 

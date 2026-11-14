@@ -42,7 +42,7 @@ observation, teaching portfolio/statement, studying one's own teaching
 (SoTL). Evidence honesty governs everything (§11): evaluations measure
 student *experience*, not teaching quality; every report states what the
 evidence shows AND what it cannot show. Checkpoints use the teacher-side
-block in pedagogy.md.
+block in pedagogy-teaching.md.
 
 ### Modes
 

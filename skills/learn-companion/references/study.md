@@ -43,7 +43,7 @@ skipped attempt, and continue. Ordinary "keep going" retains the loop.
 Routes here: lesson plans, lecture notes, slide outlines, in-class
 activities, teaching cases, discussion guides, flipped packages, rendered
 decks, STEM labs, recorded-video scripts, bilingual versions. Checkpoints
-use the teacher-side block in pedagogy.md. A lesson serves the week's
+use the teacher-side block in pedagogy-teaching.md. A lesson serves the week's
 outcomes — material mapped to no outcome gets flagged once (§2), then the
 professor decides; never silently built or silently dropped.
 

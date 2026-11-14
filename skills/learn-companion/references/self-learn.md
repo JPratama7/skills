@@ -23,7 +23,8 @@ measure before trusting, and to aim the quiz at what the measurement finds.
    known. One question at a time, committed answer before feedback, mixed
    formats (recall, apply, explain-why, predict).
 4. Record per sub-topic: demonstrated, assisted, or absent in
-   `progress.md`. Weak areas go to Needs reinforcement and route back to
+   `progress.md`. Weak areas go to Needs reinforcement — tagged with the
+   error type the diagnostic exposed (pedagogy.md) — and route back to
    `study`. Set `last reviewed` to today and `next due` per the spacing
    rule — the diagnostic *was* a retrieval attempt, so the schedule starts
    now.

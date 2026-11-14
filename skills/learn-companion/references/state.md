@@ -54,6 +54,11 @@ isn't independent recall. Keep learner-produced reasoning distinct from
 concepts the tutor explained. Consolidate repeated entries. Keep each topic
 independently readable so it can be loaded without the whole file.
 
+Needs reinforcement entries carry the error-type tag from pedagogy.md
+(`[concept-gap]`, `[application-failure]`, `[expression-unclear]`,
+`[knowledge-confusion]`) so recurring weaknesses are visible at a glance
+and `study` knows what kind of re-teaching to do.
+
 Each topic also carries scheduling fields the review command reads:
 `last reviewed: <date>`, `retention target: <how long to remember>`, and
 `next due: <date>` computed per pedagogy.md (~10–20% of the retention

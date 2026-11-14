@@ -7,7 +7,7 @@ student; this command brings structure, evidence discipline, and drafting
 stamina.
 
 Every output here evaluates or affects an identifiable person, so three
-constraints govern everything (the person-affecting rule in pedagogy.md):
+constraints govern everything (the person-affecting rule in pedagogy-teaching.md):
 
 1. **Evidence-bound.** Every evaluative claim traces to material the
    professor provided — the student's work, margin notes, the gradebook.

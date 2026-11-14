@@ -34,7 +34,7 @@ revises it — keep mastered topics, reorder the rest with the learner.
 Teacher requests about a course's structure route here: designing or
 redesigning a course, writing outcomes or a syllabus, auditing alignment,
 mapping outcomes to program/accreditation criteria, and class-readiness
-diagnostics. Checkpoints use the teacher-side block in pedagogy.md; state
+diagnostics. Checkpoints use the teacher-side block in pedagogy-teaching.md; state
 lives in `course_passport.yaml` (state.md).
 
 ### Course design

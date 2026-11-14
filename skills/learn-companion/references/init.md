@@ -51,7 +51,8 @@ call.
 ## Teacher-side state
 
 Teacher requests ("design a course", "prepare my lesson", "check these
-submissions") skip learner onboarding entirely. Look for the passport at
+submissions") skip learner onboarding entirely and load
+[pedagogy-teaching.md](pedagogy-teaching.md), not pedagogy.md. Look for the passport at
 `.learn-companion/course_passport.yaml` (default) or the `passport_path`
 memory pointer if set; if present, load it as the course's source of
 truth instead of re-asking context — the design, schedule, gates, and

@@ -1,7 +1,7 @@
 ---
 name: learn-companion
-version: 2.0.0
-description: Evidence-based learning and teaching companion — guarded tutoring, retrieval practice, spaced review, diagnostics for self-studied material, and learner-owned reasoning with a default-on Feynman teach-back gate, plus teacher-side workflows covering the full course lifecycle (design, materials, assessment, delivery, reflection). Use when the user wants to learn, study, understand, or practice a topic; says "teach me", "help me learn", "study", "quiz me", "review what I know", "test what I learned on my own", "feynman", "teach it back", or invokes `/learn-companion init|plan|study|quiz|review|self-learn|mentor|deliver`. Also for teacher requests: "design a course", "syllabus", "learning outcomes", "lesson plan", "write an exam", "build a rubric", "grade or audit submissions", "student feedback", "recommendation letter", "teaching portfolio", "slide deck", "lab assignment", "lecture script", "accreditation", "TA coordination".
+version: 2.1.0
+description: Evidence-based learning and teaching companion — guarded tutoring, retrieval practice, spaced review, diagnostics for self-studied material, learning grounded in the user's own PDFs/slides/notes, and learner-owned reasoning with a default-on Feynman teach-back gate; plus teacher-side workflows for the course lifecycle (design, materials, assessment, delivery, reflection). Use when the user wants to learn, study, understand, or practice a topic; says "teach me", "help me learn", "study", "quiz me", "test what I learned", "learn from these PDFs/slides/notes", "feynman", "teach it back", or invokes `/learn-companion init|plan|study|quiz|review|self-learn|mentor|deliver`. Also for teacher requests: "design a course", "syllabus", "lesson plan", "write an exam", "build a rubric", "grade or audit submissions", "student feedback", "recommendation letter", "teaching portfolio", "slide deck", "lab assignment", "accreditation", "TA coordination".
 ---
 
 # Learn Companion
@@ -9,21 +9,28 @@ description: Evidence-based learning and teaching companion — guarded tutoring
 | Command | Workflow |
 |---|---|
 | `/learn-companion init` | `references/init.md` → `references/onboarding.md` + `references/state.md` |
-| `/learn-companion plan` | `references/pedagogy.md` → `references/plan.md` |
-| `/learn-companion study` | `references/pedagogy.md` → `references/study.md` |
-| `/learn-companion quiz` | `references/pedagogy.md` → `references/quiz.md` |
-| `/learn-companion review` | `references/pedagogy.md` → `references/review.md` |
-| `/learn-companion self-learn` | `references/pedagogy.md` → `references/self-learn.md` |
-| `/learn-companion mentor` | `references/pedagogy.md` → `references/mentor.md` |
-| `/learn-companion deliver` | `references/pedagogy.md` → `references/deliver.md` |
+| `/learn-companion plan` | `references/plan.md` |
+| `/learn-companion study` | `references/study.md` |
+| `/learn-companion quiz` | `references/quiz.md` |
+| `/learn-companion review` | `references/review.md` |
+| `/learn-companion self-learn` | `references/self-learn.md` |
+| `/learn-companion mentor` | `references/mentor.md` |
+| `/learn-companion deliver` | `references/deliver.md` |
 
-Route unspecified learning requests ("teach me X", "help me understand Y", "let's study Z") to `study` once a learner profile exists, and to `init` when none does. Route "I studied/learned X on my own — test me" requests to `self-learn`. Requests phrased as teach-back ("feynman", "teach it back", "explain it back to you", "let me teach you X") go to `study` with the teach-back pass up front. Learning mode is active when the nearest `.learn-companion/profile.md` says `Learning mode: active` or learning was activated earlier in this conversation. Load `pedagogy.md` whenever learning mode is active; load `onboarding.md` and `state.md` only for onboarding or state creation. Plain factual questions need no mode activation — answer them directly.
+Learner requests also load `references/pedagogy.md`; teacher requests load
+`references/pedagogy-teaching.md` and run the command file's "Teacher
+side" section instead. Load `pedagogy.md` whenever learning mode is
+active; `onboarding.md` and `state.md` only for onboarding or state
+creation.
+
+| Trigger | Also load |
+|---|---|
+| Learner supplies their own materials — PDFs, slides, docs, webpage exports, pasted notes — to learn from | `references/materials.md` |
+| Generating learning-content files, citing sources, or high-stakes / fast-moving subjects | `references/reliability.md` |
+
+Route unspecified learning requests ("teach me X", "help me understand Y", "let's study Z") to `study` once a learner profile exists, and to `init` when none does. Route "I studied/learned X on my own — test me" requests to `self-learn`. Requests phrased as teach-back ("feynman", "teach it back", "explain it back to you", "let me teach you X") go to `study` with the teach-back pass up front. Learning mode is active when the nearest `.learn-companion/profile.md` says `Learning mode: active` or learning was activated earlier in this conversation. Plain factual questions need no mode activation — answer them directly.
 
 ## Teacher-side routing
-
-The commands are dual-purpose: learner requests run the learner workflow at
-the top of each file; teacher requests (the user teaches others) run the
-"Teacher side" section of the same file.
 
 | Teacher intent | Command |
 |---|---|
