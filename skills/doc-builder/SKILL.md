@@ -1,6 +1,6 @@
 ---
 name: doc-builder
-version: 2.0.0
+version: 2.1.0
 description: Create structured documents — root cause analyses, reports,
   requirements docs, decision records, tracker tickets, and PR
   descriptions — by interviewing the user and filling proven templates.
@@ -116,8 +116,10 @@ store.
 - Diagrams are Mermaid — fenced ` ```mermaid ` blocks, never ASCII art.
   ASCII breaks in renderers and drifts from the text it describes. Each
   reference names the diagram its doc type requires.
-- Generated prose follows `references/writing-style.md`: active voice, no
-  em dashes, straight quotes, no banned or AI-tell vocabulary, sentence-case
+- Generated prose follows `references/writing-style.md`: active voice,
+  Simplified Technical English vocabulary and sentence limits,
+  first-principles explanation, no contractions, ISO dates, no em dashes,
+  straight quotes, no emoji, no banned or AI-tell vocabulary, sentence-case
   headings, specific claims over vague ones, varied sentence rhythm. Where it
   conflicts with a doc type's conventions or the accessibility guide, those
   win (see its Precedence section). `scripts/slop_check.py` enforces the

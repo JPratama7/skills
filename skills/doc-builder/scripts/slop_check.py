@@ -23,7 +23,11 @@ Doc-builder deltas vs AI-Writing-Rules upstream: file-arg/stdin interface,
 allowlist for template-mandated Title-Case headings and the ticket
 **Summary:** field, bold-label rule fires on paragraph use or 4+ stacked
 label bullets (true definition lists stay legal, both `**X:**` and `**X**:`
-forms caught), subjectless "not just X, it's Y" branch.
+forms caught), subjectless "not just X, it's Y" branch. House-standard
+additions: contractions, emoji, exclamation marks, latin abbreviations,
+and/or, non-ISO dates, semicolons, spaced/spelled percent, sentences over
+25 words (STE limit). Blockquote lines are exempt for contraction and
+exclamation rules (verbatim quotes keep their punctuation).
 """
 
 import json
@@ -221,7 +225,64 @@ RULES = [
         ),
         "cut everything after the comma",
     ),
+    (
+        "contraction",
+        re.compile(
+            r"\b\w+(?:n't|'re|'ve|'ll|'m|'d)\b"
+            r"|\b(?:it|that|there|what|here|who|how|let)'s\b",
+            re.I,
+        ),
+        "write it out: do not, it is, we have",
+    ),
+    (
+        "emoji",
+        re.compile(
+            "[\U0001F000-\U0001FAFF\U00002600-\U000027BF"
+            "\U00002B00-\U00002BFF\uFE0F]"
+        ),
+        "write the word, not the emoji",
+    ),
+    (
+        "exclamation mark",
+        re.compile(r"[\w]!(?![=~])"),
+        "use a period",
+    ),
+    (
+        "latin abbreviation",
+        re.compile(r"\b(?:e\.g\.|i\.e\.|etc\.|viz\.|cf\.|et al\.)", re.I),
+        "write for example / that is / and so on",
+    ),
+    (
+        "and/or",
+        re.compile(r"\band/or\b", re.I),
+        "pick one; if both apply, write X or Y, or both",
+    ),
+    (
+        "non-ISO date",
+        re.compile(
+            r"\b\d{1,2}/\d{1,2}/\d{2,4}\b"
+            r"|\b(?:Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May"
+            r"|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:t(?:ember)?)?|Oct(?:ober)?"
+            r"|Nov(?:ember)?|Dec(?:ember)?)\.? \d{1,2}(?:st|nd|rd|th)?\b",
+            re.I,
+        ),
+        "write YYYY-MM-DD",
+    ),
+    (
+        "semicolon",
+        re.compile(r";"),
+        "split the sentence, or use a colon or period",
+    ),
+    (
+        "percent style",
+        re.compile(r"\d\s%|\b\d+(?:\.\d+)?\s+percent\b", re.I),
+        "write 30%",
+    ),
 ]
+
+# Rules that do not apply to blockquote lines (verbatim quotes keep their
+# punctuation and register).
+BLOCKQUOTE_EXEMPT = {"contraction", "exclamation mark"}
 
 TITLE_CASE_HEADING = re.compile(r"^#{1,6}\s+(?:[A-Z][a-z]+\s+){1,}(?:[A-Z][a-z]+)\s*$")
 HEADING_TEXT = re.compile(r"^#{1,6}\s+(.*?)\s*$")
@@ -292,11 +353,13 @@ def _dedupe_house_hits(house_hits, unslop_violations):
 def _house_scan(raw):
     prose = strip_noise(raw)
     lines = prose.split("\n")
+    nq_lines = ["" if l.lstrip().startswith(">") else l for l in lines]
     findings = []
 
     for label, rx, hint in RULES:
+        scan_lines = nq_lines if label in BLOCKQUOTE_EXEMPT else lines
         hits = []
-        for n, line in enumerate(lines, 1):
+        for n, line in enumerate(scan_lines, 1):
             for m in rx.finditer(line):
                 hits.append((n, m.group(0).strip()[:60]))
                 break
@@ -357,6 +420,23 @@ def _house_scan(raw):
                 "transition stacking",
                 f"{len(conn)} sentences open with a formal connector, delete them",
                 [],
+            )
+        )
+
+    hits = []
+    for n, line in enumerate(lines, 1):
+        if re.match(r"\s*[#|>`]", line) or not line.strip():
+            continue
+        for sent in re.split(r"(?<=[.!?])\s+", line):
+            if len(sent.split()) > 25:
+                hits.append((n, sent.strip()[:60]))
+                break
+    if hits:
+        findings.append(
+            (
+                "sentence over 25 words",
+                "split it: instructions max 20 words, descriptions max 25",
+                hits,
             )
         )
 

@@ -2,7 +2,7 @@
 
 Apply these rules to the prose of every generated document. They sharpen wording and keep text from reading as machine-generated. They never change section order, required fields, or substance.
 
-Adapted from the Vercel writing guidelines (vercel-labs/writing-guidelines), the AI-Writing-Rules patterns (Abdulkader-Safi/AI-Writing-Rules, MIT), and the unslop tell catalog (theclaymethod/unslop, MIT). `scripts/slop_check.py` covers the mechanical subset with line numbers; this file is the source of truth for judgment calls.
+Adapted from the Vercel writing guidelines (vercel-labs/writing-guidelines), the AI-Writing-Rules patterns (Abdulkader-Safi/AI-Writing-Rules, MIT), the unslop tell catalog (theclaymethod/unslop, MIT), and ASD-STE100 Simplified Technical English. `scripts/slop_check.py` covers the mechanical subset with line numbers; this file is the source of truth for judgment calls.
 
 ## Precedence
 
@@ -21,7 +21,8 @@ This file never removes evidence, source figures, causal detail, requirements, r
 - Address the reader as `you` in instructions. Use first person in narrative documents, as each type's reference specifies. Never write "the user" or "one can".
 - Write steps in the imperative: "Click **Add Project**", not "You will need to click **Add Project**".
 - Use the present tense unless the document describes future behavior.
-- Keep sentences under 20 words where you can, and vary the length. A four-word sentence next to a long one reads as human; ten uniform 15-word sentences read as generated even when each obeys the cap.
+- Write contractions out: `do not`, `it is`, `we have`. Contractions are banned in generated prose; verbatim quotes from sources keep theirs.
+- Keep instructions under 20 words and descriptive sentences under 25 — the ASD-STE100 limits. Vary the length inside the cap: a four-word sentence next to a long one reads as human; ten uniform 15-word sentences read as generated even when each obeys it.
 - Use `we` only for a deliberate team action ("we decided"). Never use it to mean "you".
 - Do not write rhetorical questions.
 - Repeat the real word instead of cycling synonyms ("the app... the platform... the solution"). Pick one name per thing.
@@ -44,6 +45,26 @@ This file never removes evidence, source figures, causal detail, requirements, r
 - Cut `very`, `just`, `really`, and `simply`. Replace `easy`, `simple`, and `quick` with a concrete description of the work.
 - Avoid the AI-vocabulary set: delve, tapestry, vibrant, multifaceted, nuanced, intricate, realm, testament, foster, leverage, robust, seamless, underscore, pivotal, crucial, comprehensive, holistic, transformative, elevate, embark, unlock, harness, showcase, resonate, garner, meticulous, bolster, streamline, empower, myriad, plethora, paradigm, interplay, groundbreaking, cutting-edge, world-class, enterprise-grade. Use `landscape` and `navigate` only literally.
 
+## Plain language
+
+These rules adapt ASD-STE100 to generated documents: one unambiguous reading per sentence, the common word over the rare one.
+
+- Give each word one meaning. Do not use `run` for both a test execution and a deployment, or `right` for both a direction and a correctness claim. Pick the word whose everyday meaning is the one you intend.
+- Prefer the verb over the noun built from it: `decide` not `make a decision`, `install` not `perform the installation of`, `fail` not `experience a failure`. Nominalized phrases hide the actor and add words.
+- Keep articles. Write `the browser caches the token`, never telegraphic `browser caches token`. Dropped articles read as headlinese and leave the noun's role ambiguous.
+- Use simple tenses: simple present for facts and instructions (`the queue retries the job`), simple past for events (`the deploy started at 14:02`), simple future for plans (`we will add an alert`). Reach for a perfect or progressive form only when the timing truly requires it.
+- One instruction per sentence in steps. `Run the migration, then restart the worker` is two steps; write it as two numbered items or two sentences.
+- Watch `-ing` forms. A leading `-ing` clause (`Checking the logs, the error appeared`) dangles; an `-ing` noun (`the writing of the report`) hides a verb. Rewrite both as the plain verb.
+
+## Explaining concepts
+
+When a document explains why something works or happened, write from first principles: everyday words for the mechanism, exact strings for the artifacts.
+
+- Give the mechanism before the term. `The pool ran out of connections, so requests waited in a queue and timed out` before `connection pool exhaustion`. A reader who never saw the term can still check the claim.
+- Build from what the reader knows to the new fact: state the cause, then the effect it produced, then the conclusion. Do not open an explanation with the abstraction and unpack downward.
+- Plain applies to explanation, not to artifacts. Commands, flags, identifiers, error strings, and log lines stay verbatim in code formatting.
+- Never trade correctness for simplicity. If the plain version would mislead, keep the precise term and define it in a few words on first use.
+
 ## Accuracy
 
 - Attribute each figure to the source and scope the input states. Do not attach a count to a time window, population, or source the input does not name. If the input gives a total with no window, write the total and mark the window as `TODO:`.
@@ -51,6 +72,15 @@ This file never removes evidence, source figures, causal detail, requirements, r
 - Do not name a source (a dashboard, log, deploy history, or person) that the input does not mention.
 - Name the source or drop the claim. `Experts say`, `studies have shown`, `many believe`, and `research suggests` lend authority without a source and are banned outright.
 - Data does not speak, tell stories, or make cases. `The data speaks for itself` and `the numbers tell a story` dodge the author's job: state the figure and what it shows.
+
+## Numbers, dates, and measurements
+
+- Write dates as `YYYY-MM-DD` (`2026-11-15`). Convert `11/15/2026`, `Nov 15th`, and every other format the input uses; keep the original only inside a verbatim quote.
+- Write times in 24-hour form with a timezone: `14:02 UTC`.
+- Use numerals for every quantity, measurement, and version, even under ten. Spell a number out only when it opens a sentence.
+- Group thousands with commas: `11,400`. Write percentages as `30%` — numeral, no space, `%` symbol, never `percent`. Write currency with its symbol or ISO code: `$400`, `EUR 400`.
+- Copy versions, IDs, and error codes verbatim: `v3.8.2`, `PROJ-123`, `0x8004`. Never restyle them to match house format.
+- Write ranges with `to` or an unspaced hyphen: `50 to 5 connections`, `10-20 ms`.
 
 ## Tone by document type
 
@@ -91,6 +121,13 @@ This file never removes evidence, source figures, causal detail, requirements, r
 - Name the outcome or question in a title, not the internal feature name.
 - Never skip a heading level, and never open the document with a heading that repeats its own title.
 
+## Names and references
+
+- Use the official capitalization for product and company names: `GitHub`, `Kubernetes`, `PostgreSQL`. Do not invent casing; check when unsure.
+- Introduce a person once with name and role (`Maria Chen, payments on-call`), then reuse one short form (`Chen`, `the on-call`) for the rest of the doc.
+- Quote a document or a person with a blockquote. Quote a log line, error, or command in a fenced code block.
+- Keep one rendering per recurring element: the same term, capitalization, and field format every place it appears. If the doc says `pool.max_connections` once, it never says `max connections` after.
+
 ## Lists
 
 - Convert three or more parallel items in a sentence into a list. Introduce every list with a colon.
@@ -122,6 +159,13 @@ This file never removes evidence, source figures, causal detail, requirements, r
 - Never use an em dash or a spaced hyphen as punctuation; it is a ban, not a density target. Use a colon, comma, period, or parentheses. Hyphens inside compound words, ranges, and IDs (`2026-09`, `NFR-1`) are fine.
 - Use straight quotes and apostrophes everywhere, prose included. Curly quotes read as typeset output, an AI tell in markdown sources. Write an ellipsis as three dots `...`, never the single `…` character.
 - Use `&` only in space-constrained labels. Write "and" everywhere else.
+- No emoji anywhere in generated documents, including status markers and decoration. Write `Done` or `Blocked`, not check-mark art.
+- No exclamation marks outside verbatim quotes.
+- Write `for example`, `that is`, and `and so on` instead of `e.g.`, `i.e.`, and `etc.`
+- Use the serial comma: `logs, metrics, and traces`.
+- Never write `and/or`. Pick one; if both apply, write `X or Y, or both`.
+- Avoid `X/Y` compounds in prose (`read/write`, `input/output`) unless the slash is part of a name (`CI/CD`). Write `X or Y` or `X and Y` as the meaning requires.
+- Avoid semicolons. Split the sentence, or use a colon when the second part explains the first.
 
 ## Links
 
@@ -150,6 +194,10 @@ Then check the judgment items it cannot see:
 - A decorative table, or a bolded-label wall used as a section's default shape
 - A wrap-up paragraph that restates the opening; a genuine definition list wrongly flagged
 - Template-mandated section names kept verbatim; required sections intact
+- A three-item list missing the serial comma; `X/Y` compounds or `and/or` the regex missed
+- A product or company name with invented casing; a person or term rendered two different ways
+- A nominalized verb (`make a decision`, `perform the installation`), a dropped article, or a perfect/progressive tense with no need for it
+- An explanation that opens with the abstraction instead of the mechanism; a date or figure format that drifts from the Numbers section
 
 If a fix needs a fact you do not have, write a `TODO:` marker. Do not invent the fact.
 
