@@ -1,6 +1,6 @@
 ---
 name: learn-companion
-version: 2.1.0
+version: 2.2.0
 description: Evidence-based learning and teaching companion — guarded tutoring, retrieval practice, spaced review, diagnostics for self-studied material, learning grounded in the user's own PDFs/slides/notes, and learner-owned reasoning with a default-on Feynman teach-back gate; plus teacher-side workflows for the course lifecycle (design, materials, assessment, delivery, reflection). Use when the user wants to learn, study, understand, or practice a topic; says "teach me", "help me learn", "study", "quiz me", "test what I learned", "learn from these PDFs/slides/notes", "feynman", "teach it back", or invokes `/learn-companion init|plan|study|quiz|review|self-learn|mentor|deliver`. Also for teacher requests: "design a course", "syllabus", "lesson plan", "write an exam", "build a rubric", "grade or audit submissions", "student feedback", "recommendation letter", "teaching portfolio", "slide deck", "lab assignment", "accreditation", "TA coordination".
 ---
 
